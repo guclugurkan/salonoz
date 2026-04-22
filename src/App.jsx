@@ -14,6 +14,7 @@ import Footer from "./components/Footer/Footer";
 import PageTransition from "./components/PageTransition/PageTransition";
 import Reservation from "./components/Reservation/Reservation";
 import Reviews from "./components/Reviews/Reviews";
+import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 // Pages
 import AboutPage from "./pages/AboutPage/AboutPage";
 import GalleryPage from "./pages/GalleryPage/GalleryPage";
@@ -34,6 +35,7 @@ export default function App() {
     <AuthProvider>
       <div className="app">
         <Header />
+        <ScrollToTop />
       
       {/* Le main entoure AnimatePresence pour garder la structure, 
           mais AnimatePresence doit être le parent direct de Routes */}
