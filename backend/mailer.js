@@ -1,22 +1,16 @@
 require("dotenv").config();
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 // ============================================
 // URL DE BASE — changer quand tu as un domaine
 // ============================================
-const BASE_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const BASE_URL = process.env.FRONTEND_URL || "https://salonoz.be";
 
 // ============================================
-// EMAIL TRANSPORTER
+// EMAIL CLIENT
 // ============================================
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ============================================
 // SEND EMAIL
@@ -24,15 +18,20 @@ const transporter = nodemailer.createTransport({
 
 async function sendEmail({ to, subject, text, html }) {
   try {
-    const info = await transporter.sendMail({
-      from: `"SALON OZ" <${process.env.EMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: "Salon OZ <onboarding@resend.dev>", // Changera après validation du domaine
       to,
       subject,
       text,
       html,
     });
 
-    console.log("Email sent:", info.messageId);
+    if (error) {
+      console.error("Resend error:", error);
+      return false;
+    }
+
+    console.log("Email sent successfully:", data.id);
     return true;
   } catch (error) {
     console.error("Email error:", error);
