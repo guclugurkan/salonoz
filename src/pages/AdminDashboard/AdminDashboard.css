@@ -1351,100 +1351,97 @@
 @media (max-width: 768px) {
   /* Global Layout */
   .admin-header {
-    padding: 30px 20px 20px; /* Reduced padding */
+    padding: 20px 20px 15px; /* Extremely slim header */
   }
 
   .header-label {
-    margin-bottom: 15px;
+    display: none; /* Hide decorative label on tiny screens */
   }
 
   .admin-content {
-    padding: 10px 10px 40px; /* More compact */
+    padding: 5px 5px 30px;
   }
 
   .header-title {
-    font-size: 24px; /* Smaller title */
-    letter-spacing: 0.05em;
+    font-size: 20px; /* Small title */
+    margin-bottom: 5px;
   }
 
   .header-subtitle {
-    font-size: 13px;
-    margin-bottom: 20px;
+    font-size: 11px;
+    margin-bottom: 15px;
   }
 
-  /* Navigation Tabs - Smaller text */
-  .admin-nav {
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding: 0 10px;
-    margin: 10px -10px 20px;
-    gap: 6px;
-  }
-
-  .admin-nav-btn {
-    padding: 8px 16px;
-    font-size: 9px;
-  }
-
-  /* Toolbar - More compact */
-  .calendar-toolbar {
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .week-label {
-    font-size: 14px;
-    margin: 5px 0;
-  }
-
-  .week-nav-button {
-    padding: 8px 12px;
-    font-size: 9px;
-  }
-
-  /* Appointment Cards - More compact */
-  .client-name {
-    font-size: 17px;
-  }
-
-  .status-badge {
-    padding: 2px 8px;
-    font-size: 9px;
-  }
-
-  .card-header {
-    padding: 15px;
-  }
-
-  .card-body {
-    padding: 12px 15px;
-  }
-
-  .info-label {
-    font-size: 9px;
-  }
-
-  .info-value {
-    font-size: 12px;
-  }
-
-  .card-footer {
-    padding: 12px 15px;
-  }
-
-  .created-at {
+  .refresh-button {
+    padding: 8px 20px;
     font-size: 10px;
   }
 
-  /* Images - More per row */
-  .gallery-admin-grid {
-    grid-template-columns: repeat(3, 1fr); /* 3 images instead of 2 */
+  /* Navigation Tabs - Very tight */
+  .admin-nav {
+    margin: 5px -10px 15px;
+    padding: 0 10px;
+    gap: 4px;
+  }
+
+  .admin-nav-btn {
+    padding: 6px 14px;
+    font-size: 9px;
+  }
+
+  /* Toolbar - Slimmer */
+  .calendar-toolbar {
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .week-label {
+    font-size: 13px;
+    margin: 2px 0;
+  }
+
+  .week-nav-button {
+    padding: 6px 10px;
+  }
+
+  /* Appointment Cards - Compacted */
+  .client-name {
+    font-size: 15px;
+  }
+
+  .card-header {
+    padding: 10px 15px;
+  }
+
+  .card-body {
+    padding: 8px 15px;
+  }
+
+  .info-row {
+    padding: 4px 0;
+  }
+
+  .card-footer {
+    padding: 8px 15px;
+    flex-direction: row; /* Keep on one line if possible */
+    font-size: 10px;
+  }
+
+  .created-at {
+    display: none; /* Hide timestamp on mobile to save space */
+  }
+
+  .card-actions {
+    width: 100%;
     gap: 5px;
   }
 
-  .category-title {
-    font-size: 18px;
+  /* Images */
+  .gallery-admin-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 images per row! */
+    gap: 3px;
   }
 }
+
 
 

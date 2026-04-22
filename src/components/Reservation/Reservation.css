@@ -833,35 +833,70 @@
 -------------------------------- */
 @media (max-width: 640px) {
   .reservation-page {
-    padding: 80px 16px 60px;
+    padding: 20px 10px 40px; /* Slimmer page padding */
   }
 
   .reservation-card {
-    padding: 36px 24px;
+    padding: 20px 15px; /* Compact card */
+  }
+
+  .reservation-header {
+    margin-bottom: 20px;
+  }
+
+  .header-title {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .progress-container {
+    margin-bottom: 20px;
+  }
+
+  .step-content {
+    min-height: unset; /* Remove minimum height */
+    margin-bottom: 20px;
+  }
+
+  .step-title {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .step-subtitle {
+    font-size: 11px;
+    margin-bottom: 15px;
   }
 
   .categories-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .category-pill {
+    padding: 12px 8px;
   }
 
   .time-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr); /* 4 columns on mobile to save height */
+    gap: 5px;
+  }
+
+  .time-slot {
+    padding: 8px 4px;
+    font-size: 11px;
   }
 
   .step-labels {
     display: none;
   }
-}
 
-@media (max-width: 424px) {
-  .header-title { font-size: 22px; } /* 28px -> 22px */
-  .step-title { font-size: 21px; }   /* 26px -> 21px */
-  .step-subtitle { font-size: 11px; } /* 14px -> 11px */
-  .category-pill-name { font-size: 11px; }
-  .option-name { font-size: 11px; }
-  .staff-name { font-size: 13px; }
-  .time-slot { font-size: 11px; }
-  .form-input, .form-textarea { font-size: 12px; }
-  .summary-value { font-size: 11px; }
-  .btn-primary, .btn-secondary { font-size: 9px; }
+  .navigation-buttons {
+    padding-top: 15px;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 10px 20px;
+    font-size: 10px;
+  }
 }
