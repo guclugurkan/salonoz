@@ -99,7 +99,7 @@ function AdminDashboard() {
     setError(null);
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/appointments`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -121,7 +121,7 @@ function AdminDashboard() {
   const fetchReviews = async () => {
     setReviewLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/reviews`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reviews`);
       const result = await response.json();
       if (result.success) {
         setReviews(result.data);
@@ -136,7 +136,7 @@ function AdminDashboard() {
   const fetchImages = async () => {
     setImageLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/images`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/images`);
       const result = await response.json();
       if (result.success) {
         setImages(result.data);
@@ -158,7 +158,7 @@ function AdminDashboard() {
     formData.append('image', selectedImageFile);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/images`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/images`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -187,7 +187,7 @@ function AdminDashboard() {
     if (!window.confirm('Verwijder cette photo définitivement ?')) return;
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/images`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/images`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -213,7 +213,7 @@ function AdminDashboard() {
     if (!newReview.name || !newReview.text) return;
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/reviews`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reviews`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
