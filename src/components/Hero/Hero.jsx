@@ -12,7 +12,9 @@ export default function Hero() {
         muted
         loop
         playsInline
+        webkit-playsinline="true"
         preload="auto"
+        style={{ pointerEvents: 'none' }}
       >
         <source src="https://res.cloudinary.com/dayuwiiv0/video/upload/f_auto,q_auto/v1776856370/hero4_kfop7d.mp4" type="video/mp4" />
       </video>
