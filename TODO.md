@@ -21,9 +21,10 @@ Voici la liste des tâches à accomplir pour finaliser le projet et le rendre pr
 
 ---
 ## 🚀 Prochaines étapes suggérées
-1. **Étape 1** : Mise en place de l'authentification Admin (Login).
-2. **Étape 2** : Migration vers une vraie base de données.
-3. **Étape 3** : Finalisation du système de mail.
+1. **Étape 1** : Mise en ligne du projet (Déploiement sur internet).
+2. **Étape 2** : Configuration des emails transactionnels avec Resend.
+3. **Étape 3** : Configuration de Cloudinary pour la vidéo hero et la galerie (optimisation).
+4. **Étape 4** : Migration vers une vraie base de données (si hébergement gratuit/éphémère).
 
 
 

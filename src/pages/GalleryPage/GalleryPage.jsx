@@ -19,7 +19,7 @@ export default function GalleryPage() {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/images");
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/images`);
         const data = await response.json();
 
         if (data.success) {
