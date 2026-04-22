@@ -1,0 +1,279 @@
+.cp-section {
+
+  background: #fff;
+  min-height: 100vh;
+}
+
+.cp__container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* --------------------------------
+   Header
+-------------------------------- */
+.cp__header {
+  margin-bottom: 80px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.cp__header.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cp__kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.cp__kickerLine {
+  width: 40px;
+  height: 1px;
+  background: #d1d1d1;
+}
+
+.cp__kickerText {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+.cp__title {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 200;
+  color: #111;
+  margin: 0 0 16px;
+  letter-spacing: 0.04em;
+}
+
+.cp__subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: #6f6f6f;
+  line-height: 1.8;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* --------------------------------
+   Grid
+-------------------------------- */
+.cp__grid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 100px;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1s ease 0.3s, transform 1s ease 0.3s;
+}
+
+.cp__grid.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------
+   Info side
+-------------------------------- */
+.cp__info-block {
+  margin-bottom: 48px;
+}
+
+.cp__info-label {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+  margin: 0 0 16px;
+}
+
+.cp__info-text {
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #111;
+  margin: 0 0 8px;
+}
+
+.cp__info-link {
+  display: block;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: #111;
+  text-decoration: none;
+  line-height: 1.8;
+  transition: color 0.3s ease;
+}
+
+.cp__info-link:hover {
+  color: #555;
+}
+
+.cp__map-link {
+  display: inline-block;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  color: #111;
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 2px;
+  margin-top: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.cp__map-link:hover {
+  border-color: #111;
+}
+
+/* --------------------------------
+   Hours
+-------------------------------- */
+.cp__hours-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cp__hours-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: #333;
+  padding: 9px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.cp__hours-row--closed span:last-child {
+  color: #bbb;
+  font-style: italic;
+}
+
+/* --------------------------------
+   Form
+-------------------------------- */
+.cp__form-group {
+  margin-bottom: 32px;
+}
+
+.cp__form-label {
+  display: block;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #9a9a9a;
+  margin-bottom: 10px;
+}
+
+.cp__form-input {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 1px solid #e5e5e5;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: #111;
+  background: transparent;
+  outline: none;
+  transition: border-color 0.3s ease;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.cp__form-input::placeholder {
+  color: #ccc;
+}
+
+.cp__form-input:focus {
+  border-bottom-color: #111;
+}
+
+/* --------------------------------
+   Feedback
+-------------------------------- */
+.cp__feedback {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+
+.cp__feedback--success {
+  background: #f5faf5;
+  color: #3a7a3a;
+  border-left: 2px solid #3a7a3a;
+}
+
+.cp__feedback--error {
+  background: #fdf5f5;
+  color: #a33a3a;
+  border-left: 2px solid #a33a3a;
+}
+
+/* --------------------------------
+   Submit button
+-------------------------------- */
+.cp__submit-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 15px 40px;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.cp__submit-btn:hover {
+  opacity: 0.8;
+}
+
+.cp__submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --------------------------------
+   Responsive
+-------------------------------- */
+@media (max-width: 900px) {
+  .cp__grid {
+    grid-template-columns: 1fr;
+    gap: 56px;
+  }
+
+  .cp-section {
+    padding: 40px 0 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .cp-section {
+    padding: 40px 0 20px;
+  }
+
+  .cp__container {
+    padding: 0 20px;
+  }
+
+  .cp__header {
+    margin-bottom: 48px;
+  }
+}

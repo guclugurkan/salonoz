@@ -1,0 +1,183 @@
+import { useEffect } from "react";
+import "./AboutPage.css";
+import useScrollReveal from "../../hooks/useScrollReveal";
+import { GOOGLE_REVIEWS_URL } from "../../data/reviewsData";
+
+const team = [
+  { name: "Tayyar Ozcan", role: "Oprichter & Master Stylist", initial: "T" },
+  { name: "Sarah",        role: "Senior Colorist",            initial: "S" },
+  { name: "Elena",        role: "Kapper & Stylist",           initial: "E" },
+  { name: "Marcus",       role: "Barber Specialist",          initial: "M" },
+];
+
+const stats = [
+  { value: "2020", label: "Opgericht" },
+  { value: "174+", label: "Beoordelingen" },
+  { value: "4.9★", label: "Gemiddelde score" },
+  { value: "3–5",  label: "Professionals" },
+];
+
+function Section({ children, className = "" }) {
+  const { ref, isVisible } = useScrollReveal(0.1);
+  return (
+    <div ref={ref} className={`ap__section ${isVisible ? "is-visible" : ""} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+export default function AboutPage() {
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
+  return (
+    <div className="about-page">
+
+      {/* ── HERO ── */}
+      <div className="ap__hero">
+        <img
+          src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1600&q=80"
+          alt="Salon OZ"
+          className="ap__hero-img"
+        />
+        <div className="ap__hero-overlay" />
+        <div className="ap__hero-content">
+          <span className="ap__hero-accent" />
+          <h1 className="ap__hero-title">Over Salon OZ</h1>
+          <p className="ap__hero-sub">Drongen, België — sinds 2020</p>
+        </div>
+      </div>
+
+      <div className="ap__container">
+
+        {/* ── HISTOIRE ── */}
+        <Section>
+          <div className="ap__grid">
+            {/* Image avec cadre offset */}
+            <div className="ap__img-block">
+              <div className="ap__img-frame" />
+              <div className="ap__img-wrapper">
+                <img
+                  src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80"
+                  alt="Tayyar Ozcan"
+                  className="ap__img"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+
+            {/* Texte */}
+            <div className="ap__content">
+              <div className="ap__kicker">
+                <span className="ap__kickerLine" />
+                <span className="ap__kickerText">Het verhaal</span>
+                <span className="ap__kickerLine" />
+              </div>
+              <h2 className="ap__title">Van passie tot excellentie</h2>
+              <div className="ap__divider" />
+              <p className="ap__text">
+                Salon OZ is geboren uit de passie en het harde werk van <strong>Tayyar Ozcan</strong>.
+                Na zijn opleiding in Gent en jaren ervaring in de kapperswereld, opende hij in 2020
+                zijn eerste gemengde kapsalon in Drongen.
+              </p>
+              <p className="ap__text">
+                Vandaag groeit Salon OZ uit tot een volwaardig beautysalon — een ruimte waar stijl,
+                vakmanschap en persoonlijke aandacht centraal staan. Een plek waar elke klant zich
+                welkom en op zijn best voelt.
+              </p>
+            </div>
+          </div>
+        </Section>
+
+        <div className="ap__separator" />
+
+        {/* ── ÉQUIPE ── */}
+        <Section>
+          <div className="ap__section-header">
+            <div className="ap__kicker">
+              <span className="ap__kickerLine" />
+              <span className="ap__kickerText">Ons team</span>
+              <span className="ap__kickerLine" />
+            </div>
+            <h2 className="ap__title ap__title--center">Een Team, Een Universum</h2>
+            <p className="ap__lead">
+              Ons team bestaat uit gedreven professionals, elk expert in hun vakgebied.
+              Samen staan wij voor één doel: jou op je allerbest laten voelen.
+            </p>
+          </div>
+
+          <div className="ap__team-grid">
+            {team.map((member, i) => (
+              <div key={i} className="ap__team-card">
+                <div className="ap__team-avatar">{member.initial}</div>
+                <div className="ap__team-info">
+                  <span className="ap__team-name">{member.name}</span>
+                  <span className="ap__team-role">{member.role}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+      </div>
+
+      {/* ── STATS BAND ── */}
+      <Section className="ap__stats-section">
+        <div className="ap__stats-grid">
+          {stats.map((stat, i) => (
+            <div key={i} className="ap__stat">
+              <span className="ap__stat-value">{stat.value}</span>
+              <span className="ap__stat-label">{stat.label}</span>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* ── REVIEWS BANNER ── */}
+      <div className="ap__container">
+        <Section>
+          <div className="ap__reviews-banner">
+            <div className="ap__reviews-img-block">
+              <div className="ap__img-frame ap__img-frame--right" />
+              <div className="ap__img-wrapper">
+                <img
+                  src="https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=800&q=80"
+                  alt="Tevreden klanten"
+                  className="ap__img"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+
+            <div className="ap__content">
+              <div className="ap__kicker">
+                <span className="ap__kickerLine" />
+                <span className="ap__kickerText">Beoordelingen</span>
+                <span className="ap__kickerLine" />
+              </div>
+              <h2 className="ap__title">Onze klanten spreken voor ons</h2>
+              <div className="ap__divider" />
+              <p className="ap__text">
+                Onze klanten zijn onze beste ambassadeurs. Met meer dan <strong>174 geverifieerde
+                beoordelingen</strong> en een gemiddelde score van <strong>4.9 op 5</strong>,
+                bewijzen zij elke dag dat kwaliteit en persoonlijke aandacht het verschil maken.
+              </p>
+              <p className="ap__text">
+                Jouw tevredenheid is onze drijfveer — bij elk bezoek, voor elke behandeling.
+              </p>
+              <a
+                href={GOOGLE_REVIEWS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ap__button"
+              >
+                <span className="ap__buttonText">Laat een beoordeling achter</span>
+                <span className="ap__buttonFill" />
+              </a>
+            </div>
+          </div>
+        </Section>
+      </div>
+
+    </div>
+  );
+}

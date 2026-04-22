@@ -1,0 +1,293 @@
+.experience {
+  padding: 25px 0;
+  background: #fff;
+  overflow: hidden;
+}
+
+.experience__container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+/* --------------------------------
+   Header
+-------------------------------- */
+.experience__header {
+  text-align: center;
+  margin-bottom: 40px;
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.experience__header.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.experience__kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.experience__kickerLine {
+  width: 40px;
+  height: 1px;
+  background: #d1d1d1;
+}
+
+.experience__kickerText {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+.experience__title {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 200;
+  color: #111;
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------------
+   Wall — 4 images décalées
+-------------------------------- */
+.experience__wall {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  padding-bottom: 24px;
+}
+
+/* --------------------------------
+   Chaque item = image + label
+-------------------------------- */
+.experience__item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-decoration: none;
+  flex-shrink: 0;
+  cursor: pointer;
+
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.experience__item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Tailles et décalages verticaux différents */
+.experience__item--1 {
+  width: 26%;
+  margin-bottom: 60px;
+  /* pousse vers le haut */
+}
+
+.experience__item--2 {
+  width: 22%;
+  margin-bottom: 0;
+}
+
+.experience__item--3 {
+  width: 28%;
+  margin-bottom: 40px;
+}
+
+.experience__item--4 {
+  width: 24%;
+  margin-bottom: 16px;
+}
+
+/* --------------------------------
+   Image
+-------------------------------- */
+.experience__img-wrap {
+  overflow: hidden;
+  width: 100%;
+}
+
+.experience__item--1 .experience__img-wrap {
+  aspect-ratio: 3 / 4;
+}
+
+.experience__item--2 .experience__img-wrap {
+  aspect-ratio: 4 / 5;
+}
+
+.experience__item--3 .experience__img-wrap {
+  aspect-ratio: 3 / 4;
+}
+
+.experience__item--4 .experience__img-wrap {
+  aspect-ratio: 4 / 5;
+}
+
+.experience__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s ease;
+  filter: grayscale(8%);
+}
+
+.experience__item:hover .experience__img {
+  transform: scale(1.04);
+  filter: grayscale(0%);
+}
+
+/* --------------------------------
+   Label — sous l'image
+-------------------------------- */
+.experience__label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.experience__label-sub {
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #aaa;
+}
+
+.experience__label-name {
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+  font-weight: 300;
+  color: #111;
+  letter-spacing: 0.03em;
+  transition: letter-spacing 0.3s ease;
+}
+
+.experience__item:hover .experience__label-name {
+  letter-spacing: 0.06em;
+}
+
+.experience__label-arrow {
+  font-size: 14px;
+  color: #ccc;
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: inline-block;
+}
+
+.experience__item:hover .experience__label-arrow {
+  color: #111;
+  transform: translateX(6px);
+}
+
+/* --------------------------------
+   Footer
+-------------------------------- */
+.experience__footer {
+  margin-top: 36px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1s ease 0.5s, transform 1s ease 0.5s;
+}
+
+.experience__footer.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------
+   Button
+-------------------------------- */
+.experience__button {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
+  border: 1px solid #111;
+  background: transparent;
+  color: #111;
+  padding: 14px 40px;
+  border-radius: 999px;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.experience__buttonText {
+  position: relative;
+  z-index: 2;
+}
+
+.experience__buttonFill {
+  position: absolute;
+  inset: 0;
+  background: #111;
+  border-radius: 999px;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.experience__button:hover {
+  color: #fff;
+}
+
+.experience__button:hover .experience__buttonFill {
+  transform: scaleX(1);
+}
+
+/* --------------------------------
+   Responsive
+-------------------------------- */
+@media (max-width: 900px) {
+  .experience__wall {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .experience__item--1,
+  .experience__item--2,
+  .experience__item--3,
+  .experience__item--4 {
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .experience__item--1 .experience__img-wrap,
+  .experience__item--2 .experience__img-wrap,
+  .experience__item--3 .experience__img-wrap,
+  .experience__item--4 .experience__img-wrap {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (max-width: 560px) {
+  .experience {
+    padding: 80px 0;
+  }
+
+  .experience__container {
+    padding: 0 20px;
+  }
+
+  .experience__wall {
+    grid-template-columns: 1fr;
+  }
+}

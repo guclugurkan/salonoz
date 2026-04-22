@@ -1,0 +1,867 @@
+/* Reservation.css */
+
+/* --------------------------------
+   Base
+-------------------------------- */
+.reservation-page {
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 120px 24px 80px;
+  position: relative;
+}
+
+/* Fixed background image */
+.reservation-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.45);
+  z-index: 0;
+}
+
+.reservation-card {
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  width: 100%;
+  max-width: 620px;
+  padding: 56px 52px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+}
+
+/* --------------------------------
+   Header
+-------------------------------- */
+.reservation-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.header-label {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.header-title {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  font-weight: 200;
+  letter-spacing: 0.3em;
+  color: #111;
+  margin: 0 0 20px;
+}
+
+.header-divider {
+  width: 40px;
+  height: 1px;
+  background: #d1d1d1;
+  margin: 0 auto;
+}
+
+/* --------------------------------
+   Step labels
+-------------------------------- */
+.step-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  gap: 4px;
+  padding-bottom: 4px;
+}
+
+.step-label-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.step-label-item span {
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d1d1d1;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.step-label-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e5e5e5;
+  transition: background 0.3s ease;
+}
+
+.step-label-item.active span {
+  color: #111;
+}
+
+.step-label-item.active .step-label-dot {
+  background: #111;
+}
+
+.step-label-item.done span {
+  color: #9a9a9a;
+}
+
+.step-label-item.done .step-label-dot {
+  background: #9a9a9a;
+}
+
+/* --------------------------------
+   Progress bar
+-------------------------------- */
+.progress-container {
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 1px;
+  background: #e5e5e5;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #111;
+  transition: width 0.5s ease;
+}
+
+.step-indicator {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #9a9a9a;
+  white-space: nowrap;
+}
+
+/* --------------------------------
+   Step content
+-------------------------------- */
+.step-content {
+  min-height: 320px;
+  margin-bottom: 40px;
+}
+
+.step-section {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-title {
+  font-family: "Playfair Display", serif;
+  font-size: 26px;
+  font-weight: 300;
+  color: #111;
+  margin: 0 0 8px;
+}
+
+.step-subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #9a9a9a;
+  margin: 0 0 28px;
+  line-height: 1.6;
+}
+
+.step-category-badge {
+  display: inline-block;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e5;
+  padding: 4px 14px;
+  font-size: 12px;
+  color: #6b6b6b;
+  letter-spacing: 0.05em;
+}
+
+/* --------------------------------
+   Categories grid — pills
+-------------------------------- */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.category-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 18px 12px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease;
+  text-align: center;
+}
+
+.category-pill:hover {
+  border-color: #111;
+}
+
+.category-pill.selected {
+  background: #111;
+  border-color: #111;
+}
+
+.category-pill-name {
+  font-family: "Playfair Display", serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: #111;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+  transition: color 0.25s ease;
+}
+
+.category-pill.selected .category-pill-name {
+  color: #fff;
+}
+
+.category-pill-count {
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #aaa;
+  text-transform: uppercase;
+  transition: color 0.25s ease;
+}
+
+.category-pill.selected .category-pill-count {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+
+/* --------------------------------
+   Options list (services)
+-------------------------------- */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.options-list::-webkit-scrollbar {
+  width: 2px;
+}
+
+.options-list::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+.options-list::-webkit-scrollbar-thumb {
+  background: #d1d1d1;
+}
+
+.option-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease;
+  text-align: left;
+  gap: 16px;
+}
+
+.option-card:hover {
+  border-color: #111;
+  background: #fafafa;
+}
+
+.option-card.selected {
+  border-color: #111;
+  background: #f5f5f5;
+}
+
+.option-name {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #111;
+  line-height: 1.4;
+}
+
+.option-price {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: #6b6b6b;
+  white-space: nowrap;
+  font-weight: 300;
+}
+
+/* --------------------------------
+   Staff grid
+-------------------------------- */
+.staff-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.staff-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.staff-card:hover {
+  border-color: #111;
+  background: #fafafa;
+}
+
+.staff-card.selected {
+  border-color: #111;
+  background: #f5f5f5;
+}
+
+.staff-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+  font-weight: 300;
+  color: #111;
+}
+
+.staff-name {
+  font-family: "Playfair Display", serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #111;
+}
+
+.staff-role {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  color: #9a9a9a;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+/* --------------------------------
+   Date picker
+-------------------------------- */
+.date-picker-wrapper {
+  margin-bottom: 16px;
+}
+
+.date-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: #111;
+  outline: none;
+  transition: border-color 0.25s ease;
+  box-sizing: border-box;
+}
+
+.date-input:focus {
+  border-color: #111;
+}
+
+.selected-date {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #6b6b6b;
+  margin: 0;
+  text-align: center;
+  padding: 12px 0 0;
+}
+
+/* --------------------------------
+   Time grid
+-------------------------------- */
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.time-slot {
+  padding: 12px 8px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #111;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+  text-align: center;
+}
+
+.time-slot:hover:not(.booked) {
+  border-color: #111;
+  background: #fafafa;
+}
+
+.time-slot.selected {
+  border-color: #111;
+  background: #111;
+  color: #fff;
+}
+
+.time-slot.booked {
+  background: #fafafa;
+  color: #d1d1d1;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  border-color: #f0f0f0;
+}
+
+/* --------------------------------
+   Form fields
+-------------------------------- */
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+.optional {
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  color: #c0c0c0;
+}
+
+.form-input,
+.form-textarea {
+  padding: 13px 16px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: #111;
+  outline: none;
+  transition: border-color 0.25s ease;
+  resize: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: #111;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #d1d1d1;
+}
+
+/* --------------------------------
+   Summary
+-------------------------------- */
+.summary-card {
+  border: 1px solid #e5e5e5;
+  padding: 28px;
+  background: #fafafa;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 10px 0;
+}
+
+.summary-label {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+  white-space: nowrap;
+}
+
+.summary-value {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #111;
+  text-align: right;
+  font-weight: 300;
+}
+
+.summary-divider {
+  height: 1px;
+  background: #e5e5e5;
+}
+
+/* --------------------------------
+   Navigation buttons
+-------------------------------- */
+.navigation-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 32px;
+}
+
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  padding: 13px 36px;
+  background: #111;
+  color: #fff;
+  border: 1px solid #111;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-primary:disabled {
+  background: transparent;
+  border-color: #e5e5e5;
+  color: #d1d1d1;
+  cursor: not-allowed;
+}
+
+.btn-primary:not(:disabled):hover {
+  background: #333;
+}
+
+.btn-secondary {
+  padding: 13px 28px;
+  background: transparent;
+  color: #9a9a9a;
+  border: 1px solid #e5e5e5;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.25s ease, color 0.25s ease;
+}
+
+.btn-secondary:hover {
+  border-color: #111;
+  color: #111;
+}
+
+/* --------------------------------
+   Success screen
+ -------------------------------- */
+.success-card {
+  text-align: center;
+  max-width: 580px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.success-header {
+  padding: 48px 40px 32px;
+  background: #fafafa;
+}
+
+.success-icon-wrap {
+  width: 64px;
+  height: 64px;
+  background: #111;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.success-title {
+  font-family: "Playfair Display", serif;
+  font-size: 32px;
+  font-weight: 300;
+  color: #111;
+  margin: 0 0 8px;
+}
+
+.success-subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #9a9a9a;
+  margin: 0;
+}
+
+.success-divider {
+  height: 1px;
+  background: #e5e5e5;
+  width: 100%;
+}
+
+.success-body {
+  padding: 40px;
+  text-align: left;
+}
+
+.success-section-title {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #9a9a9a;
+  margin: 0 0 20px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.success-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 16px;
+  margin-bottom: 40px;
+}
+
+.success-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.success-info-label {
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #aaa;
+}
+
+.success-info-value {
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: #111;
+  font-weight: 300;
+}
+
+.success-contact-box {
+  background: #fbfbfb;
+  border: 1px solid #f0f0f0;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.success-contact-box p {
+  margin: 0 0 8px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #6b6b6b;
+}
+
+.success-contact-box p:last-child {
+  margin-bottom: 0;
+}
+
+.success-contact-box strong {
+  color: #111;
+  font-weight: 500;
+}
+
+.success-notice {
+  text-align: center;
+  background: #fff9f0;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.success-notice p {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  color: #a08250;
+  margin: 0;
+}
+
+.success-footer {
+  padding: 0 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.success-btn {
+  width: 100%;
+  padding: 16px;
+}
+
+.success-btn-home {
+  text-align: center;
+  display: block;
+  padding: 14px;
+  text-decoration: none;
+}
+
+/* --------------------------------
+   Cancellation terms
+-------------------------------- */
+.cancel-terms {
+  margin-top: 24px;
+  border: 1px solid #e5e5e5;
+  padding: 20px 24px;
+  background: #fafafa;
+}
+
+.cancel-terms__title {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+  margin: 0 0 14px;
+}
+
+.cancel-terms__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.cancel-terms__content p {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  color: #6b6b6b;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.cancel-terms__content p strong {
+  color: #111;
+  font-weight: 500;
+}
+
+.cancel-terms__content a {
+  color: #111;
+  text-decoration: underline;
+}
+
+.cancel-terms__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding-top: 14px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.cancel-terms__checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #e5e5e5;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: #111;
+}
+
+.cancel-terms__checkbox span {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  color: #333;
+  letter-spacing: 0.02em;
+}
+
+/* --------------------------------
+   Responsive
+-------------------------------- */
+@media (max-width: 640px) {
+  .reservation-page {
+    padding: 80px 16px 60px;
+  }
+
+  .reservation-card {
+    padding: 36px 24px;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .time-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .step-labels {
+    display: none;
+  }
+}
+
+@media (max-width: 424px) {
+  .header-title { font-size: 22px; } /* 28px -> 22px */
+  .step-title { font-size: 21px; }   /* 26px -> 21px */
+  .step-subtitle { font-size: 11px; } /* 14px -> 11px */
+  .category-pill-name { font-size: 11px; }
+  .option-name { font-size: 11px; }
+  .staff-name { font-size: 13px; }
+  .time-slot { font-size: 11px; }
+  .form-input, .form-textarea { font-size: 12px; }
+  .summary-value { font-size: 11px; }
+  .btn-primary, .btn-secondary { font-size: 9px; }
+}

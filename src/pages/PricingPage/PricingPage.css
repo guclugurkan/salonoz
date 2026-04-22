@@ -1,0 +1,355 @@
+.pp-section {
+  padding: 160px 0 100px;
+  background: #fff;
+  min-height: 100vh;
+}
+
+.pp__container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* --------------------------------
+   Header
+-------------------------------- */
+.pp__header {
+  text-align: center;
+  margin-bottom: 80px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.pp__header.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pp__kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pp__kickerLine {
+  width: 40px;
+  height: 1px;
+  background: #d1d1d1;
+}
+
+.pp__kickerText {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+.pp__title {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 200;
+  color: #111;
+  margin: 0 0 16px;
+  letter-spacing: 0.04em;
+}
+
+.pp__subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: #6f6f6f;
+  line-height: 1.8;
+  margin: 0 auto;
+  max-width: 420px;
+}
+
+/* --------------------------------
+   Accordion wrapper
+-------------------------------- */
+.pp__accordion {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1s ease 0.2s, transform 1s ease 0.2s;
+  border-top: 1px solid #e5e5e5;
+}
+
+.pp__accordion.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------
+   Accordion item
+-------------------------------- */
+.pp__accordion-item {
+  border-bottom: 1px solid #e5e5e5;
+  transition: border-color 0.3s ease;
+}
+
+.pp__accordion-item.is-open {
+  border-left: 2px solid #111;
+}
+
+/* --------------------------------
+   Accordion header (button)
+-------------------------------- */
+.pp__accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 24px 28px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 16px;
+  transition: background 0.2s ease;
+}
+
+.pp__accordion-header:hover {
+  background: #fafafa;
+}
+
+.pp__accordion-item.is-open .pp__accordion-header {
+  background: #fafafa;
+}
+
+.pp__accordion-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.pp__accordion-index {
+  font-family: "Playfair Display", serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: #ccc;
+  letter-spacing: 0.1em;
+  min-width: 28px;
+  transition: color 0.3s ease;
+}
+
+.pp__accordion-item.is-open .pp__accordion-index {
+  color: #111;
+}
+
+.pp__accordion-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pp__accordion-sub {
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #aaa;
+}
+
+.pp__accordion-name {
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: #111;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+
+.pp__accordion-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.pp__accordion-count {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #aaa;
+  text-transform: uppercase;
+}
+
+.pp__accordion-arrow {
+  font-size: 18px;
+  color: #ccc;
+  transition: transform 0.4s ease, color 0.3s ease;
+  display: inline-block;
+}
+
+.pp__accordion-arrow.is-open {
+  transform: rotate(90deg);
+  color: #111;
+}
+
+/* --------------------------------
+   Accordion panel (collapsible)
+-------------------------------- */
+.pp__accordion-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pp__accordion-inner {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 48px;
+  padding: 0 24px 40px 20px;
+  align-items: start;
+}
+
+/* --------------------------------
+   Image inside panel
+-------------------------------- */
+.pp__accordion-img-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.pp__accordion-img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(10%);
+  transition: transform 0.6s ease, filter 0.4s ease;
+}
+
+.pp__accordion-item.is-open .pp__accordion-img {
+  transform: scale(1.02);
+  filter: grayscale(0%);
+}
+
+/* --------------------------------
+   Services list
+-------------------------------- */
+.pp__accordion-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  padding-top: 4px;
+}
+
+.pp__accordion-service {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pp__accordion-service:first-child {
+  border-top: 1px solid #f0f0f0;
+}
+
+.pp__accordion-service-name {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.pp__accordion-dots {
+  flex: 1;
+  border-bottom: 1px dotted #ddd;
+  min-width: 16px;
+  transform: translateY(-3px);
+}
+
+.pp__accordion-price {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #111;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------------
+   Footer
+-------------------------------- */
+.pp__footer {
+  margin-top: 56px;
+  padding-top: 40px;
+  border-top: 1px solid #ebebeb;
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  color: #aaa;
+  line-height: 1.8;
+
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 1s ease 0.4s, transform 1s ease 0.4s;
+}
+
+.pp__footer.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------
+   Responsive — tablette
+-------------------------------- */
+@media (max-width: 768px) {
+  .pp-section {
+    padding: 120px 0 80px;
+  }
+
+  .pp__accordion-inner {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .pp__accordion-img {
+    aspect-ratio: 16 / 9;
+  }
+
+  .pp__accordion-header {
+    padding: 22px 16px;
+  }
+
+  .pp__accordion-inner {
+    padding: 0 16px 32px;
+  }
+
+  .pp__accordion-count {
+    display: none;
+  }
+}
+
+/* --------------------------------
+   Responsive — mobile
+-------------------------------- */
+@media (max-width: 480px) {
+  .pp-section {
+    padding: 100px 0 60px;
+  }
+
+  .pp__container {
+    padding: 0 16px;
+  }
+
+  .pp__accordion-name {
+    font-size: 18px;
+  }
+
+  .pp__accordion-left {
+    gap: 16px;
+  }
+
+  .pp__accordion-index {
+    display: none;
+  }
+
+  .pp__header {
+    margin-bottom: 48px;
+  }
+}

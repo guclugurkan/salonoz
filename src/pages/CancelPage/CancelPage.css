@@ -1,0 +1,195 @@
+.cancel-page {
+  min-height: 100vh;
+  background: #f9f8f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 24px 80px;
+}
+
+.cancel-page__card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  width: 100%;
+  max-width: 520px;
+  padding: 56px 48px;
+}
+
+.cancel-page__state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+/* --------------------------------
+   Icon
+-------------------------------- */
+.cancel-page__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 300;
+}
+
+.cancel-page__icon--success {
+  background: #f5faf5;
+  color: #3a7a3a;
+  border: 1px solid #b8ddb8;
+}
+
+.cancel-page__icon--warning {
+  background: #fdf8f0;
+  color: #a06a10;
+  border: 1px solid #e8c87a;
+}
+
+.cancel-page__icon--error {
+  background: #fdf5f5;
+  color: #a33a3a;
+  border: 1px solid #e5b8b8;
+}
+
+/* --------------------------------
+   Text
+-------------------------------- */
+.cancel-page__title {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  font-weight: 200;
+  color: #111;
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+.cancel-page__msg {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #6b6b6b;
+  line-height: 1.8;
+  margin: 0;
+  max-width: 360px;
+}
+
+/* --------------------------------
+   Details
+-------------------------------- */
+.cancel-page__details {
+  width: 100%;
+  border: 1px solid #e5e5e5;
+  padding: 20px 24px;
+  background: #fafafa;
+}
+
+.cancel-page__detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cancel-page__detail-row:last-child {
+  border-bottom: none;
+}
+
+.cancel-page__detail-label {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+.cancel-page__detail-value {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #111;
+  font-weight: 300;
+  text-align: right;
+}
+
+/* --------------------------------
+   Phone link
+-------------------------------- */
+.cancel-page__phone {
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: #111;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 4px;
+  transition: border-color 0.3s ease;
+}
+
+.cancel-page__phone:hover {
+  border-color: #111;
+}
+
+/* --------------------------------
+   Buttons
+-------------------------------- */
+.cancel-page__btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 36px;
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  margin-top: 8px;
+}
+
+.cancel-page__btn:hover {
+  opacity: 0.8;
+}
+
+.cancel-page__btn--secondary {
+  background: transparent;
+  color: #111;
+}
+
+.cancel-page__btn--secondary:hover {
+  background: #111;
+  color: #fff;
+  opacity: 1;
+}
+
+/* --------------------------------
+   Spinner
+-------------------------------- */
+.cancel-page__spinner {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e5e5e5;
+  border-top-color: #111;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 560px) {
+  .cancel-page__card {
+    padding: 40px 24px;
+  }
+}

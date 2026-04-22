@@ -1,0 +1,461 @@
+/* --------------------------------
+   Page wrapper
+-------------------------------- */
+.about-page {
+  background: #fff;
+  min-height: 100vh;
+}
+
+.ap__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* --------------------------------
+   Section reveal
+-------------------------------- */
+.ap__section {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s ease, transform 1s ease;
+  padding: 96px 0;
+}
+
+.ap__section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------
+   Hero
+-------------------------------- */
+.ap__hero {
+  position: relative;
+  height: 55vh;
+  min-height: 360px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+.ap__hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  filter: brightness(0.55);
+}
+
+.ap__hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.5) 0%,
+    rgba(0,0,0,0.1) 50%,
+    transparent 100%
+  );
+}
+
+.ap__hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.ap__hero-accent {
+  display: block;
+  width: 48px;
+  height: 1px;
+  background: rgba(255,255,255,0.6);
+  margin: 0 auto 28px;
+}
+
+.ap__hero-title {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(32px, 6vw, 64px);
+  font-weight: 200;
+  letter-spacing: 0.1em;
+  color: #fff;
+  margin: 0 0 16px;
+  text-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+.ap__hero-sub {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+}
+
+/* --------------------------------
+   Kicker
+-------------------------------- */
+.ap__kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.ap__kickerLine {
+  width: 40px;
+  height: 1px;
+  background: #d1d1d1;
+}
+
+.ap__kickerText {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+/* --------------------------------
+   Section header (centered)
+-------------------------------- */
+.ap__section-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.ap__lead {
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: #6b6b6b;
+  line-height: 1.8;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+/* --------------------------------
+   Separator
+-------------------------------- */
+.ap__separator {
+  width: 100%;
+  height: 1px;
+  background: #e5e5e5;
+}
+
+/* --------------------------------
+   Typography
+-------------------------------- */
+.ap__title {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 200;
+  color: #111;
+  margin: 0 0 28px;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+.ap__title--center {
+  text-align: center;
+}
+
+.ap__divider {
+  width: 56px;
+  height: 1px;
+  background: #e5e5e5;
+  margin-bottom: 28px;
+}
+
+.ap__text {
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  line-height: 1.9;
+  color: #6b6b6b;
+  margin: 0 0 20px;
+}
+
+.ap__text strong {
+  color: #111;
+  font-weight: 500;
+}
+
+/* --------------------------------
+   Grid — histoire & reviews
+-------------------------------- */
+.ap__grid,
+.ap__reviews-banner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.ap__content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --------------------------------
+   Image block with offset frame
+-------------------------------- */
+.ap__img-block,
+.ap__reviews-img-block {
+  position: relative;
+}
+
+.ap__img-frame {
+  position: absolute;
+  top: -18px;
+  left: -18px;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #e5e5e5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ap__img-frame--right {
+  left: auto;
+  right: -18px;
+}
+
+.ap__img-wrapper {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  height: 500px;
+}
+
+.ap__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s ease;
+  filter: grayscale(8%);
+}
+
+.ap__img-wrapper:hover .ap__img {
+  transform: scale(1.03);
+  filter: grayscale(0%);
+}
+
+/* --------------------------------
+   Team grid
+-------------------------------- */
+.ap__team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.ap__team-card {
+  border: 1px solid #e5e5e5;
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  transition: border-color 0.3s ease, transform 0.3s ease;
+  cursor: default;
+}
+
+.ap__team-card:hover {
+  border-color: #111;
+  transform: translateY(-4px);
+}
+
+.ap__team-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: #111;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.ap__team-card:hover .ap__team-avatar {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.ap__team-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ap__team-name {
+  font-family: "Playfair Display", serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #111;
+}
+
+.ap__team-role {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+/* --------------------------------
+   Stats band
+-------------------------------- */
+.ap__stats-section {
+  background: #111;
+  padding: 0 !important;
+}
+
+.ap__stats-section.ap__section {
+  padding: 0 !important;
+}
+
+.ap__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 72px 32px;
+}
+
+.ap__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+.ap__stat:last-child {
+  border-right: none;
+}
+
+.ap__stat-value {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 200;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+
+.ap__stat-label {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+}
+
+/* --------------------------------
+   Button
+-------------------------------- */
+.ap__button {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid #111;
+  background: transparent;
+  color: #111;
+  padding: 13px 36px;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  width: fit-content;
+  margin-top: 8px;
+  align-self: center;
+}
+
+.ap__buttonText {
+  position: relative;
+  z-index: 2;
+}
+
+.ap__buttonFill {
+  position: absolute;
+  inset: 0;
+  background: #111;
+  transform: translateX(-101%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ap__button:hover { color: #fff; }
+.ap__button:hover .ap__buttonFill { transform: translateX(0); }
+
+/* --------------------------------
+   Responsive — tablette
+-------------------------------- */
+@media (max-width: 960px) {
+  .ap__grid,
+  .ap__reviews-banner {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .ap__reviews-img-block { order: -1; }
+
+  .ap__img-frame { display: none; }
+
+  .ap__img-wrapper { height: auto; aspect-ratio: 4 / 3; }
+
+  .ap__team-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .ap__stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0; }
+
+  .ap__stat {
+    padding: 40px 24px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .ap__stat:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.08); }
+  .ap__stat:nth-last-child(-n+2) { border-bottom: none; }
+
+  .ap__section { padding: 64px 0; }
+
+  .ap__kicker { justify-content: flex-start; }
+  .ap__section-header .ap__kicker { justify-content: center; }
+}
+
+/* --------------------------------
+   Responsive — mobile
+-------------------------------- */
+@media (max-width: 560px) {
+  .ap__container { padding: 0 20px; }
+
+  .ap__hero { height: 45vh; min-height: 280px; }
+
+  .ap__section { padding: 48px 0; }
+
+  .ap__team-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+  .ap__stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 48px 20px;
+  }
+
+  .ap__team-card { padding: 24px 12px; }
+
+  .ap__section-header { margin-bottom: 36px; }
+}

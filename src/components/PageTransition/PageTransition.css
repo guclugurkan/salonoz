@@ -1,0 +1,8 @@
+/* PageTransition.css - Tu peux supprimer l'ancien contenu */
+
+.app__main {
+  /* Assure-toi que ton conteneur principal a un fond blanc pour l'effet de fondu */
+  background-color: #ffffff; 
+  overflow: hidden; /* Évite les barres de défilement pendant l'animation */
+  z-index: 999999 !important; /* Un chiffre énorme */
+}

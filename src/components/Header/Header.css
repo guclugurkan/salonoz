@@ -1,0 +1,290 @@
+/* --------------------------------
+   Header
+-------------------------------- */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.header__container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 32px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* --------------------------------
+   Logo
+-------------------------------- */
+.header__logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 200;
+  letter-spacing: 0.4em;
+  color: #111;
+  flex-shrink: 0;
+  transition: opacity 0.3s ease;
+}
+
+.header__logo:hover {
+  opacity: 0.6;
+}
+
+/* --------------------------------
+   Navigation — desktop
+-------------------------------- */
+.header__nav {
+  display: flex;
+  gap: 36px;
+}
+
+.header__link {
+  position: relative;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #666;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.header__link:hover {
+  color: #111;
+}
+
+.header__link--active {
+  color: #111;
+}
+
+.header__underline {
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 0%;
+  height: 1px;
+  background: #111;
+  transition: width 0.3s ease;
+}
+
+.header__link:hover .header__underline,
+.header__link--active .header__underline {
+  width: 100%;
+}
+
+/* --------------------------------
+   CTA Button — desktop
+-------------------------------- */
+.header__button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 28px;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid #111;
+  background: transparent;
+  color: #111;
+  cursor: pointer;
+  overflow: hidden;
+  transition: color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.header__buttonText {
+  position: relative;
+  z-index: 2;
+}
+
+.header__buttonFill {
+  position: absolute;
+  inset: 0;
+  background: #111;
+  transform: translateX(-101%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header__button:hover {
+  color: #fff;
+}
+
+.header__button:hover .header__buttonFill {
+  transform: translateX(0);
+}
+
+/* --------------------------------
+   Hamburger — mobile only
+-------------------------------- */
+.header__hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  z-index: 110;
+}
+
+.header__hamburger-line {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: #111;
+  transition: transform 0.35s ease, opacity 0.3s ease;
+  transform-origin: center;
+}
+
+/* Hamburger → X animation */
+.header__hamburger.is-open .header__hamburger-line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.header__hamburger.is-open .header__hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.header__hamburger.is-open .header__hamburger-line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* --------------------------------
+   Mobile menu overlay
+-------------------------------- */
+.header__mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.header__mobile-menu.is-open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.header__mobile-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 48px;
+}
+
+.header__mobile-link {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  font-weight: 200;
+  letter-spacing: 0.06em;
+  color: #111;
+  text-decoration: none;
+  padding: 10px 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease, color 0.2s ease;
+}
+
+.header__mobile-menu.is-open .header__mobile-link {
+  opacity: 1;
+  transform: translateY(0);
+  
+}
+
+.header__mobile-link:hover {
+  color: #9a9a9a;
+}
+
+.header__mobile-button {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+
+  display: inline-block;
+  padding: 13px 40px;
+  border: 1px solid #111;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #111;
+  border-radius: 999px;
+  transition: background 0.3s ease, color 0.3s ease, opacity 0.4s ease, transform 0.4s ease;
+}
+
+.header__mobile-menu.is-open .header__mobile-button {
+  opacity: 1;
+  transform: translateY(0);
+ 
+}
+
+.header__mobile-button:hover {
+  background: #111;
+  color: #fff;
+}
+
+/* --------------------------------
+   Responsive — show hamburger
+-------------------------------- */
+@media (max-width: 900px) {
+  .header__nav,
+  .header__button {
+    display: none;
+   
+  }
+
+  .header__hamburger {
+    display: flex;
+    
+  }
+
+  .header__container {
+    position: relative;
+    
+  }
+
+  .header__logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 480px) {
+  .header__container {
+    padding: 0 20px;
+  }
+
+  .header__logo-img {
+    height: 40px;
+  }
+}

@@ -1,0 +1,287 @@
+.pricing {
+  padding: 64px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Background image */
+.pricing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.7);
+  z-index: 0;
+}
+
+.pricing__container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 1;
+}
+
+/* --------------------------------
+   Header
+-------------------------------- */
+.pricing__header {
+  text-align: center;
+  margin-bottom: 40px;
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.pricing__header.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pricing__kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pricing__kickerLine {
+  width: 48px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.pricing__kickerText {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pricing__title {
+  margin: 0 0 16px;
+  font-family: "Playfair Display", serif;
+  font-size: 40px;
+  font-weight: 200;
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+
+.pricing__subtitle {
+  margin: 0 auto;
+  max-width: 420px;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.8;
+}
+
+/* --------------------------------
+   Spotlight block
+-------------------------------- */
+.pricing__spotlight {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 72px 48px 48px;
+  text-align: center;
+  position: relative;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 1s ease 0.2s, transform 1s ease 0.2s;
+}
+
+.pricing__spotlight.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------
+   Fade animation
+-------------------------------- */
+.pricing__spotlight-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.pricing__spotlight-inner.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pricing__spotlight-inner.fade-out {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+
+/* --------------------------------
+   Service text
+-------------------------------- */
+.pricing__spot-category {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.pricing__spot-name {
+  font-family: "Playfair Display", serif;
+  font-size: 36px;
+  font-weight: 200;
+  color: #fff;
+  letter-spacing: 0.04em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pricing__spot-price {
+  font-family: "Inter", sans-serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.08em;
+}
+
+/* --------------------------------
+   Progress bar
+-------------------------------- */
+.pricing__progress {
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.pricing__progress-fill {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  transition: width 0.05s linear;
+}
+
+/* --------------------------------
+   Dots navigation
+-------------------------------- */
+.pricing__dots-nav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.pricing__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.pricing__dot.active {
+  background: #fff;
+  transform: scale(1.3);
+}
+
+.pricing__dot:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* --------------------------------
+   Footer
+-------------------------------- */
+.pricing__footer {
+  margin-top: 32px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 1s ease 0.4s, transform 1s ease 0.4s;
+}
+
+.pricing__footer.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pricing__note {
+  margin: 0 0 28px;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* --------------------------------
+   Button
+-------------------------------- */
+.pricing__button {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+  color: #fff;
+  padding: 14px 40px;
+  border-radius: 999px;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.pricing__buttonText {
+  position: relative;
+  z-index: 2;
+}
+
+.pricing__buttonFill {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  border-radius: 999px;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.pricing__button:hover {
+  color: #111;
+}
+
+.pricing__button:hover .pricing__buttonFill {
+  transform: scaleX(1);
+}
+
+/* --------------------------------
+   Responsive
+-------------------------------- */
+@media (max-width: 640px) {
+  .pricing__spot-name {
+    font-size: 26px;
+  }
+
+  .pricing__spotlight {
+    padding: 48px 28px 40px;
+    min-height: 240px;
+  }
+}

@@ -1,0 +1,298 @@
+/* Reviews.css */
+
+.reviews {
+  padding: 64px 0;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* --------------------------------
+   Header
+-------------------------------- */
+.reviews__header {
+  text-align: center;
+  margin-bottom: 36px;
+  padding: 0 32px;
+
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.reviews__header.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reviews__kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.reviews__kickerLine {
+  width: 48px;
+  height: 1px;
+  background: #d1d1d1;
+}
+
+.reviews__kickerText {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+.reviews__title {
+  margin: 0 0 16px;
+  font-family: "Playfair Display", serif;
+  font-size: 40px;
+  font-weight: 200;
+  letter-spacing: 0.08em;
+  color: #111;
+}
+
+.reviews__subtitle {
+  margin: 0 auto;
+  max-width: 420px;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: #6f6f6f;
+  line-height: 1.8;
+}
+
+/* --------------------------------
+   Ticker wrapper — reveal
+-------------------------------- */
+.reviews__ticker-wrapper {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.reviews__ticker-wrapper.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------
+   Ticker band
+-------------------------------- */
+.reviews__ticker {
+  width: 100%;
+  overflow: hidden;
+  border-top: 1px solid #e5e5e5;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 32px 0;
+  position: relative;
+}
+
+/* Fade edges */
+.reviews__ticker::before,
+.reviews__ticker::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 160px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.reviews__ticker::before {
+  left: 0;
+  background: linear-gradient(to right, #fff 0%, transparent 100%);
+}
+
+.reviews__ticker::after {
+  right: 0;
+  background: linear-gradient(to left, #fff 0%, transparent 100%);
+}
+
+/* --------------------------------
+   Ticker track
+-------------------------------- */
+.reviews__ticker-track {
+  display: flex;
+  align-items: stretch;
+  white-space: nowrap;
+  width: max-content;
+  gap: 20px;
+  animation: reviewsTicker 60s linear infinite;
+}
+
+.reviews__ticker:hover .reviews__ticker-track {
+  animation-play-state: paused;
+}
+
+@keyframes reviewsTicker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+
+/* --------------------------------
+   Review card
+-------------------------------- */
+.reviews__card {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 300px;
+  padding: 24px 28px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  white-space: normal;
+  flex-shrink: 0;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.reviews__card:hover {
+  border-color: #111;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+/* --------------------------------
+   Card top — avatar + meta + icon
+-------------------------------- */
+.reviews__card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reviews__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Playfair Display", serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #111;
+  flex-shrink: 0;
+}
+
+.reviews__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.reviews__name {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111;
+  letter-spacing: 0.02em;
+}
+
+.reviews__date {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  color: #aaa;
+  letter-spacing: 0.02em;
+}
+
+.reviews__google-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* --------------------------------
+   Stars
+-------------------------------- */
+.reviews__stars {
+  display: flex;
+  gap: 2px;
+  font-size: 13px;
+  color: #111;
+  letter-spacing: 0.05em;
+}
+
+/* --------------------------------
+   Review text
+-------------------------------- */
+.reviews__text {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: #6b6b6b;
+  line-height: 1.7;
+  margin: 0;
+  font-style: italic;
+  display: -webkit-box;
+  /* -webkit-line-clamp: 3; */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --------------------------------
+   Footer
+-------------------------------- */
+.reviews__footer {
+  margin-top: 32px;
+  text-align: center;
+  padding: 0 32px;
+
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.reviews__footer.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------
+   Button
+-------------------------------- */
+.reviews__button {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
+  border: 1px solid #111;
+  background: transparent;
+  color: #111;
+  padding: 14px 40px;
+  border-radius: 999px;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.reviews__buttonText {
+  position: relative;
+  z-index: 2;
+}
+
+.reviews__buttonFill {
+  position: absolute;
+  inset: 0;
+  background: #111;
+  border-radius: 999px;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.reviews__button:hover {
+  color: #fff;
+}
+
+.reviews__button:hover .reviews__buttonFill {
+  transform: scaleX(1);
+}
