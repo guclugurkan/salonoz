@@ -19,7 +19,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 async function sendEmail({ to, subject, text, html }) {
   try {
     const { data, error } = await resend.emails.send({
-      from: "Salon OZ <onboarding@resend.dev>", // Changera après validation du domaine
+      from: "Salon OZ <reservation@salonoz.be>",
       to,
       subject,
       text,
