@@ -1,11 +1,9 @@
 const crypto = require("crypto");
+const Appointment = require("../models/Appointment");
 
 const {
   services,
   staff,
-  readAppointments,
-  writeAppointments,
-  generateId,
   validateAppointment,
 } = require("../utils/appointments.helpers");
 
@@ -35,7 +33,7 @@ function getAllStaff() {
 // ============================================
 
 async function getAllAppointments() {
-  return await readAppointments();
+  return await Appointment.find().sort({ createdAt: -1 });
 }
 
 async function sendTestEmail() {
@@ -61,16 +59,12 @@ async function createAppointment(data) {
     };
   }
 
-  const appointments = await readAppointments();
-
-  const conflict = appointments.find(
-    (appt) =>
-      appt.staff === staff &&
-      appt.date === date &&
-      appt.time === time &&
-      appt.status !== "cancelled" &&
-      appt.status !== "rejected"
-  );
+  const conflict = await Appointment.findOne({
+    staff,
+    date,
+    time,
+    status: { $nin: ["cancelled", "rejected"] }
+  });
 
   if (conflict) {
     return {
@@ -81,13 +75,11 @@ async function createAppointment(data) {
   }
 
   // Anti-spam / Anti-doublon : 1 RDV max par jour par e-mail
-  const userConflict = appointments.find(
-    (appt) =>
-      appt.email === email &&
-      appt.date === date &&
-      appt.status !== "cancelled" &&
-      appt.status !== "rejected"
-  );
+  const userConflict = await Appointment.findOne({
+    email,
+    date,
+    status: { $nin: ["cancelled", "rejected"] }
+  });
 
   if (userConflict) {
     return {
@@ -106,8 +98,7 @@ async function createAppointment(data) {
   const appointmentDateTime = new Date(year, month - 1, day, hours, minutes);
   const cancelDeadline = new Date(appointmentDateTime.getTime() - 24 * 60 * 60 * 1000);
 
-  const newAppointment = {
-    id: generateId(),
+  const newAppointment = new Appointment({
     service,
     staff,
     date,
@@ -118,12 +109,10 @@ async function createAppointment(data) {
     notes: notes || "",
     status: "pending",
     cancelToken,
-    cancelDeadline: cancelDeadline.toISOString(),
-    createdAt: new Date().toISOString(),
-  };
+    cancelDeadline: cancelDeadline,
+  });
 
-  appointments.push(newAppointment);
-  await writeAppointments(appointments);
+  await newAppointment.save();
 
   const pendingEmail = getPendingAppointmentEmail(newAppointment);
   await sendEmail({
@@ -150,18 +139,15 @@ async function cancelAppointmentByToken(token) {
     };
   }
 
-  const appointments = await readAppointments();
-  const index = appointments.findIndex((a) => a.cancelToken === token);
+  const appointment = await Appointment.findOne({ cancelToken: token });
 
-  if (index === -1) {
+  if (!appointment) {
     return {
       success: false,
       statusCode: 404,
       error: "Ongeldige of reeds gebruikte annulatielink.",
     };
   }
-
-  const appointment = appointments[index];
 
   // Controleer of de afspraak al geannuleerd of afgewezen is
   if (appointment.status === "cancelled" || appointment.status === "rejected") {
@@ -184,12 +170,11 @@ async function cancelAppointmentByToken(token) {
     };
   }
 
-  // Annuleer de afspraak — het tijdslot wordt automatisch vrijgegeven
+  // Annuleer de afspraak — het temps de traitement est libéré
   appointment.status = "cancelled";
-  appointment.cancelledAt = new Date().toISOString();
-  delete appointment.cancelToken; // Token ongeldig maken na gebruik
+  appointment.cancelToken = undefined; // Token invalide après usage
 
-  await writeAppointments(appointments);
+  await appointment.save();
 
   console.log(`Tijdslot vrijgegeven: ${appointment.staff} op ${appointment.date} om ${appointment.time}`);
 
@@ -233,10 +218,9 @@ async function updateAppointmentStatus(id, data) {
     };
   }
 
-  const appointments = await readAppointments();
-  const appointmentIndex = appointments.findIndex((appt) => appt.id === id);
+  const appointment = await Appointment.findById(id);
 
-  if (appointmentIndex === -1) {
+  if (!appointment) {
     return {
       success: false,
       statusCode: 404,
@@ -244,24 +228,18 @@ async function updateAppointmentStatus(id, data) {
     };
   }
 
-  const appointment = appointments[appointmentIndex];
-  const oldTime = appointment.time;
-
+  const oldStatus = appointment.status;
   appointment.status = status;
 
   if (status === "rejected") {
     appointment.rejectionReason = rejectionReason.trim();
   } else {
-    delete appointment.rejectionReason;
+    appointment.rejectionReason = undefined;
   }
 
-  if ((status === "cancelled" || status === "rejected") && oldTime) {
-    console.log(`Time released for ${appointment.staff} on ${appointment.date} at ${oldTime}`);
-  }
+  await appointment.save();
 
-  await writeAppointments(appointments);
-
-  if (status === "confirmed") {
+  if (status === "confirmed" && oldStatus !== "confirmed") {
     const confirmedEmail = getConfirmedAppointmentEmail(appointment);
     await sendEmail({
       to: appointment.email,
@@ -272,8 +250,7 @@ async function updateAppointmentStatus(id, data) {
   }
 
   if (status === "rejected") {
-    const emailAppointment = { ...appointment, time: oldTime };
-    const rejectedEmail = getRejectedAppointmentEmail(emailAppointment);
+    const rejectedEmail = getRejectedAppointmentEmail(appointment);
     await sendEmail({
       to: appointment.email,
       subject: rejectedEmail.subject,
@@ -282,9 +259,8 @@ async function updateAppointmentStatus(id, data) {
     });
   }
 
-  if (status === "cancelled") {
-    const emailAppointment = { ...appointment, time: oldTime };
-    const cancelledEmail = getCancelledAppointmentEmail(emailAppointment);
+  if (status === "cancelled" && oldStatus !== "cancelled") {
+    const cancelledEmail = getCancelledAppointmentEmail(appointment);
     await sendEmail({
       to: appointment.email,
       subject: cancelledEmail.subject,

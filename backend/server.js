@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
 
 const appointmentsRoutes = require("./routes/appointments.routes");
 const imagesRoutes = require("./routes/images.routes");
@@ -12,7 +13,16 @@ const authRoutes = require("./routes/auth.routes");
 const { sendEmail, getTestEmail } = require("./mailer");
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
+
+// ============================================
+// DATABASE CONNECTION
+// ============================================
+
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("✅ Successfully connected to MongoDB Atlas"))
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
 // ============================================
 // MIDDLEWARES

@@ -1,21 +1,24 @@
-const fs = require("fs");
-const path = require("path");
+const Review = require("../models/Review");
 
-const reviewsPath = path.join(__dirname, "../data/reviews.json");
-
-const getReviews = (req, res) => {
+const getReviews = async (req, res) => {
   try {
-    const data = fs.readFileSync(reviewsPath, "utf-8");
-    const reviews = JSON.parse(data);
-    console.log(`Sending ${reviews.length} reviews`);
-    res.json({ success: true, data: reviews });
+    const reviews = await Review.find().sort({ date: -1 });
+    // Map Mongoose object to expected frontend format if necessary
+    const formattedReviews = reviews.map(r => ({
+      id: r._id,
+      name: r.author,
+      date: r.date.toISOString().split('T')[0],
+      rating: r.rating,
+      text: r.comment
+    }));
+    res.json({ success: true, data: formattedReviews });
   } catch (error) {
-    console.error("Error reading reviews:", error);
+    console.error("Error reading reviews from DB:", error);
     res.status(500).json({ success: false, message: "Error reading reviews" });
   }
 };
 
-const postReview = (req, res) => {
+const postReview = async (req, res) => {
   try {
     const { name, date, rating, text } = req.body;
     
@@ -23,43 +26,43 @@ const postReview = (req, res) => {
       return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
-    const data = fs.readFileSync(reviewsPath, "utf-8");
-    const reviews = JSON.parse(data);
-
-    const newReview = {
-      id: reviews.length > 0 ? Math.max(...reviews.map(r => r.id)) + 1 : 1,
-      name,
-      date,
+    const newReview = new Review({
+      author: name,
       rating: parseInt(rating),
-      text
-    };
+      comment: text,
+      date: new Date(date)
+    });
 
-    reviews.unshift(newReview); // Add to the beginning
-    fs.writeFileSync(reviewsPath, JSON.stringify(reviews, null, 2));
+    await newReview.save();
 
-    res.status(201).json({ success: true, data: newReview });
+    res.status(201).json({ 
+      success: true, 
+      data: {
+        id: newReview._id,
+        name: newReview.author,
+        date: newReview.date.toISOString().split('T')[0],
+        rating: newReview.rating,
+        text: newReview.comment
+      } 
+    });
   } catch (error) {
-    console.error("Error saving review:", error);
+    console.error("Error saving review to DB:", error);
     res.status(500).json({ success: false, message: "Error saving review" });
   }
 };
 
-const deleteReview = (req, res) => {
+const deleteReview = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = fs.readFileSync(reviewsPath, "utf-8");
-    const reviews = JSON.parse(data);
-
-    const filteredReviews = reviews.filter(r => r.id != id);
+    const deleted = await Review.findByIdAndDelete(id);
     
-    if (reviews.length === filteredReviews.length) {
+    if (!deleted) {
       return res.status(404).json({ success: false, message: "Review not found" });
     }
 
-    fs.writeFileSync(reviewsPath, JSON.stringify(filteredReviews, null, 2));
     res.json({ success: true, message: "Review deleted" });
   } catch (error) {
-    console.error("Error deleting review:", error);
+    console.error("Error deleting review from DB:", error);
     res.status(500).json({ success: false, message: "Error deleting review" });
   }
 };

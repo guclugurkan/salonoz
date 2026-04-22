@@ -1,47 +1,33 @@
+const Image = require("../models/Image");
+const cloudinary = require("../utils/cloudinary");
 const fs = require("fs");
 const path = require("path");
-
-// Chemin vers le dossier public du frontend
-const GALLERY_PATH = path.resolve(__dirname, "../../public/images/gallery");
 
 // GET /api/images
 async function getImages(req, res) {
   try {
+    const images = await Image.find().sort({ createdAt: -1 });
+
     const result = { heren: [], dames: [] };
 
-    const categories = [
-      { folder: "men",   key: "heren" },
-      { folder: "women", key: "dames" },
-    ];
-
-    for (const cat of categories) {
-      const folderPath = path.join(GALLERY_PATH, cat.folder);
-
-      // Vérifie que le dossier existe
-      if (!fs.existsSync(folderPath)) {
-        console.warn(`Dossier introuvable : ${folderPath}`);
-        continue;
-      }
-
-      const files = fs.readdirSync(folderPath).filter(file =>
-        /\.(jpg|jpeg|png|webp)$/i.test(file)
-      );
-
-      result[cat.key] = files.map(file => ({
-        src: `/images/gallery/${cat.folder}/${file}`,
-        category: cat.key === "heren" ? "Heren" : "Dames",
-        alt: `${cat.key === "heren" ? "Herensnit" : "Dames styling"} — ${file}`,
-      }));
-    }
+    images.forEach(img => {
+      const catKey = img.category.toLowerCase() === "heren" ? "heren" : "dames";
+      result[catKey].push({
+        id: img._id,
+        src: img.src,
+        category: img.category,
+        alt: img.alt,
+      });
+    });
 
     res.json({
       success: true,
       data: result,
-      total: result.heren.length + result.dames.length,
+      total: images.length,
     });
 
   } catch (error) {
-    console.error("Error scanning gallery:", error);
+    console.error("Error loading gallery from DB:", error);
     res.status(500).json({
       success: false,
       error: "Failed to load gallery images",
@@ -57,49 +43,82 @@ async function postImage(req, res) {
     }
 
     const { category } = req.body; // 'heren' or 'dames'
-    const folder = category === "heren" ? "men" : "women";
     
-    const fileData = {
-      src: `/images/gallery/${folder}/${req.file.filename}`,
-      category: category === "heren" ? "Heren" : "Dames",
-      alt: `${category === "heren" ? "Herensnit" : "Dames styling"} — ${req.file.originalname}`,
-    };
+    // Upload to Cloudinary using buffer
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: `salonoz/gallery/${category === "heren" ? "men" : "women"}`,
+        resource_type: "image",
+      },
+      async (error, result) => {
+        if (error) {
+          console.error("Cloudinary upload error:", error);
+          return res.status(500).json({ success: false, message: "Cloudinary upload failed" });
+        }
 
-    res.json({
-      success: true,
-      message: "Image uploaded successfully",
-      data: fileData
-    });
+        // Save to MongoDB
+        const newImage = new Image({
+          src: result.secure_url,
+          alt: `${category === "heren" ? "Herensnit" : "Dames styling"} — ${req.file.originalname}`,
+          category: category === "heren" ? "Heren" : "Dames",
+          public_id: result.public_id,
+        });
+
+        await newImage.save();
+
+        res.json({
+          success: true,
+          message: "Image uploaded successfully to Cloudinary",
+          data: newImage
+        });
+      }
+    );
+
+    uploadStream.end(req.file.buffer);
+
   } catch (error) {
-    console.error("Error uploading image:", error);
-    res.status(500).json({ success: false, message: "Failed to upload image" });
+    console.error("Error in postImage:", error);
+    res.status(500).json({ success: false, message: "Failed to process image upload" });
   }
 }
 
 // DELETE /api/images
 async function deleteImage(req, res) {
   try {
-    const { src } = req.body;
-    if (!src) {
-      return res.status(400).json({ success: false, message: "Image source is required" });
+    const { id, src } = req.body;
+    
+    if (!id && !src) {
+        return res.status(400).json({ success: false, message: "Image ID or src is required" });
     }
 
-    // src looks like "/images/gallery/men/filename.jpg"
-    // We need to map it to the actual file path
-    const filePath = path.join(__dirname, "../../public", src);
-    const resolvedPath = path.resolve(filePath);
-
-    // Security check: ensure the file is inside the gallery directory
-    if (!resolvedPath.startsWith(GALLERY_PATH)) {
-      return res.status(403).json({ success: false, message: "Access denied" });
-    }
-
-    if (fs.existsSync(resolvedPath)) {
-      fs.unlinkSync(resolvedPath);
-      res.json({ success: true, message: "Image deleted successfully" });
+    let image;
+    if (id) {
+        image = await Image.findById(id);
     } else {
-      res.status(404).json({ success: false, message: "Image not found" });
+        image = await Image.findOne({ src: src });
     }
+
+    if (!image) {
+      return res.status(404).json({ success: false, message: "Image not found in database" });
+    }
+
+    // 1. Delete from Cloudinary if it's a Cloudinary image
+    if (image.public_id) {
+      await cloudinary.uploader.destroy(image.public_id);
+    } 
+    // 2. Delete from local if it's a local path (deprecated but for safety)
+    else if (image.src.startsWith("/images/gallery/")) {
+        const filePath = path.join(__dirname, "../../public", image.src);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    }
+
+    // 3. Delete from MongoDB
+    await Image.findByIdAndDelete(image._id);
+
+    res.json({ success: true, message: "Image deleted successfully" });
+
   } catch (error) {
     console.error("Error deleting image:", error);
     res.status(500).json({ success: false, message: "Failed to delete image" });

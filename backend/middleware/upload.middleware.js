@@ -1,31 +1,9 @@
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
 
 /**
- * Configure dynamic storage based on category
+ * Use memory storage for Cloudinary uploads
  */
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const category = req.body.category; // 'heren' or 'dames'
-    const folder = category === "heren" ? "men" : "women";
-    const dest = path.join(__dirname, "../../public/images/gallery", folder);
-    
-    // Create folder if it doesn't exist
-    if (!fs.existsSync(dest)) {
-      fs.mkdirSync(dest, { recursive: true });
-    }
-    
-    cb(null, dest);
-  },
-  filename: function (req, file, cb) {
-    // Keep original name or add timestamp to avoid collisions
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    const name = path.basename(file.originalname, ext).replace(/\s+/g, '-');
-    cb(null, `${name}-${uniqueSuffix}${ext}`);
-  },
-});
+const storage = multer.memoryStorage();
 
 /**
  * Filter for image files only
