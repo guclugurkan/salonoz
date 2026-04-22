@@ -12,9 +12,9 @@ export default function Hero() {
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="auto"
       >
-        <source src="/hero2.mp4" type="video/mp4" />
+        <source src="https://res.cloudinary.com/dayuwiiv0/video/upload/f_auto,q_auto/v1776855958/hero3_bmbkf5.mp4" type="video/mp4" />
       </video>
 
       {/* Overlay vignette */}
