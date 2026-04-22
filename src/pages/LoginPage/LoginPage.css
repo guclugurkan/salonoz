@@ -169,6 +169,19 @@
   animation: spin 0.8s linear infinite;
 }
 
+@media (max-width: 480px) {
+  .login-page {
+    padding: 1rem;
+  }
+  .login-container {
+    padding: 2rem 1.5rem;
+  }
+  .login-header h1 {
+    font-size: 2rem;
+  }
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+

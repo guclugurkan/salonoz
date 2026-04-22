@@ -1343,3 +1343,164 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================
+   MOBILE RESPONSIVENESS OVERRIDES
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Global Layout */
+  .admin-header {
+    padding: 60px 20px 40px;
+  }
+
+  .admin-content {
+    padding: 20px 15px 60px;
+  }
+
+  .header-title {
+    font-size: 32px;
+    letter-spacing: 0.1em;
+  }
+
+  /* Navigation Tabs - Scrollable on mobile */
+  .admin-nav {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 5px 20px;
+    margin: 20px -20px 30px;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+  }
+
+  .admin-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-nav-btn {
+    flex-shrink: 0;
+    padding: 10px 22px;
+    font-size: 10px;
+  }
+
+  /* Toolbar & Logic */
+  .calendar-toolbar {
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  .week-label {
+    min-width: unset;
+    font-size: 16px;
+    order: -1;
+  }
+
+  .week-navigation {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .week-nav-button {
+    flex: 1;
+    padding: 10px;
+    font-size: 10px;
+  }
+
+  .staff-filter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .staff-filter-select {
+    width: 100%;
+  }
+
+  /* Appointment Cards */
+  .appointments-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .appointment-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .card-header {
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .card-body {
+    padding: 15px 20px;
+  }
+
+  .card-footer {
+    padding: 15px 20px;
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .card-actions {
+    justify-content: space-between;
+  }
+
+  .action-button {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+  }
+
+  /* Reviews Manager */
+  .add-review-form {
+    padding: 25px 20px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .admin-reviews-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Gallery Manager */
+  .gallery-upload-card {
+    padding: 25px 20px;
+  }
+
+  .upload-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .category-title {
+    font-size: 20px;
+  }
+
+  /* Modal */
+  .modal-content {
+    padding: 30px 20px;
+    margin: 15px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-button {
+    width: 100%;
+  }
+}
+
