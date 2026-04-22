@@ -20,7 +20,7 @@ export default function CancelPage() {
     const cancelAppointment = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3001/api/appointments/cancel?token=${token}`
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/cancel?token=${token}`
         );
         const data = await response.json();
 

@@ -33,7 +33,13 @@ function getAllStaff() {
 // ============================================
 
 async function getAllAppointments() {
-  return await Appointment.find().sort({ createdAt: -1 });
+  const appts = await Appointment.find().sort({ createdAt: -1 });
+  // On transforme l'objet Mongoose pour ajouter le champ 'id' que le frontend attend
+  return appts.map(a => {
+    const obj = a.toObject();
+    obj.id = obj._id.toString();
+    return obj;
+  });
 }
 
 async function sendTestEmail() {

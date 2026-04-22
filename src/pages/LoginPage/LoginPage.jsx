@@ -21,7 +21,7 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

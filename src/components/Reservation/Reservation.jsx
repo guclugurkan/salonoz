@@ -141,7 +141,7 @@ export default function Reservation() {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments`)
+        const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/appointments`)
         if (response.ok) {
           const data = await response.json()
           setAppointments(data.data || [])
@@ -212,7 +212,7 @@ export default function Reservation() {
     console.log("Submitting reservation:", formData)
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/appointments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
