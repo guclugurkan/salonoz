@@ -1443,8 +1443,25 @@
   }
 
   /* Weekly Calendar Mobile Specifics */
+  .weekly-calendar-grid-wrapper {
+    overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+    width: 100%;
+    position: relative;
+  }
+
   .weekly-calendar-grid {
-    grid-template-columns: 80px 1fr !important; /* One time col, one day col */
+    grid-template-columns: 60px 1fr !important; /* Smaller time col */
+    width: 100% !important;
+    gap: 2px !important;
+  }
+
+  .calendar-day-header {
+    padding: 10px 5px !important;
+  }
+
+  .calendar-time-cell {
+    font-size: 11px !important;
+    padding: 5px !important;
   }
 
   .mobile-hidden-day {
@@ -1455,21 +1472,19 @@
     display: flex !important;
   }
 
-  .calendar-row-wrapper {
-    display: contents; /* Allows children to participate in the main grid */
-  }
-
   .mobile-day-selector {
     display: flex;
     justify-content: space-between;
-    gap: 8px;
-    margin-top: 20px;
-    padding: 10px;
+    gap: 4px;
+    margin-top: 15px;
+    padding: 8px;
     background: #fff;
-    border-top: 1px solid #eee;
+    border: 1px solid #eee;
+    border-radius: 12px;
     position: sticky;
-    bottom: 0;
+    bottom: 10px;
     z-index: 10;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   }
 
   .day-select-btn {
@@ -1477,9 +1492,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px 5px;
-    background: #f8f8f8;
-    border: 1px solid #eee;
+    padding: 8px 2px;
+    background: #fdfdfd;
+    border: 1px solid #f0f0f0;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1489,20 +1504,27 @@
     background: #1a1a1a;
     color: #fff;
     border-color: #1a1a1a;
+    transform: translateY(-2px);
   }
 
   .day-initial {
-    font-size: 10px;
+    font-size: 9px;
     text-transform: uppercase;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     opacity: 0.7;
   }
 
   .day-number {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
   }
 }
+
+/* Fix for desktop grid layout */
+.calendar-row-wrapper {
+  display: contents;
+}
+
 
 
 
