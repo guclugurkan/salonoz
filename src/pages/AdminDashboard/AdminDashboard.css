@@ -1444,19 +1444,39 @@
 
   /* Weekly Calendar Mobile Specifics */
   .weekly-calendar-grid-wrapper {
-    overflow-x: hidden; /* Prevent horizontal scroll on mobile */
-    width: 100%;
-    position: relative;
+    overflow: hidden !important; 
+    width: 100% !important;
+    max-width: calc(100vw - 10px) !important; /* Compense le padding de 5px */
+    margin: 0 auto;
   }
 
   .weekly-calendar-grid {
-    grid-template-columns: 60px 1fr !important; /* Smaller time col */
+    grid-template-columns: 55px 1fr !important; /* Un peu plus serré sur l'heure */
     width: 100% !important;
-    gap: 2px !important;
+    max-width: 100% !important;
+    gap: 1px !important;
+    table-layout: fixed; /* Force le respect des colonnes */
+  }
+
+  .calendar-appointment {
+    width: 100%;
+    overflow: hidden;
+    padding: 4px !important;
+    font-size: 9px !important;
+  }
+
+  /* Troncation du texte pour éviter que le calendrier n'explose en largeur */
+  .calendar-appointment-client, 
+  .calendar-appointment-service {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .calendar-day-header {
-    padding: 10px 5px !important;
+    padding: 8px 2px !important;
   }
 
   .calendar-time-cell {
