@@ -30,12 +30,12 @@ function addDays(date, days) {
 function formatWeekRange(startDate) {
   const endDate = addDays(startDate, 6);
 
-  const startText = startDate.toLocaleDateString('en-US', {
+  const startText = startDate.toLocaleDateString('nl-NL', {
     month: 'long',
     day: 'numeric',
   });
 
-  const endText = endDate.toLocaleDateString('en-US', {
+  const endText = endDate.toLocaleDateString('nl-NL', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -175,18 +175,18 @@ function AdminDashboard() {
         e.target.reset();
         await fetchImages();
       } else {
-        alert(result.message || 'Upload failed');
+        alert(result.message || 'Uploaden mislukt');
       }
     } catch (err) {
       console.error('Error uploading image:', err);
-      alert('Error uploading image');
+      alert('Fout bij het uploaden van de afbeelding');
     } finally {
       setUploading(false);
     }
   };
 
   const handleDeleteImage = async (src) => {
-    if (!window.confirm('Verwijder cette photo définitivement ?')) return;
+    if (!window.confirm('Weet u zeker dat u deze foto definitief wilt verwijderen?')) return;
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/images`, {
@@ -202,11 +202,11 @@ function AdminDashboard() {
       if (result.success) {
         await fetchImages();
       } else {
-        alert(result.message || 'Delete failed');
+        alert(result.message || 'Verwijderen mislukt');
       }
     } catch (err) {
       console.error('Error deleting image:', err);
-      alert('Error deleting image');
+      alert('Fout bij het verwijderen van de afbeelding');
     }
   };
 
@@ -223,7 +223,7 @@ function AdminDashboard() {
         },
         body: JSON.stringify({
           ...newReview,
-          date: newReview.date || new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+          date: newReview.date || new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
         })
       });
       const result = await response.json();
@@ -237,7 +237,7 @@ function AdminDashboard() {
   };
 
   const handleDeleteReview = async (id) => {
-    if (!window.confirm('Verwijder deze beoordeling?')) return;
+    if (!window.confirm('Weet u zeker dat u deze beoordeling wilt verwijderen?')) return;
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reviews/${id}`, {
         method: 'DELETE',
@@ -262,7 +262,7 @@ function AdminDashboard() {
 
   const updateAppointmentStatus = async (id, newStatus, reason = null) => {
     if (newStatus === 'rejected' && !reason.trim()) {
-      alert('Rejection reason is required!');
+      alert('Reden voor weigering is verplicht!');
       return;
     }
 
@@ -310,7 +310,7 @@ function AdminDashboard() {
 
   const handleRejectSubmit = async () => {
     if (!rejectionReason.trim()) {
-      alert('Please provide a rejection reason');
+      alert('Geef alsjeblieft een reden voor weigering op');
       return;
     }
 
@@ -322,7 +322,7 @@ function AdminDashboard() {
 
   const formatDate = (dateString) => {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    return new Date(dateString).toLocaleDateString('nl-NL', options);
   };
 
   const formatCreatedAt = (dateString) => {
@@ -333,7 +333,7 @@ function AdminDashboard() {
       hour: '2-digit',
       minute: '2-digit'
     };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    return new Date(dateString).toLocaleDateString('nl-NL', options);
   };
 
   const weekLabel = useMemo(() => {
@@ -407,39 +407,39 @@ function AdminDashboard() {
           <span className="label-text">Admin</span>
           <span className="label-line"></span>
         </div>
-        <p className="header-subtitle">View and manage SALON OZ activity</p>
+        <p className="header-subtitle">Bekijk en beheer SALON OZ activiteiten</p>
 
         <div className="admin-nav">
           <button
             className={`admin-nav-btn ${activeSection === 'appointments' ? 'active' : ''}`}
             onClick={() => setActiveSection('appointments')}
           >
-            Appointments
+            Afspraken
           </button>
           <button
             className={`admin-nav-btn ${activeSection === 'reviews' ? 'active' : ''}`}
             onClick={() => setActiveSection('reviews')}
           >
-            Customer Reviews
+            Klantbeoordelingen
           </button>
           <button
             className={`admin-nav-btn ${activeSection === 'gallery' ? 'active' : ''}`}
             onClick={() => setActiveSection('gallery')}
           >
-            Gallery
+            Gallerij
           </button>
           <button
             className="admin-nav-btn logout"
             onClick={logout}
           >
-            Déconnexion
+            Uitloggen
           </button>
         </div>
         {activeSection === 'appointments' && (
           <div className="calendar-toolbar">
             <div className="staff-filter">
               <label htmlFor="staff-select" className="staff-filter-label">
-                Employee
+                Medewerker
               </label>
               <select
                 id="staff-select"
@@ -457,11 +457,11 @@ function AdminDashboard() {
 
             <div className="week-navigation">
               <button className="week-nav-button" onClick={goToPreviousWeek}>
-                Previous week
+                Vorige week
               </button>
               <span className="week-label">{weekLabel}</span>
               <button className="week-nav-button" onClick={goToNextWeek}>
-                Next week
+                Volgende week
               </button>
             </div>
           </div>
@@ -473,7 +473,7 @@ function AdminDashboard() {
             onClick={fetchAppointments}
             disabled={loading}
           >
-            {loading ? 'Refreshing...' : 'Refresh'}
+            {loading ? 'Vernieuwen...' : 'Vernieuwen'}
           </button>
         )}
       </header>
@@ -487,9 +487,9 @@ function AdminDashboard() {
                 {/* Desktop Weekly Calendar (Hidden < 600px via CSS) */}
                 <div className="desktop-calendar-view">
                   <div className="weekly-calendar-header">
-                    <h2 className="weekly-calendar-title">Weekly Calendar</h2>
+                    <h2 className="weekly-calendar-title">Weekkalender</h2>
                     <p className="weekly-calendar-subtitle">
-                      {selectedStaff} · {filteredAppointments.length} active appointment(s)
+                      {selectedStaff} · {filteredAppointments.length} actieve afspraak/afspraken
                     </p>
                   </div>
 
@@ -498,11 +498,11 @@ function AdminDashboard() {
                       className="weekly-calendar-grid"
                       style={{ gridTemplateColumns: `120px repeat(${weekDays.length}, 1fr)` }}
                     >
-                      <div className="calendar-cell calendar-time-header">Time</div>
+                      <div className="calendar-cell calendar-time-header">Tijd</div>
                       {weekDays.map((day) => (
                         <div key={formatDateToYMD(day)} className="calendar-cell calendar-day-header">
-                          <span className="calendar-day-name">{day.toLocaleDateString('en-US', { weekday: 'short' })}</span>
-                          <span className="calendar-day-date">{day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                          <span className="calendar-day-name">{day.toLocaleDateString('nl-NL', { weekday: 'short' })}</span>
+                          <span className="calendar-day-date">{day.toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })}</span>
                         </div>
                       ))}
 
@@ -517,7 +517,12 @@ function AdminDashboard() {
                                   <div className={`calendar-appointment status-${appointment.status || 'pending'}`}>
                                     <span className="calendar-appointment-client">{appointment.name}</span>
                                     <span className="calendar-appointment-service">{appointment.service}</span>
-                                    <span className="calendar-appointment-status">{appointment.status}</span>
+                                    <span className="calendar-appointment-status">
+                                      {appointment.status === 'pending' ? 'In afwachting' :
+                                       appointment.status === 'confirmed' ? 'Bevestigd' :
+                                       appointment.status === 'rejected' ? 'Geweigerd' :
+                                       appointment.status === 'cancelled' ? 'Geannuleerd' : appointment.status}
+                                    </span>
                                   </div>
                                 ) : (
                                   <span className="calendar-slot-empty">—</span>
@@ -540,7 +545,7 @@ function AdminDashboard() {
                         className={`day-tab ${selectedDayIndex === index ? 'active' : ''}`}
                         onClick={() => setSelectedDayIndex(index)}
                       >
-                        <span className="tab-name">{day.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0)}</span>
+                        <span className="tab-name">{day.toLocaleDateString('nl-NL', { weekday: 'short' }).charAt(0)}</span>
                         <span className="tab-date">{day.getDate()}</span>
                       </button>
                     ))}
@@ -548,8 +553,8 @@ function AdminDashboard() {
 
                   <div className="daily-schedule">
                     <div className="daily-schedule-info">
-                      <h3>{weekDays[selectedDayIndex].toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
-                      <p>{getAppointmentCountForDay(weekDays[selectedDayIndex])} appointment(s)</p>
+                      <h3>{weekDays[selectedDayIndex].toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
+                      <p>{getAppointmentCountForDay(weekDays[selectedDayIndex])} afspraak/afspraken</p>
                     </div>
                     
                     <div className="timeline">
@@ -563,12 +568,17 @@ function AdminDashboard() {
                                 <div className={`mini-card status-${appointment.status}`}>
                                   <div className="mini-card-header">
                                     <span className="mini-card-client">{appointment.name}</span>
-                                    <span className="mini-card-status">{appointment.status}</span>
+                                    <span className="mini-card-status">
+                                      {appointment.status === 'pending' ? 'In afwachting' :
+                                       appointment.status === 'confirmed' ? 'Bevestigd' :
+                                       appointment.status === 'rejected' ? 'Geweigerd' :
+                                       appointment.status === 'cancelled' ? 'Geannuleerd' : appointment.status}
+                                    </span>
                                   </div>
                                   <div className="mini-card-service">{appointment.service}</div>
                                 </div>
                               ) : (
-                                <div className="slot-empty">Available</div>
+                                <div className="slot-empty">Beschikbaar</div>
                               )}
                             </div>
                           </div>
@@ -583,16 +593,16 @@ function AdminDashboard() {
             {loading && (
               <div className="state-container">
                 <div className="loading-spinner"></div>
-                <p className="state-text">Loading appointments...</p>
+                <p className="state-text">Afspraken laden...</p>
               </div>
             )}
 
             {error && !loading && (
               <div className="state-container error">
-                <p className="state-title">Unable to load appointments</p>
+                <p className="state-title">Afspraken laden mislukt</p>
                 <p className="state-text">{error}</p>
                 <button className="retry-button" onClick={fetchAppointments}>
-                  Try Again
+                  Opnieuw proberen
                 </button>
               </div>
             )}
@@ -600,16 +610,16 @@ function AdminDashboard() {
             {!loading && !error && appointments.length > 0 && (
               <section className="appointments-filters">
                 <div className="appointments-filters-header">
-                  <h2 className="appointments-filters-title">Appointment Filters</h2>
+                  <h2 className="appointments-filters-title">Afspraakfilters</h2>
                   <p className="appointments-filters-subtitle">
-                    {filteredCardAppointments.length} result(s)
+                    {filteredCardAppointments.length} result(aat/aten)
                   </p>
                 </div>
 
                 <div className="appointments-filters-grid">
                   <div className="appointments-filter-group">
                     <label htmlFor="card-staff-filter" className="appointments-filter-label">
-                      Employee
+                      Medewerker
                     </label>
                     <select
                       id="card-staff-filter"
@@ -617,7 +627,7 @@ function AdminDashboard() {
                       value={cardStaffFilter}
                       onChange={(e) => setCardStaffFilter(e.target.value)}
                     >
-                      <option value="all">All employees</option>
+                      <option value="all">Alle medewerkers</option>
                       {staffMembers.map((staff) => (
                         <option key={staff} value={staff}>
                           {staff}
@@ -636,23 +646,23 @@ function AdminDashboard() {
                       value={cardStatusFilter}
                       onChange={(e) => setCardStatusFilter(e.target.value)}
                     >
-                      <option value="all">All statuses</option>
-                      <option value="pending">Pending</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="cancelled">Cancelled</option>
-                      <option value="rejected">Rejected</option>
+                      <option value="all">Alle statussen</option>
+                      <option value="pending">In afwachting</option>
+                      <option value="confirmed">Bevestigd</option>
+                      <option value="cancelled">Geannuleerd</option>
+                      <option value="rejected">Geweigerd</option>
                     </select>
                   </div>
 
                   <div className="appointments-filter-group">
                     <label htmlFor="card-search-filter" className="appointments-filter-label">
-                      Search Client
+                      Zoek Klant
                     </label>
                     <input
                       id="card-search-filter"
                       type="text"
                       className="appointments-filter-input"
-                      placeholder="Search by name..."
+                      placeholder="Zoeken op naam..."
                       value={cardSearchTerm}
                       onChange={(e) => setCardSearchTerm(e.target.value)}
                     />
@@ -665,7 +675,7 @@ function AdminDashboard() {
                         checked={showOnlyCurrentWeek}
                         onChange={(e) => setShowOnlyCurrentWeek(e.target.checked)}
                       />
-                      <span>Current week only</span>
+                      <span>Alleen huidige week</span>
                     </label>
                   </div>
                 </div>
@@ -674,18 +684,18 @@ function AdminDashboard() {
 
             {!loading && !error && appointments.length > 0 && filteredCardAppointments.length === 0 && (
               <div className="state-container">
-                <p className="state-title">No matching appointments</p>
+                <p className="state-title">Geen overeenkomende afspraken</p>
                 <p className="state-text">
-                  Try changing your filters to see more results.
+                  Probeer uw filters te wijzigen om meer resultaten te zien.
                 </p>
               </div>
             )}
 
             {!loading && !error && appointments.length === 0 && (
               <div className="state-container">
-                <p className="state-title">No appointments yet</p>
+                <p className="state-title">Nog geen afspraken</p>
                 <p className="state-text">
-                  When clients book appointments, they will appear here.
+                  Wanneer klanten afspraken boeken, verschijnen deze hier.
                 </p>
               </div>
             )}
@@ -695,47 +705,67 @@ function AdminDashboard() {
                 {filteredCardAppointments.map((appointment) => (
                   <article key={appointment.id} className="appointment-card">
                     <div className="card-header">
-                      <div className="card-header-left">
-                        <h2 className="client-name">{appointment.name}</h2>
-                        <span className={`status-badge status-${appointment.status || 'pending'}`}>
-                          {appointment.status || 'pending'}
-                        </span>
+                      <div className="card-header-top">
+                        <div className="card-header-left">
+                          <h2 className="client-name">{appointment.name}</h2>
+                          <span className={`status-badge status-${appointment.status || 'pending'}`}>
+                            {appointment.status || 'pending'}
+                          </span>
+                        </div>
+                        <span className="appointment-id-tech">#{appointment.id}</span>
                       </div>
-                      <span className="appointment-id">#{appointment.id}</span>
+
+                      {appointment.status === 'pending' && (
+                        <div className="card-actions-top">
+                          <button
+                            className="action-button confirm"
+                            onClick={() => handleUpdateStatus(appointment.id, 'confirmed')}
+                          >
+                            Bevestigen
+                          </button>
+                          <button
+                            className="action-button reject"
+                            onClick={() => setRejectModal({ isOpen: true, appointmentId: appointment.id })}
+                          >
+                            Weigeren
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="card-divider"></div>
 
                     <div className="card-body">
+                      {/* ... reste du contenu ... */}
                       <div className="info-row">
-                        <span className="info-label">Service</span>
+                        <span className="info-label">Dienst</span>
                         <span className="info-value">{appointment.service}</span>
                       </div>
 
                       <div className="info-row">
-                        <span className="info-label">Stylist</span>
+                        <span className="info-label">Medewerker</span>
                         <span className="info-value">{appointment.staff}</span>
                       </div>
 
                       <div className="info-row">
-                        <span className="info-label">Date</span>
+                        <span className="info-label">Datum</span>
                         <span className="info-value">{formatDate(appointment.date)}</span>
                       </div>
 
                       <div className="info-row">
-                        <span className="info-label">Time</span>
+                        <span className="info-label">Tijd</span>
                         <span className="info-value">{appointment.time}</span>
                       </div>
 
                       <div className="card-divider subtle"></div>
 
                       <div className="info-row">
-                        <span className="info-label">Email</span>
+                        <span className="info-label">E-mail</span>
                         <span className="info-value">{appointment.email}</span>
                       </div>
 
                       <div className="info-row">
-                        <span className="info-label">Phone</span>
+                        <span className="info-label">Telefoon</span>
                         <span className="info-value">{appointment.phone}</span>
                       </div>
 
@@ -743,7 +773,7 @@ function AdminDashboard() {
                         <>
                           <div className="card-divider subtle"></div>
                           <div className="info-row notes">
-                            <span className="info-label">Notes</span>
+                            <span className="info-label">Notities</span>
                             <span className="info-value">{appointment.notes}</span>
                           </div>
                         </>
@@ -753,7 +783,7 @@ function AdminDashboard() {
                         <>
                           <div className="card-divider subtle"></div>
                           <div className="info-row notes rejection">
-                            <span className="info-label">Rejection Reason</span>
+                            <span className="info-label">Reden van weigering</span>
                             <span className="info-value">{appointment.rejectionReason}</span>
                           </div>
                         </>
@@ -762,35 +792,8 @@ function AdminDashboard() {
 
                     <div className="card-footer">
                       <span className="created-at">
-                        Booked on {formatCreatedAt(appointment.createdAt)}
+                        Geboekt op {formatCreatedAt(appointment.createdAt)}
                       </span>
-
-                      <div className="card-actions">
-                        {(appointment.status === 'pending' || !appointment.status) && (
-                          <>
-                            <button
-                              className="action-button confirm"
-                              onClick={() => updateAppointmentStatus(appointment.id, 'confirmed')}
-                            >
-                              Confirm
-                            </button>
-                            <button
-                              className="action-button reject"
-                              onClick={() => openRejectModal(appointment.id)}
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
-                        {appointment.status === 'confirmed' && (
-                          <button
-                            className="action-button cancel"
-                            onClick={() => updateAppointmentStatus(appointment.id, 'cancelled')}
-                          >
-                            Cancel
-                          </button>
-                        )}
-                      </div>
                     </div>
                   </article>
                 ))}
@@ -803,57 +806,57 @@ function AdminDashboard() {
         {activeSection === 'reviews' && (
           <section className="admin-reviews-manager">
             <div className="reviews-manager-header">
-              <h2 className="section-title">Manage Customer Reviews</h2>
-              <p className="section-subtitle">Add or remove reviews displayed on the website</p>
+              <h2 className="section-title">Klantbeoordelingen Beheren</h2>
+              <p className="section-subtitle">Beoordelingen toevoegen of verwijderen op de website</p>
             </div>
 
             <form className="add-review-form" onSubmit={handleReviewSubmit}>
-              <h3>Add New Review</h3>
+              <h3>Nieuwe Beoordeling Toevoegen</h3>
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Client Name</label>
+                  <label>Klantnaam</label>
                   <input
                     type="text"
-                    placeholder="e.g. Sarah M."
+                    placeholder="bijv. Sarah M."
                     value={newReview.name}
                     onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
                     required
                   />
                 </div>
                 <div className="form-group">
-                  <label>Date</label>
+                  <label>Datum</label>
                   <input
                     type="text"
-                    placeholder="e.g. 12 Mar 2026"
+                    placeholder="bijv. 12 Mrt 2026"
                     value={newReview.date}
                     onChange={(e) => setNewReview({ ...newReview, date: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
-                  <label>Rating (1-5)</label>
+                  <label>Beoordeling (1-5)</label>
                   <select
                     value={newReview.rating}
                     onChange={(e) => setNewReview({ ...newReview, rating: parseInt(e.target.value) })}
                   >
-                    {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n} Stars</option>)}
+                    {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n} Sterren</option>)}
                   </select>
                 </div>
               </div>
               <div className="form-group">
-                <label>Review Text</label>
+                <label>Beoordelingstekst</label>
                 <textarea
                   rows="3"
-                  placeholder="What did the client say?"
+                  placeholder="Wat zei de klant?"
                   value={newReview.text}
                   onChange={(e) => setNewReview({ ...newReview, text: e.target.value })}
                   required
                 ></textarea>
               </div>
-              <button type="submit" className="submit-review-btn">Add Review</button>
+              <button type="submit" className="submit-review-btn">Beoordeling Toevoegen</button>
             </form>
 
             <div className="admin-reviews-list">
-              <h3>Existing Reviews ({reviews.length})</h3>
+              <h3>Bestaande Beoordelingen ({reviews.length})</h3>
               <div className="admin-reviews-grid">
                 {reviews.map(review => (
                   <div key={review.id} className="admin-review-card">
@@ -868,7 +871,7 @@ function AdminDashboard() {
                         className="delete-review-btn"
                         onClick={() => handleDeleteReview(review.id)}
                       >
-                        Delete
+                        Verwijderen
                       </button>
                     </div>
                   </div>
@@ -882,26 +885,26 @@ function AdminDashboard() {
         {activeSection === 'gallery' && (
           <section className="admin-gallery-manager">
             <div className="section-header">
-              <h2 className="section-title">Manage Gallery Images</h2>
-              <p className="section-subtitle">Add or remove photos from your website showcase</p>
+              <h2 className="section-title">Gallerij Afbeeldingen Beheren</h2>
+              <p className="section-subtitle">Foto's toevoegen of verwijderen van uw website</p>
             </div>
 
             <div className="gallery-upload-card">
-              <h3>Upload New Photo</h3>
+              <h3>Nieuwe Foto Uploaden</h3>
               <form className="upload-form" onSubmit={handleImageUpload}>
                 <div className="upload-grid">
                   <div className="form-group">
-                    <label>Category</label>
+                    <label>Categorie</label>
                     <select
                       value={uploadCategory}
                       onChange={(e) => setUploadCategory(e.target.value)}
                     >
-                      <option value="heren">Men (Heren)</option>
-                      <option value="dames">Women (Dames)</option>
+                      <option value="heren">Heren</option>
+                      <option value="dames">Dames</option>
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Image File</label>
+                    <label>Afbeeldingsbestand</label>
                     <input
                       type="file"
                       accept="image/*"
@@ -911,7 +914,7 @@ function AdminDashboard() {
                   </div>
                 </div>
                 <button type="submit" className="upload-button" disabled={uploading || !selectedImageFile}>
-                  {uploading ? 'Uploading...' : 'Add to Gallery'}
+                  {uploading ? 'Uploaden...' : 'Toevoegen aan Gallerij'}
                 </button>
               </form>
             </div>
@@ -919,13 +922,13 @@ function AdminDashboard() {
             {imageLoading ? (
               <div className="state-container">
                 <div className="loading-spinner"></div>
-                <p>Loading gallery...</p>
+                <p>Gallerij laden...</p>
               </div>
             ) : (
               <div className="admin-gallery-list">
                 {['heren', 'dames'].map(cat => (
                   <div key={cat} className="category-section">
-                    <h3 className="category-title">{cat === 'heren' ? 'Men (Heren)' : 'Women (Dames)'}</h3>
+                    <h3 className="category-title">{cat === 'heren' ? 'Heren' : 'Dames'}</h3>
                     <div className="gallery-admin-grid">
                       {images[cat] && images[cat].length > 0 ? (
                         images[cat].map(img => (
@@ -935,7 +938,7 @@ function AdminDashboard() {
                               <button
                                 className="delete-image-overlay"
                                 onClick={() => handleDeleteImage(img.src)}
-                                title="Supprimer"
+                                title="Verwijderen"
                               >
                                 ✕
                               </button>
@@ -943,7 +946,7 @@ function AdminDashboard() {
                           </div>
                         ))
                       ) : (
-                        <p className="empty-category">No images in this category.</p>
+                        <p className="empty-category">Geen afbeeldingen in deze categorie.</p>
                       )}
                     </div>
                   </div>
@@ -957,12 +960,12 @@ function AdminDashboard() {
       {rejectModal.isOpen && (
         <div className="modal-overlay" onClick={closeRejectModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3 className="modal-title">Reject Appointment</h3>
-            <p className="modal-subtitle">Please provide a reason for rejection</p>
+            <h3 className="modal-title">Afspraak Weigeren</h3>
+            <p className="modal-subtitle">Geef een reden voor weigering op</p>
 
             <textarea
               className="modal-textarea"
-              placeholder="Enter rejection reason..."
+              placeholder="Voer de reden voor weigering in..."
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               rows={4}
@@ -970,14 +973,14 @@ function AdminDashboard() {
 
             <div className="modal-actions">
               <button className="modal-button cancel" onClick={closeRejectModal}>
-                Cancel
+                Annuleren
               </button>
               <button
                 className="modal-button submit"
                 onClick={handleRejectSubmit}
                 disabled={!rejectionReason.trim()}
               >
-                Reject Appointment
+                Weigeren Bevestigen
               </button>
             </div>
           </div>
