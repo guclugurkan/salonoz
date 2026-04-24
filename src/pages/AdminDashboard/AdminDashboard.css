@@ -1441,7 +1441,69 @@
     grid-template-columns: repeat(4, 1fr); /* 4 images per row! */
     gap: 3px;
   }
+
+  /* Weekly Calendar Mobile Specifics */
+  .weekly-calendar-grid {
+    grid-template-columns: 80px 1fr !important; /* One time col, one day col */
+  }
+
+  .mobile-hidden-day {
+    display: none !important;
+  }
+
+  .mobile-active-day {
+    display: flex !important;
+  }
+
+  .calendar-row-wrapper {
+    display: contents; /* Allows children to participate in the main grid */
+  }
+
+  .mobile-day-selector {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 10px;
+    background: #fff;
+    border-top: 1px solid #eee;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+
+  .day-select-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 5px;
+    background: #f8f8f8;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .day-select-btn.active {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+  }
+
+  .day-initial {
+    font-size: 10px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+
+  .day-number {
+    font-size: 14px;
+    font-weight: 600;
+  }
 }
+
 
 
 

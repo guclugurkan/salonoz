@@ -79,6 +79,8 @@ function AdminDashboard() {
   const [uploading, setUploading] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [uploadCategory, setUploadCategory] = useState('heren');
+  // Day selection for Mobile View
+  const [selectedDayIndex, setSelectedDayIndex] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1); 
   // Existing Appointment States
   const [rejectModal, setRejectModal] = useState({ isOpen: false, appointmentId: null });
   const [rejectionReason, setRejectionReason] = useState('');
@@ -491,8 +493,11 @@ function AdminDashboard() {
                   >
                     <div className="calendar-cell calendar-time-header">Time</div>
 
-                    {weekDays.map((day) => (
-                      <div key={formatDateToYMD(day)} className="calendar-cell calendar-day-header">
+                    {weekDays.map((day, index) => (
+                      <div 
+                        key={formatDateToYMD(day)} 
+                        className={`calendar-cell calendar-day-header ${selectedDayIndex === index ? 'mobile-active-day' : 'mobile-hidden-day'}`}
+                      >
                         <span className="calendar-day-name">
                           {day.toLocaleDateString('en-US', { weekday: 'long' })}
                         </span>
@@ -503,18 +508,18 @@ function AdminDashboard() {
                     ))}
 
                     {timeSlots.map((time) => (
-                      <>
+                      <div key={`row-${time}`} className="calendar-row-wrapper">
                         <div key={`time-${time}`} className="calendar-cell calendar-time-cell">
                           {time}
                         </div>
 
-                        {weekDays.map((day) => {
+                        {weekDays.map((day, index) => {
                           const appointment = getAppointmentForCell(day, time);
 
                           return (
                             <div
                               key={`${formatDateToYMD(day)}-${time}`}
-                              className="calendar-cell calendar-slot-cell"
+                              className={`calendar-cell calendar-slot-cell ${selectedDayIndex === index ? 'mobile-active-day' : 'mobile-hidden-day'}`}
                             >
                               {appointment ? (
                                 <div className={`calendar-appointment status-${appointment.status || 'pending'}`}>
@@ -534,9 +539,23 @@ function AdminDashboard() {
                             </div>
                           );
                         })}
-                      </>
+                      </div>
                     ))}
                   </div>
+                </div>
+
+                {/* Day selector for Mobile View */}
+                <div className="mobile-day-selector">
+                  {weekDays.map((day, index) => (
+                    <button
+                      key={`select-${index}`}
+                      className={`day-select-btn ${selectedDayIndex === index ? 'active' : ''}`}
+                      onClick={() => setSelectedDayIndex(index)}
+                    >
+                      <span className="day-initial">{day.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0)}</span>
+                      <span className="day-number">{day.getDate()}</span>
+                    </button>
+                  ))}
                 </div>
               </section>
             )}
