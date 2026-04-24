@@ -499,7 +499,7 @@ function AdminDashboard() {
                         className={`calendar-cell calendar-day-header ${selectedDayIndex === index ? 'mobile-active-day' : 'mobile-hidden-day'}`}
                       >
                         <span className="calendar-day-name">
-                          {day.toLocaleDateString('en-US', { weekday: 'long' })}
+                          {day.toLocaleDateString('en-US', { weekday: 'short' })}
                         </span>
                         <span className="calendar-day-date">
                           {day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}

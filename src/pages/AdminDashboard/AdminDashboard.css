@@ -1476,7 +1476,30 @@
   }
 
   .calendar-day-header {
-    padding: 8px 2px !important;
+    padding: 5px 2px !important;
+    flex-direction: column !important; /* Empile le nom et la date */
+    justify-content: center !important;
+    gap: 0 !important;
+    min-height: 50px;
+  }
+
+  .calendar-day-name {
+    font-size: 10px !important;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .calendar-day-date {
+    font-size: 9px !important;
+    opacity: 0.8;
+  }
+
+  .calendar-time-cell {
+    font-size: 10px !important;
+    padding: 2px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .calendar-time-cell {
