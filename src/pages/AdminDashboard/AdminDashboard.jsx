@@ -303,6 +303,11 @@ function AdminDashboard() {
     setRejectionReason('');
   };
 
+  const getAppointmentCountForDay = (dayDate) => {
+    const dayKey = formatDateToYMD(dayDate);
+    return filteredAppointments.filter(a => a.date === dayKey).length;
+  };
+
   const handleRejectSubmit = async () => {
     if (!rejectionReason.trim()) {
       alert('Please provide a rejection reason');
@@ -478,84 +483,99 @@ function AdminDashboard() {
         {activeSection === 'appointments' && (
           <>
             {!loading && !error && (
-              <section className="weekly-calendar">
-                <div className="weekly-calendar-header">
-                  <h2 className="weekly-calendar-title">Weekly Calendar</h2>
-                  <p className="weekly-calendar-subtitle">
-                    {selectedStaff} · {filteredAppointments.length} active appointment(s) this week
-                  </p>
-                </div>
+              <section className="calendar-section">
+                {/* Desktop Weekly Calendar (Hidden < 600px via CSS) */}
+                <div className="desktop-calendar-view">
+                  <div className="weekly-calendar-header">
+                    <h2 className="weekly-calendar-title">Weekly Calendar</h2>
+                    <p className="weekly-calendar-subtitle">
+                      {selectedStaff} · {filteredAppointments.length} active appointment(s)
+                    </p>
+                  </div>
 
-                <div className="weekly-calendar-grid-wrapper">
-                  <div
-                    className="weekly-calendar-grid"
-                    style={{ gridTemplateColumns: `120px repeat(${weekDays.length}, 1fr)` }}
-                  >
-                    <div className="calendar-cell calendar-time-header">Time</div>
-
-                    {weekDays.map((day, index) => (
-                      <div
-                        key={formatDateToYMD(day)}
-                        className={`calendar-cell calendar-day-header ${selectedDayIndex === index ? 'mobile-active-day' : 'mobile-hidden-day'}`}
-                      >
-                        <span className="calendar-day-name">
-                          {day.toLocaleDateString('en-US', { weekday: 'long' })}
-                        </span>
-                        <span className="calendar-day-date">
-                          {day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      </div>
-                    ))}
-
-                    {timeSlots.map((time) => (
-                      <div key={`row-${time}`} className="calendar-row-wrapper">
-                        <div key={`time-${time}`} className="calendar-cell calendar-time-cell">
-                          {time}
+                  <div className="weekly-calendar-grid-wrapper">
+                    <div
+                      className="weekly-calendar-grid"
+                      style={{ gridTemplateColumns: `120px repeat(${weekDays.length}, 1fr)` }}
+                    >
+                      <div className="calendar-cell calendar-time-header">Time</div>
+                      {weekDays.map((day) => (
+                        <div key={formatDateToYMD(day)} className="calendar-cell calendar-day-header">
+                          <span className="calendar-day-name">{day.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                          <span className="calendar-day-date">{day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                         </div>
+                      ))}
 
-                        {weekDays.map((day, index) => {
-                          const appointment = getAppointmentForCell(day, time);
-
-                          return (
-                            <div
-                              key={`${formatDateToYMD(day)}-${time}`}
-                              className={`calendar-cell calendar-slot-cell ${selectedDayIndex === index ? 'mobile-active-day' : 'mobile-hidden-day'}`}
-                            >
-                              {appointment ? (
-                                <div className={`calendar-appointment status-${appointment.status || 'pending'}`}>
-                                  <span className="calendar-appointment-client">
-                                    {appointment.name}
-                                  </span>
-                                  <span className="calendar-appointment-service">
-                                    {appointment.service}
-                                  </span>
-                                  <span className="calendar-appointment-status">
-                                    {appointment.status}
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="calendar-slot-empty">—</span>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ))}
+                      {timeSlots.map((time) => (
+                        <div key={`row-${time}`} className="calendar-row-wrapper">
+                          <div className="calendar-cell calendar-time-cell">{time}</div>
+                          {weekDays.map((day) => {
+                            const appointment = getAppointmentForCell(day, time);
+                            return (
+                              <div key={`${formatDateToYMD(day)}-${time}`} className="calendar-cell calendar-slot-cell">
+                                {appointment ? (
+                                  <div className={`calendar-appointment status-${appointment.status || 'pending'}`}>
+                                    <span className="calendar-appointment-client">{appointment.name}</span>
+                                    <span className="calendar-appointment-service">{appointment.service}</span>
+                                    <span className="calendar-appointment-status">{appointment.status}</span>
+                                  </div>
+                                ) : (
+                                  <span className="calendar-slot-empty">—</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Day selector for Mobile View */}
-                <div className="mobile-day-selector">
-                  {weekDays.map((day, index) => (
-                    <button
-                      key={`select-${index}`}
-                      className={`day-select-btn ${selectedDayIndex === index ? 'active' : ''}`}
-                      onClick={() => setSelectedDayIndex(index)}
-                    >
-                      <span className="day-initial">{day.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0)}</span>
-                      <span className="day-number">{day.getDate()}</span>
-                    </button>
-                  ))}
+                {/* Mobile Daily Calendar (Hidden > 600px via CSS) */}
+                <div className="mobile-calendar-view">
+                  <div className="mobile-day-tabs">
+                    {weekDays.map((day, index) => (
+                      <button
+                        key={`day-tab-${index}`}
+                        className={`day-tab ${selectedDayIndex === index ? 'active' : ''}`}
+                        onClick={() => setSelectedDayIndex(index)}
+                      >
+                        <span className="tab-name">{day.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0)}</span>
+                        <span className="tab-date">{day.getDate()}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="daily-schedule">
+                    <div className="daily-schedule-info">
+                      <h3>{weekDays[selectedDayIndex].toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
+                      <p>{getAppointmentCountForDay(weekDays[selectedDayIndex])} appointment(s)</p>
+                    </div>
+                    
+                    <div className="timeline">
+                      {timeSlots.map((time) => {
+                        const appointment = getAppointmentForCell(weekDays[selectedDayIndex], time);
+                        return (
+                          <div key={`timeline-${time}`} className="timeline-slot">
+                            <div className="slot-time">{time}</div>
+                            <div className="slot-content">
+                              {appointment ? (
+                                <div className={`mini-card status-${appointment.status}`}>
+                                  <div className="mini-card-header">
+                                    <span className="mini-card-client">{appointment.name}</span>
+                                    <span className="mini-card-status">{appointment.status}</span>
+                                  </div>
+                                  <div className="mini-card-service">{appointment.service}</div>
+                                </div>
+                              ) : (
+                                <div className="slot-empty">Available</div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </section>
             )}
