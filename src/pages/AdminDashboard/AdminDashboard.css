@@ -222,6 +222,7 @@
 .admin-nav {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 12px;
   margin: 32px 0 48px;
 }
@@ -2497,6 +2498,114 @@
 .admin-review-card.pending {
   border: 1px solid #ffcc00 !important;
   background-color: #fffdf5 !important;
+}
+
+/* ============================================
+   REVIEWS MANAGER
+   ============================================ */
+.admin-reviews-manager {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.add-review-form {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  padding: 40px;
+  margin-bottom: 60px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+.add-review-form h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  margin-bottom: 24px;
+  font-weight: 400;
+}
+
+.submit-review-btn {
+  background-color: #1a1a1a;
+  color: #fff;
+  border: none;
+  padding: 14px 28px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.submit-review-btn:hover:not(:disabled) {
+  background-color: #333;
+}
+
+.admin-reviews-list h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.admin-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.admin-review-card {
+  background: #fff;
+  border: 1px solid #eee;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-review-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.admin-review-author {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.admin-review-rating {
+  color: #D4AF37;
+  letter-spacing: 2px;
+}
+
+.admin-review-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #555;
+  font-style: italic;
+  flex-grow: 1;
+  margin-bottom: 20px;
+}
+
+.admin-review-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f9f9f9;
+  padding-top: 15px;
+}
+
+.admin-review-date {
+  font-size: 12px;
+  color: #888;
+}
+
+.delete-review-btn {
+  background: none;
+  border: none;
+  color: #cc0000;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .pending-badge {
