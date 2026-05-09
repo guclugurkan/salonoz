@@ -88,6 +88,7 @@ export default function ReviewsPage() {
         body: formData,
       });
       const result = await res.json();
+      console.log("DEBUG: Submit Result:", result);
       if (result.success) {
         setSubmitSuccess(true);
         setName("");
@@ -99,9 +100,12 @@ export default function ReviewsPage() {
             setShowForm(false);
             setSubmitSuccess(false);
         }, 3000);
+      } else {
+        alert("Fout: " + (result.message || "Onbekende fout"));
       }
     } catch (err) {
       console.error("Error submitting review:", err);
+      alert("Er is een fout opgetreden bij het verzenden.");
     } finally {
       setIsSubmitting(false);
     }
