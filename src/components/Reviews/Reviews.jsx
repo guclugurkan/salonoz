@@ -1,3 +1,4 @@
+import "./Reviews.css";
 import { Link } from "react-router-dom";
 import { googleReviews, GOOGLE_REVIEWS_URL } from "../../data/reviewsData";
 
