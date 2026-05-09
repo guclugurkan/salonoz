@@ -28,7 +28,7 @@ export default function Hero() {
 
         <h1 className="hero__title">SALON OZ</h1>
 
-        <p className="hero__subtitle">Established 2020</p>
+        <p className="hero__subtitle">SINCE 2020</p>
 
         <p className="hero__tagline">Hair • Beauty • Barber</p>
 
@@ -41,7 +41,7 @@ export default function Hero() {
         </div>
       </div>
 
-      
+
     </section>
   );
 }

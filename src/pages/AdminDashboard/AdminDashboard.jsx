@@ -1,13 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './AdminDashboard.css';
+import AdminServices from './AdminServices';
+import AdminSettings from './AdminSettings';
+import AdminStaff from './AdminStaff';
 
-const staffMembers = ['Oz', 'Sarah', 'Alex'];
+// staffMembers is now dynamic
 
 const timeSlots = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '12:00', '13:00', '13:30', '14:00', '14:30', '15:00',
-  '15:30', '16:00', '16:30'
+  '09:00', '09:15', '09:30', '09:45', '10:00', '10:15', '10:30', '10:45',
+  '11:00', '11:15', '11:30', '11:45', '12:00', '12:15', '12:30', '12:45',
+  '13:00', '13:15', '13:30', '13:45', '14:00', '14:15', '14:30', '14:45',
+  '15:00', '15:15', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45'
 ];
 
 function getStartOfWeek(date) {
@@ -84,7 +88,9 @@ function AdminDashboard() {
   // Existing Appointment States
   const [rejectModal, setRejectModal] = useState({ isOpen: false, appointmentId: null });
   const [rejectionReason, setRejectionReason] = useState('');
-  const [selectedStaff, setSelectedStaff] = useState('Oz');
+  const [acceptModal, setAcceptModal] = useState({ isOpen: false, appointmentId: null });
+  const [acceptMessage, setAcceptMessage] = useState('');
+  const [selectedStaff, setSelectedStaff] = useState('OZ');
   const [currentWeekStart, setCurrentWeekStart] = useState(() => getStartOfWeek(new Date()));
   const [cardStaffFilter, setCardStaffFilter] = useState('all');
   const [cardStatusFilter, setCardStatusFilter] = useState('all');
@@ -94,7 +100,24 @@ function AdminDashboard() {
   // Reviews States
   const [reviews, setReviews] = useState([]);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [staffList, setStaffList] = useState([]);
+
+  // Settings States
+  const [settings, setSettings] = useState(null);
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [newReview, setNewReview] = useState({ name: '', date: '', rating: 5, text: '' });
+
+  // UI States
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: '', type: 'success' });
+    }, 4000);
+  };
 
   const fetchAppointments = async () => {
     setLoading(true);
@@ -124,14 +147,69 @@ function AdminDashboard() {
     setReviewLoading(true);
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reviews`);
-      const result = await response.json();
-      if (result.success) {
-        setReviews(result.data);
+      const data = await response.json();
+      if (data.success) {
+        setReviews(data.data);
       }
     } catch (err) {
       console.error('Error fetching reviews:', err);
     } finally {
       setReviewLoading(false);
+    }
+  };
+
+  const fetchStaff = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/staff`);
+      const data = await response.json();
+      if (data.success) {
+        setStaffList(data.data);
+        // Default to first staff if none selected
+        if (data.data.length > 0 && (!selectedStaff || !data.data.find(s => s.name === selectedStaff))) {
+          setSelectedStaff(data.data[0].name);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching staff:', err);
+    }
+  };
+
+  const fetchSettings = async () => {
+    setSettingsLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/settings`);
+      const data = await response.json();
+      if (data.success) {
+        setSettings(data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching settings:', err);
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleUpdateSettings = async (updatedSettings) => {
+    setIsSavingSettings(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedSettings),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSettings(data.data);
+        showToast('Instellingen succesvol bijgewerkt!');
+      }
+    } catch (err) {
+      console.error('Error updating settings:', err);
+      showToast('Fout bij bijwerken instellingen', 'error');
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -212,8 +290,12 @@ function AdminDashboard() {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!newReview.name || !newReview.text) return;
+    if (!newReview.name || !newReview.text) {
+      showToast('Vul alle verplichte velden in', 'error');
+      return;
+    }
 
+    setIsSubmitting(true);
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reviews`, {
         method: 'POST',
@@ -230,9 +312,15 @@ function AdminDashboard() {
       if (result.success) {
         setReviews([result.data, ...reviews]);
         setNewReview({ name: '', date: '', rating: 5, text: '' });
+        showToast('Beoordeling succesvol toegevoegd!');
+      } else {
+        showToast(result.message || 'Fout bij toevoegen beoordeling', 'error');
       }
     } catch (err) {
       console.error('Error adding review:', err);
+      showToast('Er is een fout opgetreden', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -258,19 +346,18 @@ function AdminDashboard() {
     fetchAppointments();
     fetchReviews();
     fetchImages();
+    fetchSettings();
+    fetchStaff();
   }, []);
 
-  const updateAppointmentStatus = async (id, newStatus, reason = null) => {
-    if (newStatus === 'rejected' && !reason.trim()) {
+  const updateAppointmentStatus = async (id, newStatus, extraData = {}) => {
+    if (newStatus === 'rejected' && !extraData.rejectionReason?.trim()) {
       alert('Reden voor weigering is verplicht!');
       return;
     }
 
     try {
-      const body = { status: newStatus };
-      if (reason) {
-        body.rejectionReason = reason;
-      }
+      const body = { status: newStatus, ...extraData };
 
       console.log('Request Body:', body);
 
@@ -293,6 +380,40 @@ function AdminDashboard() {
     }
   };
 
+  const archiveAppointment = async (id) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/${id}/archive`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        await fetchAppointments();
+      }
+    } catch (err) {
+      console.error('Error archiving appointment:', err);
+    }
+  };
+
+  const handleDeleteAppointment = async (id) => {
+    if (!window.confirm("Weet u zeker que vous voulez supprimer ce rendez-vous de manière permanente ?")) return;
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        await fetchAppointments();
+      }
+    } catch (err) {
+      console.error('Error deleting appointment:', err);
+    }
+  };
+
   const openRejectModal = (appointmentId) => {
     setRejectModal({ isOpen: true, appointmentId });
     setRejectionReason('');
@@ -301,6 +422,16 @@ function AdminDashboard() {
   const closeRejectModal = () => {
     setRejectModal({ isOpen: false, appointmentId: null });
     setRejectionReason('');
+  };
+
+  const openAcceptModal = (appointmentId) => {
+    setAcceptModal({ isOpen: true, appointmentId });
+    setAcceptMessage('');
+  };
+
+  const closeAcceptModal = () => {
+    setAcceptModal({ isOpen: false, appointmentId: null });
+    setAcceptMessage('');
   };
 
   const getAppointmentCountForDay = (dayDate) => {
@@ -316,8 +447,45 @@ function AdminDashboard() {
 
     console.log('Rejection Reason:', rejectionReason);
 
-    await updateAppointmentStatus(rejectModal.appointmentId, 'rejected', rejectionReason);
+    await updateAppointmentStatus(rejectModal.appointmentId, 'rejected', { rejectionReason });
     closeRejectModal();
+  };
+
+  const handleAcceptSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      await updateAppointmentStatus(acceptModal.appointmentId, 'confirmed', { confirmationMessage: acceptMessage.trim() });
+      showToast('Afspraak bevestigd en bericht succesvol verzonden!');
+      closeAcceptModal();
+    } catch (error) {
+      showToast('Fout bij bevestigen van de afspraak', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleWhatsApp = (appointment) => {
+    // Keep digits and '+'
+    let cleanPhone = appointment.phone.replace(/[^\d+]/g, '');
+    
+    // Remove leading '+'
+    if (cleanPhone.startsWith('+')) {
+      cleanPhone = cleanPhone.substring(1);
+    } else if (cleanPhone.startsWith('00')) {
+      // Replace leading '00' with nothing
+      cleanPhone = cleanPhone.substring(2);
+    } else if (cleanPhone.startsWith('0')) {
+      // If it starts with '0', assume Belgium (+32)
+      cleanPhone = '32' + cleanPhone.substring(1);
+    }
+    
+    // Format message in Dutch
+    const message = `Beste ${appointment.name},\n\nUw afspraak bij SALON OZ is bevestigd.\n\nDatum: ${formatDate(appointment.date)}\nTijd: ${appointment.time}\nDienst: ${appointment.service}\n\nGelieve indien mogelijk contant te betalen in het salon.\n\nWe kijken ernaar uit u te verwelkomen!`;
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
   };
 
   const formatDate = (dateString) => {
@@ -377,7 +545,10 @@ function AdminDashboard() {
       const matchesWeek =
         !showOnlyCurrentWeek || isDateInCurrentWeek(appointment.date, currentWeekStart);
 
-      return matchesStaff && matchesStatus && matchesSearch && matchesWeek;
+      const isPast = new Date(appointment.date) < new Date(new Date().setHours(0,0,0,0));
+      const matchesArchive = !appointment.isArchived && !isPast;
+
+      return matchesStaff && matchesStatus && matchesSearch && matchesWeek && matchesArchive;
     });
   }, [
     appointments,
@@ -393,14 +564,29 @@ function AdminDashboard() {
     const dayKey = formatDateToYMD(dayDate);
 
     return filteredAppointments.find(
-      (appointment) =>
-        appointment.date === dayKey &&
-        appointment.time === time
+      (appointment) => {
+        if (appointment.date !== dayKey) return false;
+        // If bookedSlots exists and has items, check if the time is in it
+        if (appointment.bookedSlots && appointment.bookedSlots.length > 0) {
+          return appointment.bookedSlots.includes(time);
+        }
+        // Fallback for older appointments
+        return appointment.time === time;
+      }
     );
   };
 
   return (
     <div className="admin-dashboard">
+      {toast.show && (
+        <div className={`admin-toast ${toast.type}`}>
+          <div className="admin-toast-icon">
+            {toast.type === 'success' ? '✓' : '⚠️'}
+          </div>
+          <p>{toast.message}</p>
+        </div>
+      )}
+      
       <header className="admin-header">
         <div className="header-label">
           <span className="label-line"></span>
@@ -417,6 +603,12 @@ function AdminDashboard() {
             Afspraken
           </button>
           <button
+            className={`admin-nav-btn ${activeSection === 'archive' ? 'active' : ''}`}
+            onClick={() => setActiveSection('archive')}
+          >
+            Archief
+          </button>
+          <button
             className={`admin-nav-btn ${activeSection === 'reviews' ? 'active' : ''}`}
             onClick={() => setActiveSection('reviews')}
           >
@@ -428,12 +620,30 @@ function AdminDashboard() {
           >
             Gallerij
           </button>
-          <button
-            className="admin-nav-btn logout"
-            onClick={logout}
-          >
-            Uitloggen
-          </button>
+            <button 
+              className={`admin-nav-btn ${activeSection === 'services' ? 'active' : ''}`}
+              onClick={() => setActiveSection('services')}
+            >
+              Services
+            </button>
+            <button 
+              className={`admin-nav-btn ${activeSection === 'settings' ? 'active' : ''}`}
+              onClick={() => setActiveSection('settings')}
+            >
+              Openingsuren & Verlof
+            </button>
+            <button 
+              className={`admin-nav-btn ${activeSection === 'staff' ? 'active' : ''}`}
+              onClick={() => setActiveSection('staff')}
+            >
+              Team
+            </button>
+            <button 
+              className="admin-nav-btn logout"
+              onClick={logout}
+            >
+              Uitloggen
+            </button>
         </div>
         {activeSection === 'appointments' && (
           <div className="calendar-toolbar">
@@ -447,9 +657,9 @@ function AdminDashboard() {
                 value={selectedStaff}
                 onChange={(e) => setSelectedStaff(e.target.value)}
               >
-                {staffMembers.map((staff) => (
-                  <option key={staff} value={staff}>
-                    {staff}
+                {staffList.map((staff) => (
+                  <option key={staff._id} value={staff.name}>
+                    {staff.name}
                   </option>
                 ))}
               </select>
@@ -480,6 +690,22 @@ function AdminDashboard() {
 
       <main className="admin-content">
 
+          {activeSection === 'services' && (
+            <AdminServices token={token} showToast={showToast} />
+          )}
+
+          {activeSection === 'settings' && (
+            <AdminSettings 
+              settings={settings} 
+              onUpdate={handleUpdateSettings} 
+              isSaving={isSavingSettings} 
+            />
+          )}
+
+          {activeSection === 'staff' && (
+            <AdminStaff token={token} showToast={showToast} />
+          )}
+
         {activeSection === 'appointments' && (
           <>
             {!loading && !error && (
@@ -506,23 +732,33 @@ function AdminDashboard() {
                         </div>
                       ))}
 
-                      {timeSlots.map((time) => (
+                      {timeSlots.map((time, timeIndex) => (
                         <div key={`row-${time}`} className="calendar-row-wrapper">
                           <div className="calendar-cell calendar-time-cell">{time}</div>
                           {weekDays.map((day) => {
                             const appointment = getAppointmentForCell(day, time);
+                            const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(day, timeSlots[timeIndex - 1])?.id === appointment.id;
+                            const isContinued = timeIndex < timeSlots.length - 1 && appointment && getAppointmentForCell(day, timeSlots[timeIndex + 1])?.id === appointment.id;
+                            
                             return (
-                              <div key={`${formatDateToYMD(day)}-${time}`} className="calendar-cell calendar-slot-cell">
+                              <div key={`${formatDateToYMD(day)}-${time}`} className={`calendar-cell calendar-slot-cell ${appointment ? 'has-appointment' : ''}`}>
                                 {appointment ? (
-                                  <div className={`calendar-appointment status-${appointment.status || 'pending'}`}>
-                                    <span className="calendar-appointment-client">{appointment.name}</span>
-                                    <span className="calendar-appointment-service">{appointment.service}</span>
-                                    <span className="calendar-appointment-status">
-                                      {appointment.status === 'pending' ? 'In afwachting' :
-                                       appointment.status === 'confirmed' ? 'Bevestigd' :
-                                       appointment.status === 'rejected' ? 'Geweigerd' :
-                                       appointment.status === 'cancelled' ? 'Geannuleerd' : appointment.status}
-                                    </span>
+                                  <div className={`calendar-appointment status-${appointment.status || 'pending'} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''} ${appointment.notes?.includes('[DUO') ? 'is-duo' : ''}`}>
+                                    {!isContinuation && (
+                                      <>
+                                        <div className="calendar-appointment-header">
+                                          <span className="calendar-appointment-client">{appointment.name}</span>
+                                          {appointment.notes?.includes('[DUO') && <span className="duo-badge" title="Duo Afspraak">👥 Duo</span>}
+                                        </div>
+                                        <span className="calendar-appointment-service">{appointment.service}</span>
+                                        <span className="calendar-appointment-status">
+                                          {appointment.status === 'pending' ? 'In afwachting' :
+                                           appointment.status === 'confirmed' ? 'Bevestigd' :
+                                           appointment.status === 'rejected' ? 'Geweigerd' :
+                                           appointment.status === 'cancelled' ? 'Geannuleerd' : appointment.status}
+                                        </span>
+                                      </>
+                                    )}
                                   </div>
                                 ) : (
                                   <span className="calendar-slot-empty">—</span>
@@ -558,24 +794,31 @@ function AdminDashboard() {
                     </div>
                     
                     <div className="timeline">
-                      {timeSlots.map((time) => {
+                      {timeSlots.map((time, timeIndex) => {
                         const appointment = getAppointmentForCell(weekDays[selectedDayIndex], time);
+                        const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(weekDays[selectedDayIndex], timeSlots[timeIndex - 1])?.id === appointment.id;
+                        const isContinued = timeIndex < timeSlots.length - 1 && appointment && getAppointmentForCell(weekDays[selectedDayIndex], timeSlots[timeIndex + 1])?.id === appointment.id;
+
                         return (
                           <div key={`timeline-${time}`} className="timeline-slot">
                             <div className="slot-time">{time}</div>
-                            <div className="slot-content">
+                            <div className={`slot-content ${appointment ? 'has-appointment' : ''}`}>
                               {appointment ? (
-                                <div className={`mini-card status-${appointment.status}`}>
-                                  <div className="mini-card-header">
-                                    <span className="mini-card-client">{appointment.name}</span>
-                                    <span className="mini-card-status">
-                                      {appointment.status === 'pending' ? 'In afwachting' :
-                                       appointment.status === 'confirmed' ? 'Bevestigd' :
-                                       appointment.status === 'rejected' ? 'Geweigerd' :
-                                       appointment.status === 'cancelled' ? 'Geannuleerd' : appointment.status}
-                                    </span>
-                                  </div>
-                                  <div className="mini-card-service">{appointment.service}</div>
+                                <div className={`mini-card status-${appointment.status} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''}`}>
+                                  {!isContinuation && (
+                                    <>
+                                      <div className="mini-card-header">
+                                        <span className="mini-card-client">{appointment.name}</span>
+                                        <span className="mini-card-status">
+                                          {appointment.status === 'pending' ? 'In afwachting' :
+                                           appointment.status === 'confirmed' ? 'Bevestigd' :
+                                           appointment.status === 'rejected' ? 'Geweigerd' :
+                                           appointment.status === 'cancelled' ? 'Geannuleerd' : appointment.status}
+                                        </span>
+                                      </div>
+                                      <div className="mini-card-service">{appointment.service}</div>
+                                    </>
+                                  )}
                                 </div>
                               ) : (
                                 <div className="slot-empty">Beschikbaar</div>
@@ -628,9 +871,9 @@ function AdminDashboard() {
                       onChange={(e) => setCardStaffFilter(e.target.value)}
                     >
                       <option value="all">Alle medewerkers</option>
-                      {staffMembers.map((staff) => (
-                        <option key={staff} value={staff}>
-                          {staff}
+                      {staffList.map((staff) => (
+                        <option key={staff._id} value={staff.name}>
+                          {staff.name}
                         </option>
                       ))}
                     </select>
@@ -719,7 +962,7 @@ function AdminDashboard() {
                         <div className="card-actions-top">
                           <button
                             className="action-button confirm"
-                            onClick={() => handleUpdateStatus(appointment.id, 'confirmed')}
+                            onClick={() => openAcceptModal(appointment.id)}
                           >
                             Bevestigen
                           </button>
@@ -736,7 +979,6 @@ function AdminDashboard() {
                     <div className="card-divider"></div>
 
                     <div className="card-body">
-                      {/* ... reste du contenu ... */}
                       <div className="info-row">
                         <span className="info-label">Dienst</span>
                         <span className="info-value">{appointment.service}</span>
@@ -772,10 +1014,27 @@ function AdminDashboard() {
                       {appointment.notes && (
                         <>
                           <div className="card-divider subtle"></div>
-                          <div className="info-row notes">
-                            <span className="info-label">Notities</span>
-                            <span className="info-value">{appointment.notes}</span>
-                          </div>
+                          {appointment.notes.includes('[DUO:') ? (
+                            <div className="duo-info-box">
+                              <div className="duo-info-header">
+                                <span className="duo-icon">👥</span>
+                                <strong>Duo Service Details</strong>
+                              </div>
+                              <p className="duo-details-text">
+                                {appointment.notes.match(/\[DUO: (.*?)\]/)?.[1] || "Duo details"}
+                              </p>
+                              {appointment.notes.split('] ')[1] && (
+                                <p className="duo-notes-extra">
+                                  <strong>Nota:</strong> {appointment.notes.split('] ')[1]}
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="info-row notes">
+                              <span className="info-label">Notities</span>
+                              <span className="info-value">{appointment.notes}</span>
+                            </div>
+                          )}
                         </>
                       )}
 
@@ -794,12 +1053,127 @@ function AdminDashboard() {
                       <span className="created-at">
                         Geboekt op {formatCreatedAt(appointment.createdAt)}
                       </span>
+                      {appointment.status === 'confirmed' && (
+                        <button 
+                          className="action-button whatsapp" 
+                          onClick={() => handleWhatsApp(appointment)}
+                          title="Verstuur via WhatsApp"
+                        >
+                          WhatsApp
+                        </button>
+                      )}
+                      <button 
+                        className="action-button archive" 
+                        onClick={() => archiveAppointment(appointment.id)}
+                        title={appointment.isArchived ? "Dearchiveren" : "Archiveren"}
+                      >
+                        {appointment.isArchived ? "Dearchiveren" : "Archiveren"}
+                      </button>
+                      <button 
+                        className="action-button delete" 
+                        onClick={() => handleDeleteAppointment(appointment.id)}
+                        title="Permanent verwijderen"
+                      >
+                        Supprimer
+                      </button>
                     </div>
                   </article>
                 ))}
               </div>
             )}
           </>
+        )}
+
+        {/* ARCHIVE SECTION */}
+        {activeSection === 'archive' && (
+          <section className="admin-archive-manager">
+            <div className="section-header" style={{ textAlign: 'center', marginBottom: '40px' }}>
+              <h2 className="section-title">Archief</h2>
+              <p className="section-subtitle">Beheer uw gearchiveerde afspraken</p>
+            </div>
+            
+            <div className="appointments-grid">
+              {appointments.filter(a => {
+                const isPast = new Date(a.date) < new Date(new Date().setHours(0,0,0,0));
+                return a.isArchived || isPast;
+              }).length === 0 ? (
+                <div className="state-container" style={{ gridColumn: '1 / -1' }}>
+                  <p className="state-text">Geen gearchiveerde of oude afspraken gevonden.</p>
+                </div>
+              ) : (
+                appointments
+                  .filter(a => {
+                    const isPast = new Date(a.date) < new Date(new Date().setHours(0,0,0,0));
+                    return a.isArchived || isPast;
+                  })
+                  .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort newest archive first
+                  .map((appointment) => {
+                    const isPast = new Date(appointment.date) < new Date(new Date().setHours(0,0,0,0));
+                    return (
+                      <article key={appointment.id} className="appointment-card">
+                        <div className="card-header">
+                          <div className="card-header-top">
+                            <div className="card-header-left">
+                              <h2 className="client-name">{appointment.name}</h2>
+                              <span className={`status-badge status-${appointment.status || 'pending'}`}>
+                                {appointment.status || 'pending'}
+                              </span>
+                            </div>
+                            <span className="appointment-id-tech">#{appointment.id.slice(-6)}</span>
+                          </div>
+                        </div>
+
+                        <div className="card-divider"></div>
+
+                        <div className="card-body">
+                          <div className="info-row">
+                            <span className="info-label">Dienst</span>
+                            <span className="info-value">{appointment.service}</span>
+                          </div>
+
+                          <div className="info-row">
+                            <span className="info-label">Datum & Tijd</span>
+                            <span className="info-value" style={{ color: isPast ? '#888' : 'inherit' }}>
+                              {formatDate(appointment.date)} om {appointment.time} 
+                              {isPast && <span style={{ fontSize: '10px', marginLeft: '5px', fontStyle: 'italic' }}>(Verstreken)</span>}
+                            </span>
+                          </div>
+                          
+                          <div className="info-row">
+                            <span className="info-label">Telefoon</span>
+                            <span className="info-value">{appointment.phone}</span>
+                          </div>
+                        </div>
+
+                        <div className="card-footer">
+                          <span className="created-at">
+                            {isPast ? 'Verstreken datum' : 'Gearchiveerd'}
+                          </span>
+                          <div className="card-actions">
+                            {!isPast && (
+                              <button 
+                                className="action-button archive" 
+                                onClick={() => archiveAppointment(appointment.id)}
+                                title="Herstellen"
+                              >
+                                Herstellen
+                              </button>
+                            )}
+                            <button 
+                              className="action-button delete" 
+                              onClick={() => handleDeleteAppointment(appointment.id)}
+                              title="Permanent verwijderen"
+                            >
+                              Supprimer
+                            </button>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })
+              )}
+            </div>
+          </section>
         )}
 
         {/* REVIEWS SECTION */}
@@ -852,7 +1226,9 @@ function AdminDashboard() {
                   required
                 ></textarea>
               </div>
-              <button type="submit" className="submit-review-btn">Beoordeling Toevoegen</button>
+              <button type="submit" className="submit-review-btn" disabled={isSubmitting}>
+                {isSubmitting ? 'Bezig met toevoegen...' : 'Beoordeling Toevoegen'}
+              </button>
             </form>
 
             <div className="admin-reviews-list">
@@ -981,6 +1357,37 @@ function AdminDashboard() {
                 disabled={!rejectionReason.trim()}
               >
                 Weigeren Bevestigen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {acceptModal.isOpen && (
+        <div className="modal-overlay" onClick={closeAcceptModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3 className="modal-title">Afspraak Bevestigen</h3>
+            <p className="modal-subtitle">Wil je een optioneel bericht toevoegen voor de klant? Dit wordt meegestuurd in de bevestigingsmail.</p>
+
+            <textarea
+              className="modal-textarea"
+              placeholder="Typ hier je bericht (optioneel)..."
+              value={acceptMessage}
+              onChange={(e) => setAcceptMessage(e.target.value)}
+              rows={4}
+            />
+
+            <div className="modal-actions">
+              <button className="modal-button cancel" onClick={closeAcceptModal} disabled={isSubmitting}>
+                Annuleren
+              </button>
+              <button
+                className="action-button confirm"
+                style={{ padding: '0.75rem 1.5rem', borderRadius: '8px' }}
+                onClick={handleAcceptSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Bezig...' : 'Bevestigen'}
               </button>
             </div>
           </div>

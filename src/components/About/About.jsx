@@ -10,27 +10,29 @@ export default function About() {
       <div className={`about__container ${isVisible ? "is-visible" : ""}`}>
 
         <div className="about__kicker">
-          <span className="about__kickerLine" />
-          <span className="about__kickerText">Over ons</span>
-          <span className="about__kickerLine" />
+          {/* <span className="about__kickerLine" />
+          {/* <span className="about__kickerText">Over ons</span> */}
+          {/* <span className="about__kickerLine" /> */}
         </div>
 
         <h2 className="about__title">
-          Het Verhaal van Salon OZ
+          Over ons
         </h2>
 
 
 
         <div className="about__content">
           <p className="about__text">
-            Salon OZ is geboren uit de passie en het harde werk van Tayyar Ozcan.
-            Na zijn opleiding in Gent en jaren ervaring in de kapperswereld, opende
-            hij in <span className="about__highlight">2020</span> zijn eerste gemengde kapsalon.
+            Salon OZ in Drongen is een modern en rustgevend salon waar je even kan ontsnappen aan de drukte. Een plek waar comfort, stijl en kwaliteit samenkomen in een ontspannen sfeer.
           </p>
           <p className="about__text">
-            Vandaag groeit Salon OZ uit tot een volwaardig beautysalon waar stijl,
-            vakmanschap en persoonlijke aandacht centraal staan. Met een team van gedreven professionals
-            verwelkomen wij elke klant met één doel: <span className="about__highlight-italic">jou op je allerbest laten voelen</span>.
+            Wij ontvangen dames, heren en kinderen en zijn gespecialiseerd in snitten, kleuringen, balayages, hairextensions en verzorgende treatments. Voor heren bieden we ook professionele baardverzorging en styling, met oog voor een verzorgde en evenwichtige look.
+          </p>
+          <p className="about__text">
+            Bij ons staat persoonlijke aandacht centraal. We luisteren naar jouw wensen en vertalen die naar een look die natuurlijk bij je past en je persoonlijkheid versterkt. Ons team werkt met passie, precisie en oog voor detail.
+          </p>
+          <p className="about__text">
+            Je bent van harte welkom in Salon OZ, waar ons team je met warmte en oprechte gastvrijheid ontvangt.
           </p>
         </div>
 

@@ -4,17 +4,16 @@ import useScrollReveal from "../../hooks/useScrollReveal";
 import { GOOGLE_REVIEWS_URL } from "../../data/reviewsData";
 
 const team = [
-  { name: "Tayyar Ozcan", role: "Oprichter & Master Stylist", initial: "T" },
-  { name: "Sarah",        role: "Senior Colorist",            initial: "S" },
-  { name: "Elena",        role: "Kapper & Stylist",           initial: "E" },
-  { name: "Marcus",       role: "Barber Specialist",          initial: "M" },
+  { name: "OZ", role: "Men's & International Artist", initial: "O" },
+  { name: "Elanur", role: "Color & Balayage", initial: "E" },
+  { name: "Ashkan", role: "Color & Balayage Specialist", initial: "A" },
 ];
 
 const stats = [
   { value: "2020", label: "Opgericht" },
   { value: "174+", label: "Beoordelingen" },
   { value: "4.9★", label: "Gemiddelde score" },
-  { value: "3–5",  label: "Professionals" },
+  { value: "3–5", label: "Professionals" },
 ];
 
 function Section({ children, className = "" }) {
@@ -33,17 +32,18 @@ export default function AboutPage() {
     <div className="about-page">
 
       {/* ── HERO ── */}
+      {/* ── HERO ── */}
       <div className="ap__hero">
         <img
-          src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1600&q=80"
-          alt="Salon OZ"
+          src="/images/salon_interior.webp"
+          alt="Salon OZ Interior"
           className="ap__hero-img"
         />
         <div className="ap__hero-overlay" />
         <div className="ap__hero-content">
           <span className="ap__hero-accent" />
-          <h1 className="ap__hero-title">Over Salon OZ</h1>
-          <p className="ap__hero-sub">Drongen, België — sinds 2020</p>
+          <h1 className="ap__hero-title">Salon OZ</h1>
+          <p className="ap__hero-sub">Since 2020</p>
         </div>
       </div>
 
@@ -75,14 +75,16 @@ export default function AboutPage() {
               <h2 className="ap__title">Van passie tot excellentie</h2>
               <div className="ap__divider" />
               <p className="ap__text">
-                Salon OZ is geboren uit de passie en het harde werk van <strong>Tayyar Ozcan</strong>.
-                Na zijn opleiding in Gent en jaren ervaring in de kapperswereld, opende hij in 2020
-                zijn eerste gemengde kapsalon in Drongen.
+                Bij Salon Oz staan passie, vakmanschap en een persoonlijke aanpak centraal. Oz wist al op jonge leeftijd dat het kappersvak zijn toekomst was. Vanuit die passie begon hij zich al vroeg te verdiepen in het vak en volgde hij verschillende opleidingen, waaronder gespecialiseerde trainingen in herenhaar en baardverzorging.
               </p>
               <p className="ap__text">
-                Vandaag groeit Salon OZ uit tot een volwaardig beautysalon — een ruimte waar stijl,
-                vakmanschap en persoonlijke aandacht centraal staan. Een plek waar elke klant zich
-                welkom en op zijn best voelt.
+                Na jaren ervaring op te doen in verschillende salons en zich voortdurend bij te scholen, besloot Oz in 2020 zijn eigen weg uit te gaan en startte hij zelfstandig met Salon Oz. Sindsdien bouwde hij het salon uit tot een warme plek waar klanten zich welkom voelen en waar eerlijk advies en kwaliteit vooropstaan.
+              </p>
+              <p className="ap__text">
+                Doorheen de jaren specialiseerde hij zich in metamorfoses, moderne snitten, kleuringen en hairextensions. Ook mannen kunnen bij hem terecht voor verzorgde herensnitten en professioneel gestylde baarden, telkens met oog voor detail en persoonlijkheid.
+              </p>
+              <p className="ap__text">
+                Wat Salon Oz bijzonder maakt, is de sfeer die Oz samen met zijn team creëert: ontspannen, oprecht en professioneel. Zijn positieve energie, spontaniteit en liefde voor het vak zorgen ervoor dat klanten niet alleen buitenwandelen met een sterk kapsel, maar ook met een glimlach.
               </p>
             </div>
           </div>
@@ -158,7 +160,7 @@ export default function AboutPage() {
               <div className="ap__divider" />
               <p className="ap__text">
                 Onze klanten zijn onze beste ambassadeurs. Met meer dan <strong>174 geverifieerde
-                beoordelingen</strong> en een gemiddelde score van <strong>4.9 op 5</strong>,
+                  beoordelingen</strong> en een gemiddelde score van <strong>4.9 op 5</strong>,
                 bewijzen zij elke dag dat kwaliteit en persoonlijke aandacht het verschil maken.
               </p>
               <p className="ap__text">

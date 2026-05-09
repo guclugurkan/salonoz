@@ -1,5 +1,31 @@
 const crypto = require("crypto");
 const Appointment = require("../models/Appointment");
+const Service = require("../models/Service");
+
+function addMinutes(timeStr, mins) {
+  const [h, m] = timeStr.split(':').map(Number);
+  const date = new Date(2000, 0, 1, h, m);
+  date.setMinutes(date.getMinutes() + mins);
+  return date.toTimeString().substring(0, 5);
+}
+
+function calculateBookedSlots(startTime, blocks) {
+  if (!blocks || blocks.length === 0) return [startTime];
+  
+  let currentStartTime = startTime;
+  const bookedSlots = [];
+  
+  for (const block of blocks) {
+    const numIntervals = Math.ceil(block.duration / 15);
+    for (let i = 0; i < numIntervals; i++) {
+      if (block.type === "work") {
+        bookedSlots.push(currentStartTime);
+      }
+      currentStartTime = addMinutes(currentStartTime, 15);
+    }
+  }
+  return bookedSlots;
+}
 
 const {
   services,
@@ -42,6 +68,19 @@ async function getAllAppointments() {
   });
 }
 
+async function getPublicAppointments() {
+  // Only return necessary fields to prevent leaking PII
+  const appts = await Appointment.find({ status: { $in: ["confirmed", "pending"] } })
+    .select("staff date time status bookedSlots")
+    .sort({ createdAt: -1 });
+    
+  return appts.map(a => {
+    const obj = a.toObject();
+    obj.id = obj._id.toString();
+    return obj;
+  });
+}
+
 async function sendTestEmail() {
   const testEmail = getTestEmail();
   const emailSent = await sendEmail({
@@ -55,6 +94,7 @@ async function sendTestEmail() {
 
 async function createAppointment(data) {
   const { service, staff, date, time, name, email, phone, notes } = data;
+  console.log(`[BACKEND] Creation request: ${service} for ${name} at ${time} on ${date}. BookedSlots provided: ${data.bookedSlots ? 'YES' : 'NO'}`);
 
   const errors = validateAppointment(data);
   if (errors.length > 0) {
@@ -65,11 +105,46 @@ async function createAppointment(data) {
     };
   }
 
+  // Find the service in DB to get its blocks
+  let blocks = [];
+  let serviceName = service;
+  let variantName = null;
+
+  // Si le nom contient des parenthèses à la fin, on extrait le service et la variante
+  if (service.includes(" (") && service.endsWith(")")) {
+    const lastParenIndex = service.lastIndexOf(" (");
+    serviceName = service.substring(0, lastParenIndex);
+    variantName = service.substring(lastParenIndex + 2, service.length - 1);
+  }
+
+  const serviceObj = await Service.findOne({ name: serviceName });
+
+  if (serviceObj) {
+    if (variantName && serviceObj.variants && serviceObj.variants.length > 0) {
+      const variant = serviceObj.variants.find(v => v.name === variantName);
+      if (variant && variant.blocks && variant.blocks.length > 0) {
+        blocks = variant.blocks;
+      }
+    }
+    
+    // Si pas de variante ou blocs de variante vides, on prend les blocs du service
+    if (blocks.length === 0 && serviceObj.blocks && serviceObj.blocks.length > 0) {
+      blocks = serviceObj.blocks;
+    }
+  }
+
+  const generatedBookedSlots = data.bookedSlots || calculateBookedSlots(time, blocks);
+
+  // Check conflicts using bookedSlots
   const conflict = await Appointment.findOne({
     staff,
     date,
-    time,
-    status: { $nin: ["cancelled", "rejected"] }
+    status: { $nin: ["cancelled", "rejected"] },
+    $or: [
+      { bookedSlots: { $in: generatedBookedSlots } },
+      { time: { $in: generatedBookedSlots }, bookedSlots: { $size: 0 } },
+      { time: { $in: generatedBookedSlots }, bookedSlots: { $exists: false } }
+    ]
   });
 
   if (conflict) {
@@ -116,6 +191,7 @@ async function createAppointment(data) {
     status: "pending",
     cancelToken,
     cancelDeadline: cancelDeadline,
+    bookedSlots: generatedBookedSlots,
   });
 
   await newAppointment.save();
@@ -202,7 +278,7 @@ async function cancelAppointmentByToken(token) {
 }
 
 async function updateAppointmentStatus(id, data) {
-  const { status, rejectionReason } = data;
+  const { status, rejectionReason, confirmationMessage } = data;
 
   const allowedStatuses = ["pending", "confirmed", "cancelled", "rejected"];
   if (!status || !allowedStatuses.includes(status)) {
@@ -241,6 +317,10 @@ async function updateAppointmentStatus(id, data) {
     appointment.rejectionReason = rejectionReason.trim();
   } else {
     appointment.rejectionReason = undefined;
+  }
+
+  if (status === "confirmed" && confirmationMessage) {
+    appointment.confirmationMessage = confirmationMessage.trim();
   }
 
   await appointment.save();
@@ -283,12 +363,51 @@ async function updateAppointmentStatus(id, data) {
   };
 }
 
+async function toggleArchiveAppointment(id) {
+  const appointment = await Appointment.findById(id);
+  if (!appointment) {
+    return {
+      success: false,
+      statusCode: 404,
+      error: "Appointment not found",
+    };
+  }
+  appointment.isArchived = !appointment.isArchived;
+  await appointment.save();
+  return {
+    success: true,
+    statusCode: 200,
+    data: appointment,
+    message: `Appointment ${appointment.isArchived ? "archived" : "unarchived"} successfully`,
+  };
+}
+
+async function deleteAppointment(id) {
+  const appointment = await Appointment.findByIdAndDelete(id);
+  if (!appointment) {
+    return {
+      success: false,
+      statusCode: 404,
+      error: "Appointment not found",
+    };
+  }
+  return {
+    success: true,
+    statusCode: 200,
+    message: "Appointment deleted permanently",
+  };
+}
+
 module.exports = {
   getAllServices,
   getAllStaff,
   getAllAppointments,
-  sendTestEmail,
+  getPublicAppointments,
   createAppointment,
   cancelAppointmentByToken,
   updateAppointmentStatus,
+  toggleArchiveAppointment,
+  deleteAppointment,
+  sendTestEmail,
+  calculateBookedSlots,
 };

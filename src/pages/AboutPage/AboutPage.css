@@ -32,8 +32,8 @@
 -------------------------------- */
 .ap__hero {
   position: relative;
-  height: 55vh;
-  min-height: 360px;
+  height: 60vh;
+  min-height: 400px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -47,8 +47,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 30%;
-  filter: brightness(0.55);
+  object-position: center;
+  filter: brightness(0.65);
 }
 
 .ap__hero-overlay {
@@ -249,8 +249,10 @@
 -------------------------------- */
 .ap__team-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .ap__team-card {
@@ -339,7 +341,7 @@
   align-items: center;
   gap: 10px;
   padding: 0 24px;
-  border-right: 1px solid rgba(255,255,255,0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .ap__stat:last-child {
@@ -359,7 +361,7 @@
   font-size: 11px;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* --------------------------------
@@ -400,62 +402,103 @@
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.ap__button:hover { color: #fff; }
-.ap__button:hover .ap__buttonFill { transform: translateX(0); }
+.ap__button:hover {
+  color: #fff;
+}
+
+.ap__button:hover .ap__buttonFill {
+  transform: translateX(0);
+}
 
 /* --------------------------------
    Responsive — tablette
 -------------------------------- */
 @media (max-width: 960px) {
+
   .ap__grid,
   .ap__reviews-banner {
     grid-template-columns: 1fr;
     gap: 48px;
   }
 
-  .ap__reviews-img-block { order: -1; }
+  .ap__reviews-img-block {
+    order: -1;
+  }
 
-  .ap__img-frame { display: none; }
+  .ap__img-frame {
+    display: none;
+  }
 
-  .ap__img-wrapper { height: auto; aspect-ratio: 4 / 3; }
+  .ap__img-wrapper {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
 
-  .ap__team-grid { grid-template-columns: repeat(2, 1fr); }
+  .ap__team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-  .ap__stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0; }
+  .ap__stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+  }
 
   .ap__stat {
     padding: 40px 24px;
     border-right: none;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  .ap__stat:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.08); }
-  .ap__stat:nth-last-child(-n+2) { border-bottom: none; }
+  .ap__stat:nth-child(odd) {
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
 
-  .ap__section { padding: 64px 0; }
+  .ap__stat:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
 
-  .ap__kicker { justify-content: flex-start; }
-  .ap__section-header .ap__kicker { justify-content: center; }
+  .ap__section {
+    padding: 64px 0;
+  }
+
+  .ap__kicker {
+    justify-content: flex-start;
+  }
+
+  .ap__section-header .ap__kicker {
+    justify-content: center;
+  }
 }
 
 /* --------------------------------
    Responsive — mobile
 -------------------------------- */
 @media (max-width: 560px) {
-  .ap__container { padding: 0 20px; }
+  .ap__container {
+    padding: 0 20px;
+  }
 
   .ap__hero { height: 45vh; min-height: 280px; }
 
-  .ap__section { padding: 48px 0; }
+  .ap__section {
+    padding: 48px 0;
+  }
 
-  .ap__team-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .ap__team-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
 
   .ap__stats-grid {
     grid-template-columns: repeat(2, 1fr);
     padding: 48px 20px;
   }
 
-  .ap__team-card { padding: 24px 12px; }
+  .ap__team-card {
+    padding: 24px 12px;
+  }
 
-  .ap__section-header { margin-bottom: 36px; }
+  .ap__section-header {
+    margin-bottom: 36px;
+  }
 }

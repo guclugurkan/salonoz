@@ -207,7 +207,7 @@ Afspraakgegevens:
 - Stylist: ${appointment.staff}
 - Datum: ${formatAppointmentDate(appointment.date)}
 - Tijdstip: ${appointment.time}
-
+${appointment.confirmationMessage ? `\nBericht van het salon:\n${appointment.confirmationMessage}\n` : ''}
 Wij kijken ernaar uit u te verwelkomen.
 
 Wilt u annuleren? Dat kan tot 24u voor de afspraak via: ${cancelUrl || "neem telefonisch contact op"}
@@ -219,7 +219,9 @@ SALON OZ`;
     title: "Afspraak Bevestigd",
     intro: `Hallo <strong>${appointment.name}</strong>,<br><br>Uw afspraak bij <strong>SALON OZ</strong> is bevestigd.`,
     appointment,
-    extraMessage: "Uw afspraak is bevestigd. We kijken ernaar uit u te verwelkomen in het salon.",
+    extraMessage: appointment.confirmationMessage 
+      ? `Uw afspraak is bevestigd.<br><br><strong>Bericht van het salon:</strong><br>${appointment.confirmationMessage}`
+      : "Uw afspraak is bevestigd. We kijken ernaar uit u te verwelkomen in het salon.",
     statusLabel: "Bevestigd",
     statusColor: "#4f7c59",
     cancelUrl,

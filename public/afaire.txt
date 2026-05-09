@@ -1,0 +1,226 @@
+yapilacaklar
+
+Since 2020
+
+Quand j'accepte un rdv, j'veux pouvoir écrire un commentaire. 
+OK
+
+
+Le bouton pour accepter les rdv ne marche pas. 
+OK
+
+
+
+OZ -- Men's & International Artist
+Elanur -- Color & Balayage 
+Ashkan -- Color & Balayage Specialist
+OK
+
+Supprimer photo bouton marche pas 
+OK
+
+Supprimer un commentaire via admin 
+OK
+
+Message de confirmation à envoyer par whatsapp. 
+OK
+
+
+
+Herensnit 30min
+Heren halflang/lang haar 45min
+Tondeuse 15min
+Tondeuse met fade 30min
+Herensnit met hoofdmassage 45min 
+Haar baard 45min
+Baard trimmen/aflijnen 15min
+OK
+
+
+Dames styling 
+Kort 30min 
+HalfLang 45min 
+Lang 45min 
+Extensions 45min 
+OK 
+
+
+Dames styles snit brushing : 
+Kort 45min
+HalfLang 1h
+Lang 1h
+OK 
+
+
+Kleuren 
+Kleuren uitgroei (max 3cm) met Brushing Kort 30min - 30 pause - 30 min 
+Kleuren uitgroei (max 3cm) met Brushing Halflang - lang : 30min - 30 pause - 45min
+OK
+
+
+
+Kleuren uitgroei (max 3cm) met Brushing Kort 30min - 30 pause - 45min 
+Kleuren uitgroei (max 3cm) met Brushing halflang - lang : 30 - 30 - 60 
+OK
+
+
+Kleuren Uitgroei & Lengtes met Snit & Brushing Kort : 40- 30 - 45
+Kleuren Uitgroei & Lengtes met Snit & Brushing halflang - lang : 40-30-60 
+OK
+
+
+Kleuren uitgroei (max 3cm) met Snit & Losdrogen kort : 30-30-30
+Kleuren uitgroei (max 3cm) met Snit & Losdrogen halflang - lang : 30-30-45
+OK
+
+
+Kleuren Uitgroei & Lengtes met Brushing Kort 30-30-45
+Kleuren Uitgroei & Lengtes met Brushing halflang - lang : 30-30-60
+OK
+
+Kleuren Uitgroei & Lengtes met Snit & Losdrogen Kort : 30-30-30
+Kleuren Uitgroei & Lengtes met Snit & Losdrogen halflang - lang : 30-30-45 
+OK
+
+Kleuren uitgroei (max 3cm) + losdrogen vanaf 80 
+Kort  - halflang - lang: 30-30-30
+OK
+
+
+
+
+Balayage : 
+
+Balayage & Foilyage met Brushing  halflang lang : 1h30 - 30min pause - 1h 
+kort : 1h - 30min - 1h 
+OK 
+
+
+
+
+Balayage & Foilyage met Snit & Brushing kort : 1h - 30min - 1h 
+lang  - halflang : 1h30 - 30min - 1h
+OK
+
+
+
+
+Opfrissingstoner + Brushing : 30min - 30 pause - 45min
+OK 
+
+
+Opfrissingstoner met Snit & Brushing : 30min - 30 pause - 1h 
+OK 
+
+
+
+Kids : 
+
+
+Snit meisje tot 12 jaar : 2 option : yikamali yikamasiz  Met wassen & losdrogen  
+Snit jongen tot 12 jaar : aynisini 
+OK
+
+
+Snit meisje tot 6 jaar : 30min OK
+Snit meisje tot 12 jaar : 30min OK 
+Snit meisje tot 12 jaar (Met wassen) : 45min OK
+
+
+Snit meisje tot 12 jaar (Veel & lang haar) : 30min normal
+45dk yikamali kurutmali
+OK
+
+Snit jongen tot 12 jaar : 30min OK
+Snit jongen tot 12 jaar yikamali : 30min OK
+
+
+
+
+Brazilian keratine behandeling & brushing : 45min - 30min pause - 1h 
+Brazilian keratine behandeling Snit & brushing aynisi 
+OK
+
+
+Bruidskapsel (+ proef) : 1h
+ Opsteken meisjes 45min 
+ Opsteken dames (Normaal haar) 45min
+ Opsteken dames (Veel/lang haar) 1h 
+
+OK
+
+K => Kort
+L => Lang
+H => HalfLang
+Extensions à ajouter dans DamesBrushing 
+OK
+
+
+
+Kleuren
+Les prix à partir de , en fonction de la longueur et de la quantité de cheveux. 
+OK
+
+L'admin doit pouvoir changer la durée des services lui même. 
+Les services à mettre en ordre. 
+OK
+
+
+
+Uitzonderlijke prestaties om jouw identiteit te sublimeren. 
+à supprimer 
+OK
+
+De Kaart van Salon OZ
+à remplacer par   Diensten
+OK
+
+Possibilité de changer les services et leur prix. 
+OK
+
+Quand le client choisi un truc avec taille (K H L), une étape supplémentaire pour choisir K H L. 
+OK
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Snit & Losdrogen à faire
+
+Kleuren uitgroei (max 3cm) + losdrogen vanaf 80 Les prix à définir 
+
+
+Snit meisje tot 12 jaar (Veel & lang haar) yikamali fiyat 
+
+
+Le jour même après le rendez-vous, envoyé un message pour demander un avis. (whatsapp)
+
+
+
+Système d'avis à faire sur le site. 
+Ajouter une image sur les commentaires. 
+
+
+Faire un mail pour les anciens client qui ont les anciens prix. 
+
+
+indexer le site 
+
+
+
+Pour les pause, proposer si ils veulent un service
+

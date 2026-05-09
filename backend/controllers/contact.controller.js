@@ -13,7 +13,7 @@ async function postContact(req, res) {
     }
 
     const emailSent = await sendEmail({
-      to: "guclugrkn@gmail.com",
+      to: "Salonoz@hotmail.com",
       subject: `Nieuw contactbericht van ${name} — Salon OZ`,
       text: `
 Naam: ${name}

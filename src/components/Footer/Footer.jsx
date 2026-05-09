@@ -1,5 +1,6 @@
 import "./Footer.css";
 import { Phone, MapPin, Mail, Instagram } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -77,7 +78,7 @@ export default function Footer() {
           </p>
           <div className="footer__bottomLinks">
             <a href="#" className="footer__bottomLink">Privacybeleid</a>
-            <a href="#" className="footer__bottomLink">Algemene voorwaarden</a>
+            <Link to="/voorwaarden" className="footer__bottomLink">Algemene voorwaarden</Link>
           </div>
         </div>
       </div>

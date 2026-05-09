@@ -1,131 +1,32 @@
 import { useState, useEffect } from 'react'
 import './Reservation.css'
 
-const categories = [
-  {
-    id: 1,
-    name: "Heren",
-    icon: "✦",
-    img: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=400&q=80",
-    services: [
-      { id: 101, name: "Heren halflang/lang haar", price: 45 },
-      { id: 102, name: "Herensnit", price: 35 },
-      { id: 103, name: "Tondeuse", price: 20 },
-      { id: 104, name: "Tondeuse met fade", price: 30 },
-      { id: 105, name: "Herensnit met hoofdmassage", price: 55 },
-      { id: 106, name: "Haar baard", price: 50 },
-      { id: 107, name: "Baard trimmen/aflijnen", price: 25 },
-    ]
-  },
-  {
-    id: 2,
-    name: "Dames Styling",
-    icon: "✄",
-    img: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80",
-    services: [
-      { id: 201, name: "Snit & Losdrogen", price: "K: 45 € | H: 50 € | L: 55 €" },
-      { id: 202, name: "Dames Brushing", price: "K: 35 € | H: 40 € | L: 45 €" },
-      { id: 203, name: "Extensions", price: 55 },
-      { id: 204, name: "Snit & Brushing", price: "K: 65 € | H: 70 € | L: 80 €" },
-    ]
-  },
-  {
-    id: 3,
-    name: "Kleuren",
-    icon: "◈",
-    img: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&q=80",
-    services: [
-      { id: 301, name: "Kleuren uitgroei (max 3cm) met Brushing", price: "K: 100 € | H: 115 € | L: 120 €" },
-      { id: 302, name: "Kleuren uitgroei + snit & brushing", price: "K: 135 € | H: 142 € | L: 148 €" },
-      { id: 303, name: "Kleuren Uitgroei & Lengtes met Snit & Brushing", price: "K: 143 € | H: 158 € | L: 173 €" },
-      { id: 304, name: "Kleuren uitgroei (max 3cm) met Snit & Losdrogen", price: "K: 115 € | H: 125 € | L: 130 €" },
-      { id: 305, name: "Kleuren Uitgroei & Lengtes met Brushing", price: "K: 118 € | H: 133 € | L: 148 €" },
-      { id: 306, name: "Kleuren Uitgroei & Lengtes met Snit & Losdrogen", price: "K: 128 € | H: 143 € | L: 158 €" },
-    ]
-  },
-  {
-    id: 4,
-    name: "Balayage & Highlights",
-    icon: "❋",
-    img: "https://images.unsplash.com/photo-1600948836101-f9ffda59d250?w=400&q=80",
-    services: [
-      { id: 401, name: "Balayage & Foilyage met Brushing", price: "K: 170 € | H: 180 € | L: 190 €" },
-      { id: 402, name: "Balayage & Foilyage met Snit & Brushing", price: "K: 195 € | H: 215 € | L: 230 €" },
-      { id: 403, name: "Opfrissingstoner + Brushing", price: "K: 60 € | H: 75 € | L: 90 €" },
-      { id: 404, name: "Opfrissingstoner met Snit & Brushing", price: "K: 100 € | H: 105 € | L: 115 €" },
-    ]
-  },
-  {
-    id: 5,
-    name: "Kids",
-    icon: "◇",
-    img: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80",
-    services: [
-      { id: 501, name: "Snit meisje tot 6 jaar", price: 20 },
-      { id: 502, name: "Snit meisje tot 12 jaar", price: 30 },
-      { id: 503, name: "Snit meisje tot 12 jaar (Met wassen)", price: 40 },
-      { id: 504, name: "Snit meisje tot 12 jaar (Veel & lang haar)", price: 50 },
-      { id: 505, name: "Snit jongen tot 6 jaar", price: 20 },
-      { id: 506, name: "Snit jongen tot 12 jaar (Zonder wassen)", price: 25 },
-      { id: 507, name: "Snit jongen tot 12 jaar (Met wassen)", price: 30 },
-    ]
-  },
-  {
-    id: 6,
-    name: "Keratine Behandeling",
-    icon: "⟡",
-    img: "https://images.unsplash.com/photo-1634302086682-5c2bc7db8dc6?w=400&q=80",
-    services: [
-      { id: 601, name: "Brazilian keratine behandeling & brushing", price: "K: 200 € | H: 210 € | L: 220 €" },
-      { id: 602, name: "Brazilian keratine behandeling Snit & brushing", price: "K: 230 € | H: 240 € | L: 260 €" },
-    ]
-  },
-  {
-    id: 7,
-    name: "Opsteken",
-    icon: "✿",
-    img: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=400&q=80",
-    services: [
-      { id: 701, name: "Bruidskapsel (+ proef)", price: 165 },
-      { id: 702, name: "Opsteken meisjes", price: 35 },
-      { id: 703, name: "Opsteken dames (Normaal haar)", price: 55 },
-      { id: 704, name: "Opsteken dames (Veel/lang haar)", price: 65 },
-    ]
-  },
-  {
-    id: 8,
-    name: "Verzorging",
-    icon: "◉",
-    img: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=400&q=80",
-    services: [
-      { id: 801, name: "Verzorging", price: 5 },
-      { id: 802, name: "Haarmasker", price: 10 },
-    ]
-  },
-]
+// Categories are now fetched dynamically from backend
+// The hardcoded ones are removed.
 
-const staff = [
-  { id: 1, name: "Oz", role: "Master Stylist" },
-  { id: 2, name: "Sarah", role: "Senior Colorist" },
-  { id: 3, name: "Alex", role: "Barber Specialist" },
-]
+// Staff is now fetched dynamically from backend
+const staff_placeholder = [] 
 
 const timeSlots = [
-  "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-  "12:00", "13:00", "13:30", "14:00", "14:30", "15:00",
-  "15:30", "16:00", "16:30"
+  "09:00", "09:15", "09:30", "09:45", "10:00", "10:15", "10:30", "10:45",
+  "11:00", "11:15", "11:30", "11:45", "12:00", "12:15", "12:30", "12:45",
+  "13:00", "13:15", "13:30", "13:45", "14:00", "14:15", "14:30", "14:45",
+  "15:00", "15:15", "15:30", "15:45", "16:00", "16:15", "16:30", "16:45"
 ]
 
-const totalSteps = 7
+const totalSteps = 8
 
 export default function Reservation() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isConfirmed, setIsConfirmed] = useState(false)
+  const [categories, setCategories] = useState([])
   const [appointments, setAppointments] = useState([])
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorStatus, setErrorStatus] = useState(null)
   const [validationError, setValidationError] = useState(null)
+  const [settings, setSettings] = useState(null)
+  const [staff, setStaff] = useState([])
   const [formData, setFormData] = useState({
     category: null,
     service: null,
@@ -135,13 +36,38 @@ export default function Reservation() {
     name: '',
     email: '',
     phone: '',
-    notes: ''
+    notes: '',
+    subService: null,
+    subServiceName: ''
   })
+
+  function addMinutes(timeStr, mins) {
+    if (!timeStr) return '';
+    const [h, m] = timeStr.split(':').map(Number);
+    const date = new Date(2000, 0, 1, h, m);
+    date.setMinutes(date.getMinutes() + mins);
+    return date.toTimeString().substring(0, 5);
+  }
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/categories`)
+        if (response.ok) {
+          const data = await response.json()
+          setCategories(data.data || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error)
+      }
+    }
+    fetchCategories()
+  }, [])
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments`)
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/public`)
         if (response.ok) {
           const data = await response.json()
           setAppointments(data.data || [])
@@ -153,7 +79,47 @@ export default function Reservation() {
     fetchAppointments()
   }, [])
 
-  const getBookedTimeSlots = () => {
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/settings`)
+        if (response.ok) {
+          const data = await response.json()
+          setSettings(data.data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch settings:', error)
+      }
+    }
+    fetchSettings()
+  }, [])
+
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/staff`)
+        if (response.ok) {
+          const data = await response.json()
+          setStaff(data.data || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch staff:', error)
+      }
+    }
+    fetchStaff()
+  }, [])
+
+  const getFilteredStaff = () => {
+    if (!formData.service) return staff;
+    return staff.filter(member => {
+      if (member.canDoAllServices) return true;
+      return member.allowedServices && member.allowedServices.includes(formData.service.id);
+    });
+  }
+
+  const filteredStaff = getFilteredStaff();
+
+  const getOccupiedSlots = () => {
     if (!formData.staff || !formData.date) return []
     return appointments
       .filter(a =>
@@ -162,16 +128,115 @@ export default function Reservation() {
         a.status !== 'cancelled' &&
         a.status !== 'rejected'
       )
-      .map(a => a.time)
+      .flatMap(a => (a.bookedSlots && a.bookedSlots.length > 0) ? a.bookedSlots : [a.time])
   }
 
-  const bookedTimeSlots = getBookedTimeSlots()
+  const occupiedSlots = getOccupiedSlots()
+
+  const isTimeValidForService = (startTime) => {
+    if (!formData.service) return false;
+    
+    // Check if the actual start time is occupied
+    if (occupiedSlots.includes(startTime)) return false;
+
+    // Calculate required slots for blocks
+    const targetService = formData.variant ? formData.variant : formData.service;
+    const blocks = targetService.blocks && targetService.blocks.length > 0 
+      ? targetService.blocks 
+      : [{ duration: 30, type: 'work' }];
+      
+    let currentStartTime = startTime;
+    
+    for (const block of blocks) {
+      const numIntervals = Math.ceil(block.duration / 15);
+      for (let i = 0; i < numIntervals; i++) {
+        if (block.type === 'work') {
+          // Check if this required slot is occupied by another appointment
+          if (occupiedSlots.includes(currentStartTime)) {
+            return false;
+          }
+        }
+        currentStartTime = addMinutes(currentStartTime, 15);
+      }
+    }
+
+    // Check if the service ends before closing time
+    if (settings) {
+      const dayName = getDayName(formData.date);
+      const daySettings = settings.workingHours[dayName];
+      if (daySettings && currentStartTime > daySettings.close) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  const getDayName = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    return days[date.getDay()];
+  }
+
+  const getAvailableTimeSlots = () => {
+    if (!formData.date || !settings) return timeSlots;
+    
+    // Check if date is in closedDays
+    if (settings.closedDays && settings.closedDays.includes(formData.date)) return [];
+    
+    const dayName = getDayName(formData.date);
+    const daySettings = settings.workingHours[dayName];
+    
+    if (!daySettings || daySettings.closed) return [];
+    
+    const { open, close } = daySettings;
+    
+    return timeSlots.filter(slot => {
+      return slot >= open && slot < close;
+    });
+  }
+
+  const dynamicTimeSlots = getAvailableTimeSlots();
+
+  const getPauseInfo = () => {
+    const target = formData.variant || formData.service;
+    if (!target || !target.blocks) return null;
+    
+    let elapsed = 0;
+    for (const block of target.blocks) {
+      if (block.type === 'pause' && block.duration >= 15) {
+        return {
+          duration: block.duration,
+          startTime: addMinutes(formData.time, elapsed)
+        };
+      }
+      elapsed += block.duration;
+    }
+    return null;
+  }
+
+  const getSubServices = () => {
+    const pauseInfo = getPauseInfo();
+    if (!pauseInfo) return [];
+    
+    const available = [];
+    categories.forEach(cat => {
+      cat.services.forEach(s => {
+        const duration = s.blocks ? s.blocks.reduce((acc, b) => acc + b.duration, 0) : 30;
+        if (duration <= pauseInfo.duration && s.id !== formData.service?.id) {
+          available.push({...s, categoryName: cat.name});
+        }
+      });
+    });
+    return available;
+  }
 
   useEffect(() => {
-    if (!isConfirmed && formData.time && bookedTimeSlots.includes(formData.time)) {
+    if (!isConfirmed && formData.time && !isTimeValidForService(formData.time)) {
       setFormData(prev => ({ ...prev, time: '' }))
     }
-  }, [formData.staff, formData.date, bookedTimeSlots, formData.time, isConfirmed])
+  }, [formData.staff, formData.date, occupiedSlots, formData.time, isConfirmed, formData.service])
 
   const validateStep6 = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -186,20 +251,29 @@ export default function Reservation() {
   }
 
   const handleNext = () => {
+    if (currentStep === 5 && !getPauseInfo()) {
+      setCurrentStep(7); // Skip gap filling step if no pause
+      return;
+    }
     if (currentStep === 6) {
+      setValidationError(null);
+    }
+    if (currentStep === 7) {
       const error = validateStep6();
       if (error) {
         setValidationError(error);
-        return; // stop progression
+        return;
       }
-      setValidationError(null);
-    } else {
       setValidationError(null);
     }
     if (currentStep < totalSteps) setCurrentStep(currentStep + 1)
   }
 
   const handleBack = () => {
+    if (currentStep === 7 && !getPauseInfo()) {
+      setCurrentStep(5);
+      return;
+    }
     if (currentStep > 1) setCurrentStep(currentStep - 1)
   }
 
@@ -209,39 +283,64 @@ export default function Reservation() {
 
     setIsLoading(true)
     setErrorStatus(null)
-    console.log("Submitting reservation:", formData)
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+      // 1. Calculate full continuous blocks if Duo is selected
+      let customBookedSlots = null;
+      let duoNote = formData.notes;
+
+      if (formData.subService) {
+        const target = formData.variant || formData.service;
+        if (target && target.blocks) {
+          const totalDuration = target.blocks.reduce((acc, b) => acc + b.duration, 0);
+          customBookedSlots = [];
+          let curr = formData.time;
+          const numSlots = Math.ceil(totalDuration / 15);
+          for (let i = 0; i < numSlots; i++) {
+            customBookedSlots.push(curr);
+            curr = addMinutes(curr, 15);
+          }
+        }
+        
+        const startTime = getPauseInfo()?.startTime || "Tijdens de pauze";
+        duoNote = `[DUO: ${formData.subService.name} voor ${formData.subServiceName || 'Partner'} - Tijd: ${startTime}] ${formData.notes}`;
+      }
+
+      // 2. Prepare main appointment data
+      const appointmentData = {
+        service: formData.variant ? `${formData.service?.name} (${formData.variant?.name})` : formData.service?.name,
+        staff: formData.staff?.name,
+        date: formData.date,
+        time: formData.time,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        notes: duoNote,
+        bookedSlots: customBookedSlots,
+      };
+
+      // 3. Send combined request
+      const response = await fetch(`${apiUrl}/api/appointments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          service: formData.service?.name,
-          staff: formData.staff?.name,
-          date: formData.date,
-          time: formData.time,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          notes: formData.notes,
-        }),
-      })
+        body: JSON.stringify(appointmentData),
+      });
 
-      const result = await response.json()
-      console.log("Server response received:", result)
+      const result = await response.json();
 
-      if (response.ok && result.success) {
-        console.log("Success! Setting isConfirmed to true");
-        setIsConfirmed(true)
-        if (result.data) {
-          setAppointments(prev => [...prev, result.data])
-        }
-      } else {
-        setErrorStatus(result.error || "Reservatie mislukt")
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Reservatie mislukt");
+      }
+
+      setIsConfirmed(true)
+      if (result.data) {
+        setAppointments(prev => [...prev, result.data])
       }
     } catch (error) {
       console.error("Error booking appointment:", error)
-      setErrorStatus("Kon geen verbinding maken met de server")
+      setErrorStatus(error.message || "Kon geen verbinding maken met de server")
     } finally {
       setIsLoading(false)
     }
@@ -250,12 +349,16 @@ export default function Reservation() {
   const canProceed = () => {
     switch (currentStep) {
       case 1: return formData.category !== null
-      case 2: return formData.service !== null
+      case 2: 
+        if (!formData.service) return false;
+        if (formData.service.variants && formData.service.variants.length > 0) return formData.variant !== null;
+        return true;
       case 3: return formData.staff !== null
       case 4: return formData.date !== ''
       case 5: return formData.time !== ''
-      case 6: return formData.name && formData.email && formData.phone
-      case 7: return termsAccepted
+      case 6: return true // Gap filling is optional
+      case 7: return formData.name && formData.email && formData.phone
+      case 8: return true
       default: return true
     }
   }
@@ -267,7 +370,7 @@ export default function Reservation() {
     return service.fromPrice ? `v.a. ${service.price} €` : `${service.price} €`;
   }
 
-  const stepLabels = ["Categorie", "Service", "Stylist", "Datum", "Tijdstip", "Gegevens", "Overzicht"]
+  const stepLabels = ["Cat.", "Serv.", "Styl.", "Dat.", "Tijd.", "Extra", "Gegevens", "Overz."]
 
   // Success screen
   if (isConfirmed) {
@@ -312,6 +415,16 @@ export default function Reservation() {
                 <span className="success-info-label">Tijdstip</span>
                 <span className="success-info-value">{formData.time}</span>
               </div>
+              {formData.subService && (
+                <div className="success-info-item" style={{ gridColumn: '1 / -1', background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <span className="success-info-label" style={{ color: '#0f172a', fontWeight: 'bold' }}>Extra Duo Service</span>
+                  <span className="success-info-value" style={{ display: 'block', marginTop: '4px' }}>
+                    {formData.subService.name} voor {formData.subServiceName || 'Partner'}
+                  </span>
+                  <span className="success-info-label" style={{ marginTop: '8px', display: 'block' }}>Starttijd Duo</span>
+                  <span className="success-info-value">{getPauseInfo()?.startTime}</span>
+                </div>
+              )}
             </div>
 
             <div className="success-contact-box">
@@ -401,22 +514,58 @@ export default function Reservation() {
           {/* STEP 2 — Service */}
           {currentStep === 2 && (
             <div className="step-section fade-in">
-              <h2 className="step-title">Kies uw Service</h2>
-              <p className="step-subtitle">
-                <span className="step-category-badge">{formData.category?.icon} {formData.category?.name}</span>
-              </p>
-              <div className="options-list">
-                {formData.category?.services.map(service => (
-                  <button
-                    key={service.id}
-                    className={`option-card ${formData.service?.id === service.id ? 'selected' : ''}`}
-                    onClick={() => setFormData({ ...formData, service })}
-                  >
-                    <span className="option-name">{service.name}</span>
-                    <span className="option-price">{formatPrice(service)}</span>
-                  </button>
-                ))}
-              </div>
+              {formData.service && formData.service.variants && formData.service.variants.length > 0 ? (
+                <>
+                  <div style={{display: 'flex', alignItems: 'center', marginBottom: '1rem'}}>
+                    <button onClick={() => setFormData({...formData, service: null, variant: null})} style={{marginRight: '15px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', padding: '6px 12px', borderRadius: '8px', backgroundColor: '#f1f5f9'}}>← Terug</button>
+                    <h2 className="step-title" style={{margin: 0}}>Kies de lengte / variant</h2>
+                  </div>
+                  <p className="step-subtitle">
+                    <span className="step-category-badge">{formData.service.name}</span>
+                  </p>
+                  {formData.category?.name === 'Kleuren' && (
+                    <p style={{ fontSize: '0.85rem', color: '#64748b', fontStyle: 'italic', marginBottom: '1.5rem', textAlign: 'center' }}>
+                      * De prijzen zijn vanaf, afhankelijk van de lengte en dikte van het haar.
+                    </p>
+                  )}
+                  <div className="options-list">
+                    {formData.service.variants.map(v => (
+                      <button
+                        key={v.name}
+                        className={`option-card ${formData.variant?.name === v.name ? 'selected' : ''}`}
+                        onClick={() => setFormData({ ...formData, variant: v })}
+                      >
+                        <span className="option-name">{v.name}</span>
+                        <span className="option-price">{formatPrice(v)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="step-title">Kies uw Service</h2>
+                  <p className="step-subtitle">
+                    <span className="step-category-badge">{formData.category?.icon} {formData.category?.name}</span>
+                  </p>
+                  {formData.category?.name === 'Kleuren' && (
+                    <p style={{ fontSize: '0.85rem', color: '#64748b', fontStyle: 'italic', marginBottom: '1.5rem', textAlign: 'center' }}>
+                      * De prijzen zijn vanaf, afhankelijk van de lengte en dikte van het haar.
+                    </p>
+                  )}
+                  <div className="options-list">
+                    {formData.category?.services.map(service => (
+                      <button
+                        key={service.id}
+                        className={`option-card ${formData.service?.id === service.id ? 'selected' : ''}`}
+                        onClick={() => setFormData({ ...formData, service, variant: null })}
+                      >
+                        <span className="option-name">{service.name}</span>
+                        <span className="option-price">{formatPrice(service)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -426,10 +575,14 @@ export default function Reservation() {
               <h2 className="step-title">Kies uw Stylist</h2>
               <p className="step-subtitle">Selecteer uw voorkeursstylist</p>
               <div className="staff-grid">
-                {staff.map(member => (
+                {filteredStaff.length === 0 ? (
+                  <p style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                    Geen medewerkers beschikbaar voor deze service.
+                  </p>
+                ) : filteredStaff.map(member => (
                   <button
-                    key={member.id}
-                    className={`staff-card ${formData.staff?.id === member.id ? 'selected' : ''}`}
+                    key={member._id}
+                    className={`staff-card ${formData.staff?._id === member._id ? 'selected' : ''}`}
                     onClick={() => setFormData({ ...formData, staff: member })}
                   >
                     <div className="staff-avatar">{member.name.charAt(0)}</div>
@@ -471,14 +624,18 @@ export default function Reservation() {
               <h2 className="step-title">Kies een Tijdstip</h2>
               <p className="step-subtitle">Selecteer een beschikbaar tijdslot</p>
               <div className="time-grid">
-                {timeSlots.map(time => {
-                  const isBooked = bookedTimeSlots.includes(time)
+                {dynamicTimeSlots.length === 0 ? (
+                  <p className="no-slots-text" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '20px', color: '#64748b' }}>
+                    Geen beschikbare tijdsloten voor deze dag.
+                  </p>
+                ) : dynamicTimeSlots.map(time => {
+                  const isAvailable = isTimeValidForService(time)
                   return (
                     <button
                       key={time}
-                      className={`time-slot ${formData.time === time ? 'selected' : ''} ${isBooked ? 'booked' : ''}`}
-                      onClick={() => { if (!isBooked) setFormData({ ...formData, time }) }}
-                      disabled={isBooked}
+                      className={`time-slot ${formData.time === time ? 'selected' : ''} ${!isAvailable ? 'booked' : ''}`}
+                      onClick={() => { if (isAvailable) setFormData({ ...formData, time }) }}
+                      disabled={!isAvailable}
                     >
                       {time}
                     </button>
@@ -488,8 +645,55 @@ export default function Reservation() {
             </div>
           )}
 
-          {/* STEP 6 — Infos client */}
+          {/* STEP 6 — Gap Filling / Duo Option */}
           {currentStep === 6 && (
+            <div className="step-section fade-in">
+              <h2 className="step-title">Duo Optie</h2>
+              <p className="step-subtitle">
+                U heeft een pauze van <strong>{getPauseInfo()?.duration} min</strong>. 
+                Wilt u een extra service boeken voor iemand anders (of uzelf) tijdens deze tijd?
+              </p>
+              
+              <div className="options-list" style={{ marginBottom: '20px' }}>
+                <button 
+                  className={`option-card ${!formData.subService ? 'selected' : ''}`}
+                  onClick={() => setFormData({ ...formData, subService: null })}
+                >
+                  <span className="option-name">Nee, bedankt</span>
+                </button>
+                
+                {getSubServices().map(s => (
+                  <button
+                    key={s.id}
+                    className={`option-card ${formData.subService?.id === s.id ? 'selected' : ''}`}
+                    onClick={() => setFormData({ ...formData, subService: s })}
+                  >
+                    <div>
+                      <div className="option-name">{s.name}</div>
+                      <div style={{fontSize: '10px', color: '#aaa'}}>{s.categoryName}</div>
+                    </div>
+                    <span className="option-price">{formatPrice(s)}</span>
+                  </button>
+                ))}
+              </div>
+
+              {formData.subService && (
+                <div className="form-group fade-in">
+                  <label className="form-label">Naam van de extra persoon</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="Naam van uw partner / vriend(in)"
+                    value={formData.subServiceName} 
+                    onChange={(e) => setFormData({ ...formData, subServiceName: e.target.value })} 
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* STEP 7 — Infos client */}
+          {currentStep === 7 && (
             <div className="step-section fade-in">
               <h2 className="step-title">Uw Gegevens</h2>
               <p className="step-subtitle">Vul uw contactgegevens in</p>
@@ -523,19 +727,24 @@ export default function Reservation() {
             </div>
           )}
 
-          {/* STEP 7 — Summary */}
-          {currentStep === 7 && (
+          {/* STEP 8 — Summary */}
+          {currentStep === 8 && (
             <div className="step-section fade-in">
               <h2 className="step-title">Overzicht</h2>
               <p className="step-subtitle">Controleer uw reservatiegegevens</p>
               <div className="summary-card">
                 {[
                   { label: "Categorie", value: `${formData.category?.icon} ${formData.category?.name}` },
-                  { label: "Service", value: formData.service?.name },
-                  { label: "Prijs", value: formatPrice(formData.service) },
+                  { label: "Service", value: formData.variant ? `${formData.service?.name} (${formData.variant?.name})` : formData.service?.name },
+                  { label: "Prijs", value: formatPrice(formData.variant ? formData.variant : formData.service) },
                   { label: "Stylist", value: formData.staff?.name },
                   { label: "Datum", value: new Date(formData.date).toLocaleDateString('nl-BE', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) },
                   { label: "Tijdstip", value: formData.time },
+                  ...(formData.subService ? [
+                    { label: "Extra Duo Service", value: formData.subService.name },
+                    { label: "Naam Duo", value: formData.subServiceName || 'Duo' },
+                    { label: "Starttijd Duo", value: getPauseInfo()?.startTime }
+                  ] : []),
                   { label: "Naam", value: formData.name },
                   { label: "E-mail", value: formData.email },
                   { label: "Telefoon", value: formData.phone },
@@ -559,15 +768,10 @@ export default function Reservation() {
                   <p>Bij grote behandelingen: telefonisch via <a href="tel:+320485550271">0485 55 02 71</a></p>
                   <p>Niet opdagen of te laat zonder verwittigen: het <strong>volledige bedrag wordt aangerekend</strong>.</p>
                   <p>Betaling: cash of Payconiq.</p>
+                  <p style={{ marginTop: '15px', fontSize: '12px', fontStyle: 'italic', color: '#64748b' }}>
+                    Door uw afspraak te bevestigen, gaat u akkoord met deze voorwaarden.
+                  </p>
                 </div>
-                <label className="cancel-terms__checkbox">
-                  <input
-                    type="checkbox"
-                    checked={termsAccepted}
-                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                  />
-                  <span>Ik ga akkoord met de annulatievoorwaarden</span>
-                </label>
               </div>
 
             </div>

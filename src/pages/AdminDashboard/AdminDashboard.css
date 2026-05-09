@@ -14,6 +14,64 @@
 }
 
 /* ============================================
+   TOAST NOTIFICATION
+   ============================================ */
+.admin-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  padding: 16px 24px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  animation: slideIn 0.3s ease forwards;
+}
+
+.admin-toast.success {
+  border-left: 4px solid #1a7f4b;
+}
+
+.admin-toast.error {
+  border-left: 4px solid #b91c1c;
+}
+
+.admin-toast-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.admin-toast.success .admin-toast-icon {
+  color: #1a7f4b;
+}
+
+.admin-toast.error .admin-toast-icon {
+  color: #b91c1c;
+}
+
+.admin-toast p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+
+/* ============================================
    HEADER
    ============================================ */
 .admin-header {
@@ -284,8 +342,13 @@
   transition: opacity 0.3s ease;
 }
 
-.submit-review-btn:hover {
+.submit-review-btn:hover:not(:disabled) {
   opacity: 0.9;
+}
+
+.submit-review-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Reviews List */
@@ -528,6 +591,250 @@
   border-top: 1px solid #f0f0f0;
 }
 
+/* ==========================================================================
+   Admin Services Manager
+   ========================================================================== */
+
+.admin-services {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-services-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.category-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.category-header {
+  background: #f8fafc;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.category-title-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.category-icon {
+  font-size: 1.5rem;
+}
+
+.category-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+.category-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reorder-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-right: 1rem;
+}
+
+.reorder-btn {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1;
+}
+
+.reorder-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: var(--accent-gold);
+}
+
+.reorder-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.services-table-wrapper {
+  padding: 1rem 1.5rem;
+}
+
+.services-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.services-table th {
+  text-align: left;
+  padding: 1rem 0.75rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.services-table td {
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid #f8fafc;
+  vertical-align: middle;
+}
+
+.service-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.service-name {
+  font-weight: 600;
+  color: #334155;
+}
+
+.service-price {
+  font-family: 'Inter', sans-serif;
+  color: #64748b;
+}
+
+.duration-blocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.duration-block-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.duration-block-tag.work {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #dcfce7;
+}
+
+.duration-block-tag.pause {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fef3c7;
+}
+
+.block-icon {
+  font-size: 10px;
+}
+
+.add-service-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  font-weight: 600;
+  border-radius: 0 0 16px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-service-btn:hover {
+  background: #f1f5f9;
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+.cat-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cat-btn.edit {
+  background: transparent;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.cat-btn.delete {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #fee2e2;
+}
+
+.cat-btn:hover {
+  background: #f1f5f9;
+}
+
+.cat-btn.delete:hover {
+  background: #fef2f2;
+}
+
+/* Modals */
+.srv-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.srv-block-editor {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin: 1.5rem 0;
+}
+
+.srv-block-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: white;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  border: 1px solid #e2e8f0;
+}
+
+.block-type-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.block-type-badge.work { background: #dcfce7; color: #166534; }
+.block-type-badge.pause { background: #fef3c7; color: #92400e; }
+
 .created-at {
   font-size: 12px;
   color: #aaaaaa;
@@ -586,9 +893,96 @@
   color: #ffffff;
 }
 
+.action-button.whatsapp {
+  background-color: transparent;
+  color: #25D366;
+  border-color: #25D366;
+}
+
+.action-button.whatsapp:hover {
+  background-color: #25D366;
+  color: #ffffff;
+}
+
+.action-button.archive {
+  background-color: transparent;
+  color: #888888;
+  border-color: #d0d0d0;
+}
+
+.action-button.archive:hover {
+  background-color: #888888;
+  color: #ffffff;
+}
+
+.action-button.delete {
+  background-color: transparent;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.action-button.delete:hover {
+  background-color: #b91c1c;
+  color: #ffffff;
+  border-color: #b91c1c;
+}
+
 /* Rejection Reason Display */
 .info-row.rejection .info-value {
   color: #b91c1c;
+}
+
+/* Duo Display Styles */
+.calendar-appointment.is-duo {
+  border-left: 4px solid #8b5cf6 !important;
+}
+
+.calendar-appointment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
+.duo-badge {
+  background: #8b5cf6;
+  color: white;
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.duo-info-box {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.duo-info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #5b21b6;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.duo-details-text {
+  font-size: 15px;
+  color: #1e1b4b;
+  font-weight: 500;
+  margin: 0;
+}
+
+.duo-notes-extra {
+  font-size: 13px;
+  color: #4c1d95;
+  margin-top: 8px;
+  border-top: 1px dashed #c4b5fd;
+  padding-top: 8px;
 }
 
 /* ============================================
@@ -1032,6 +1426,12 @@
   min-height: 88px;
   padding: 10px;
   background-color: #ffffff;
+  transition: padding 0.2s ease;
+}
+
+.calendar-slot-cell.has-appointment {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .calendar-slot-empty {
@@ -1044,7 +1444,7 @@
 }
 
 .calendar-appointment {
-  height: 100%;
+  height: calc(100% - 20px);
   min-height: 66px;
   padding: 10px 12px;
   border-radius: 10px;
@@ -1052,6 +1452,30 @@
   flex-direction: column;
   gap: 4px;
   border: 1px solid transparent;
+  margin: 10px 0;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.calendar-appointment.is-continuation {
+  margin-top: 0;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  height: 100%;
+}
+
+.calendar-appointment.is-continued {
+  margin-bottom: 0;
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  height: 100%;
+}
+
+.calendar-appointment.is-continuation.is-continued {
+  height: 100%;
+  border-radius: 0;
 }
 
 .calendar-appointment.status-pending {
@@ -1545,9 +1969,11 @@
   /* Compact Appointment Mini-Cards */
   .mini-card {
     flex: 1;
+    margin: 5px 0;
     padding: 8px 10px;
     border-radius: 8px;
     background: #fff;
+    box-sizing: border-box;
     box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     display: flex;
     flex-direction: column;
@@ -1742,6 +2168,27 @@
     .day-tab { min-width: 34px; }
   }
 
+  .slot-content.has-appointment {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .mini-card.is-continuation {
+    margin-top: 0;
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    height: 100%;
+  }
+
+  .mini-card.is-continued {
+    margin-bottom: 0;
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    height: 100%;
+  }
+
   /* Status Colors Info */
   .mini-card.status-confirmed { border-left-color: #10b981; background: #f0fdf4; }
   .mini-card.status-pending { border-left-color: #f59e0b; background: #fffcf0; }
@@ -1750,4 +2197,299 @@
 
 /* Ensure the desktop wrapper works as intended */
 .calendar-row-wrapper { display: contents; }
+
+/* ============================================
+   ADMIN SETTINGS (HOURS & CLOSED DAYS)
+   ============================================ */
+.admin-settings-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-bottom: 60px;
+}
+
+.admin-card {
+  background: #ffffff;
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  padding: 40px;
+  margin-bottom: 30px;
+}
+
+.admin-card-header {
+  margin-bottom: 30px;
+}
+
+.admin-card-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #111;
+  margin-bottom: 8px;
+}
+
+.admin-card-subtitle {
+  font-size: 14px;
+  color: #888;
+}
+
+.settings-hours-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-hour-row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  align-items: center;
+  padding: 16px 24px;
+  background: #ffffff;
+  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.settings-hour-row:hover {
+  border-color: #d0d0d0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.settings-hour-row.is-closed {
+  background-color: #f9f9f9;
+  border-style: dashed;
+}
+
+.settings-hour-row.is-closed .day-name {
+  color: #999;
+}
+
+.day-name {
+  font-weight: 600;
+  color: #111;
+  font-size: 14px;
+}
+
+.hour-inputs {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.input-group label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #aaa;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+
+.input-group input[type="time"] {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  color: #333;
+}
+
+.input-group input[type="time"]:focus {
+  outline: none;
+  border-color: #1a1a1a;
+}
+
+.input-group input[type="time"]:disabled {
+  background-color: #f5f5f5;
+  color: #ccc;
+  border-color: #eee;
+}
+
+.toggle-group {
+  display: flex;
+  align-items: center;
+}
+
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.switch-text {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.settings-hour-row.is-closed .switch-text {
+  color: #b91c1c;
+}
+
+.admin-card-divider {
+  height: 1px;
+  background-color: #f0f0f0;
+  margin: 40px 0;
+}
+
+.closed-days-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.add-closed-day {
+  display: flex;
+  gap: 12px;
+  max-width: 400px;
+}
+
+.add-closed-day input[type="date"] {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.closed-days-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.closed-day-tag {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.closed-day-tag button {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.closed-day-tag button:hover {
+  opacity: 1;
+}
+
+.settings-footer {
+  margin-top: 50px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.no-data-text {
+  font-size: 14px;
+  color: #aaa;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .admin-card {
+    padding: 24px;
+  }
+  
+  .settings-hour-row {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .hour-inputs {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
+  .toggle-group {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+
+/* ============================================
+   ADMIN STAFF MANAGEMENT
+   ============================================ */
+.staff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.staff-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px !important;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 10px;
+}
+
+.status-badge.all {
+  background-color: #e6f7ed;
+  color: #1a7f4b;
+}
+
+.status-badge.limited {
+  background-color: #fff8e6;
+  color: #b38600;
+}
+
+.staff-modal .info-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.service-category-group h4 {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: #555;
+}
+
+.service-checkbox-item:hover {
+  color: #1a1a1a;
+}
+
+.service-checkbox-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #1a1a1a;
+}
 

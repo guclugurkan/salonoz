@@ -2,10 +2,13 @@ const {
   getAllServices,
   getAllStaff,
   getAllAppointments,
+  getPublicAppointments,
   sendTestEmail,
   createAppointment,
   cancelAppointmentByToken,
   updateAppointmentStatus,
+  toggleArchiveAppointment,
+  deleteAppointment,
 } = require("../services/appointments.service");
 
 // GET /api/services
@@ -41,6 +44,17 @@ async function getAppointments(req, res) {
   }
 }
 
+// GET /api/appointments/public
+async function getPublicAppointmentsController(req, res) {
+  try {
+    const appointments = await getPublicAppointments();
+    res.json({ success: true, data: appointments });
+  } catch (error) {
+    console.error("Error getting public appointments:", error);
+    res.status(500).json({ success: false, error: "Failed to read appointments" });
+  }
+}
+
 // GET /test-email
 async function testEmail(req, res) {
   try {
@@ -63,6 +77,7 @@ async function postAppointment(req, res) {
     if (!result.success) {
       return res.status(result.statusCode).json({ success: false, error: result.error });
     }
+
     res.status(result.statusCode).json({
       success: true,
       message: result.message,
@@ -73,6 +88,7 @@ async function postAppointment(req, res) {
     res.status(500).json({ success: false, error: "Failed to create appointment" });
   }
 }
+
 
 // GET /api/appointments/cancel?token=xxx
 async function cancelByToken(req, res) {
@@ -112,12 +128,52 @@ async function putAppointmentStatus(req, res) {
   }
 }
 
+// PATCH /api/appointments/:id/archive
+async function patchAppointmentArchive(req, res) {
+  try {
+    const { id } = req.params;
+    const result = await toggleArchiveAppointment(id);
+    if (!result.success) {
+      return res.status(result.statusCode).json({ success: false, error: result.error });
+    }
+    res.status(result.statusCode).json({
+      success: true,
+      message: result.message,
+      data: result.data,
+    });
+  } catch (error) {
+    console.error("Error archiving appointment:", error);
+    res.status(500).json({ success: false, error: "Failed to archive appointment" });
+  }
+}
+
+// DELETE /api/appointments/:id
+async function deleteAppointmentController(req, res) {
+  try {
+    const { id } = req.params;
+    const result = await deleteAppointment(id);
+    if (!result.success) {
+      return res.status(result.statusCode).json({ success: false, error: result.error });
+    }
+    res.status(result.statusCode).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    console.error("Error deleting appointment:", error);
+    res.status(500).json({ success: false, error: "Failed to delete appointment" });
+  }
+}
+
 module.exports = {
   getServices,
   getStaff,
   getAppointments,
+  getPublicAppointments: getPublicAppointmentsController,
   testEmail,
   postAppointment,
   cancelByToken,
   putAppointmentStatus,
+  patchAppointmentArchive,
+  deleteAppointment: deleteAppointmentController,
 };

@@ -4,11 +4,14 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 
+const categoriesRoutes = require("./routes/categories.routes");
 const appointmentsRoutes = require("./routes/appointments.routes");
 const imagesRoutes = require("./routes/images.routes");
 const contactRoutes = require("./routes/contact.routes");
 const reviewsRoutes = require("./routes/reviews.routes");
 const authRoutes = require("./routes/auth.routes");
+const settingsRoutes = require("./routes/settings.routes");
+const staffRoutes = require("./routes/staff.routes");
 
 const { sendEmail, getTestEmail } = require("./mailer");
 
@@ -41,10 +44,13 @@ app.use((req, res, next) => {
 // ROUTES
 // ============================================
 
+app.use("/api", categoriesRoutes);
 app.use("/api", appointmentsRoutes);
 app.use("/api", imagesRoutes);
 app.use("/api", contactRoutes);
 app.use("/api", reviewsRoutes);
+app.use("/api", settingsRoutes);
+app.use("/api", staffRoutes);
 app.use("/api/auth", authRoutes);
 
 // Test email route

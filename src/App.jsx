@@ -25,6 +25,7 @@ import ReviewsPage from "./pages/ReviewsPage/ReviewsPage";
 import ContactPage from "./pages/ContactPage/ContactPage";
 import CancelPage from "./pages/CancelPage/CancelPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
+import TermsPage from "./pages/TermsPage/TermsPage";
 import { AuthProvider } from "./context/AuthContext";
 
 
@@ -76,6 +77,7 @@ export default function App() {
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/cancel" element={<CancelPage />} />
+            <Route path="/voorwaarden" element={<TermsPage />} />
 
           </Routes>
         </AnimatePresence>

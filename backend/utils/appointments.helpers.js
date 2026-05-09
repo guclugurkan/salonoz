@@ -17,9 +17,9 @@ const services = [
 ];
 
 const staff = [
-  { id: 1, name: "Oz", role: "Master Stylist" },
-  { id: 2, name: "Sarah", role: "Senior Colorist" },
-  { id: 3, name: "Alex", role: "Barber Specialist" },
+  { id: 1, name: "OZ", role: "Men's & International Artist" },
+  { id: 2, name: "Elanur", role: "Color & Balayage" },
+  { id: 3, name: "Ashkan", role: "Color & Balayage Specialist" },
 ];
 
 // ============================================

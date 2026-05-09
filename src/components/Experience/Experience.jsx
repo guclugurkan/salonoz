@@ -4,25 +4,25 @@ import { Link } from "react-router-dom";
 
 const images = [
   {
-    src: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=800&q=80",
+    src: "/images/services/heren.jpeg",
     alt: "Heren",
     name: "Heren",
     sub: "Kapsalon",
   },
   {
-    src: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80",
+    src: "/images/services/dames.jpeg",
     alt: "Dames",
     name: "Dames",
     sub: "Styling",
   },
   {
-    src: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800&q=80",
+    src: "/images/services/kleuren.jpeg",
     alt: "Kleuren",
     name: "Kleuren",
     sub: "Techniek",
   },
   {
-    src: "https://images.unsplash.com/photo-1600948836101-f9ffda59d250?w=800&q=80",
+    src: "/images/services/balayage-higlights.jpeg",
     alt: "Balayage",
     name: "Balayage",
     sub: "Highlights",
