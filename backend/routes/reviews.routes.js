@@ -12,7 +12,19 @@ const {
 
 // Public routes
 router.get("/reviews", getReviews);
-router.post("/reviews", upload.single("image"), postReview); // Public submission
+
+// Helper to handle multer errors
+const uploadSingleImage = (req, res, next) => {
+  upload.single("image")(req, res, (err) => {
+    if (err) {
+      console.error("DEBUG: Multer error:", err);
+      return res.status(400).json({ success: false, message: err.message });
+    }
+    next();
+  });
+};
+
+router.post("/reviews", uploadSingleImage, postReview); // Public submission
 
 // Admin routes
 router.put("/reviews/:id/approve", verifyToken, approveReview);
