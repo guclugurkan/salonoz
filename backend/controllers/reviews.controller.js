@@ -4,11 +4,11 @@ const cloudinary = require("../utils/cloudinary");
 // GET /api/reviews
 const getReviews = async (req, res) => {
   try {
-    const { all } = req.query; // If all=true, return all reviews (admin only)
+    const { all } = req.query;
     
     let query = { isApproved: true };
     if (all === 'true') {
-      query = {}; // No filter for admin
+      query = {};
     }
 
     const reviews = await Review.find(query).sort({ date: -1 });
@@ -39,52 +39,56 @@ const postReview = async (req, res) => {
       return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
-    let imageUrl = null;
-
-    // Handle image upload if present
-    if (req.file) {
-      const uploadPromise = new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            folder: "salonoz/reviews",
-            resource_type: "image",
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result.secure_url);
-          }
-        );
-        uploadStream.end(req.file.buffer);
+    const saveReview = async (url) => {
+      const newReview = new Review({
+        author: name,
+        rating: parseInt(rating),
+        comment: text,
+        imageUrl: url,
+        date: new Date(),
+        isApproved: false
       });
-      imageUrl = await uploadPromise;
+      await newReview.save();
+      return newReview;
+    };
+
+    if (req.file) {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "salonoz/reviews",
+          resource_type: "image",
+        },
+        async (error, result) => {
+          if (error) {
+            console.error("Cloudinary upload error:", error);
+            return res.status(500).json({ success: false, message: "Image upload failed", error: error.message });
+          }
+
+          try {
+            const newReview = await saveReview(result.secure_url);
+            res.status(201).json({ 
+              success: true, 
+              message: "Uw beoordeling is verzonden en zal worden gecontroleerd door ons team.",
+              data: newReview
+            });
+          } catch (err) {
+            console.error("Error saving review with image:", err);
+            res.status(500).json({ success: false, message: "Failed to save review", error: err.message });
+          }
+        }
+      );
+      uploadStream.end(req.file.buffer);
+    } else {
+      const newReview = await saveReview(null);
+      res.status(201).json({ 
+        success: true, 
+        message: "Uw beoordeling is verzonden en zal worden gecontroleerd door ons team.",
+        data: newReview
+      });
     }
-
-    const newReview = new Review({
-      author: name,
-      rating: parseInt(rating),
-      comment: text,
-      imageUrl: imageUrl,
-      date: new Date(),
-      isApproved: false // New reviews must be approved by admin
-    });
-
-    await newReview.save();
-
-    res.status(201).json({ 
-      success: true, 
-      message: "Uw beoordeling is verzonden en zal worden gecontroleerd door ons team.",
-      data: {
-        id: newReview._id,
-        name: newReview.author,
-        rating: newReview.rating,
-        text: newReview.comment,
-        imageUrl: newReview.imageUrl,
-        isApproved: newReview.isApproved
-      } 
-    });
   } catch (error) {
-    console.error("Error saving review to DB:", error);
-    res.status(500).json({ success: false, message: "Error saving review" });
+    console.error("Error in postReview:", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 

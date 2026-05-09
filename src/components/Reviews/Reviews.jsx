@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "./Reviews.css";
-import { GOOGLE_REVIEWS_URL } from "../../data/reviewsData";
+import { googleReviews, GOOGLE_REVIEWS_URL } from "../../data/reviewsData";
 
 const Stars = ({ count }) => (
   <span className="reviews__stars">
@@ -21,20 +19,8 @@ const GoogleIcon = () => (
 );
 
 export default function Reviews() {
-  const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reviews`)
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setReviews(result.data);
-        }
-      })
-      .catch(err => console.error("Error fetching reviews:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  const reviews = googleReviews;
+  const loading = false;
 
   if (loading) {
     return (
