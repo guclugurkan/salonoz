@@ -146,7 +146,7 @@ function AdminDashboard() {
   const fetchReviews = async () => {
     setReviewLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reviews`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reviews?all=true`);
       const data = await response.json();
       if (data.success) {
         setReviews(data.data);
@@ -321,6 +321,25 @@ function AdminDashboard() {
       showToast('Er is een fout opgetreden', 'error');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleApproveReview = async (id) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reviews/${id}/approve`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      if (data.success) {
+        showToast('Beoordeling goedgekeurd');
+        fetchReviews();
+      }
+    } catch (err) {
+      console.error('Error approving review:', err);
+      showToast('Fout bij goedkeuren', 'error');
     }
   };
 
@@ -1235,20 +1254,40 @@ function AdminDashboard() {
               <h3>Bestaande Beoordelingen ({reviews.length})</h3>
               <div className="admin-reviews-grid">
                 {reviews.map(review => (
-                  <div key={review.id} className="admin-review-card">
-                    <div className="admin-review-header">
-                      <span className="admin-review-author">{review.name}</span>
-                      <span className="admin-review-rating">{'★'.repeat(review.rating)}</span>
-                    </div>
-                    <p className="admin-review-text">"{review.text}"</p>
-                    <div className="admin-review-footer">
-                      <span className="admin-review-date">{review.date}</span>
-                      <button
-                        className="delete-review-btn"
-                        onClick={() => handleDeleteReview(review.id)}
-                      >
-                        Verwijderen
-                      </button>
+                   <div key={review.id} className={`admin-review-card ${!review.isApproved ? 'pending' : ''}`}>
+                    {!review.isApproved && <div className="pending-badge">In afwachting</div>}
+                    
+                    {review.imageUrl && (
+                      <div className="admin-review-img">
+                        <img src={review.imageUrl} alt="Review" />
+                      </div>
+                    )}
+                    
+                    <div className="admin-review-content">
+                      <div className="admin-review-header">
+                        <span className="admin-review-author">{review.name}</span>
+                        <span className="admin-review-rating">{'★'.repeat(review.rating)}</span>
+                      </div>
+                      <p className="admin-review-text">"{review.text}"</p>
+                      <div className="admin-review-footer">
+                        <span className="admin-review-date">{review.date}</span>
+                        <div className="admin-review-actions">
+                          {!review.isApproved && (
+                            <button
+                              className="approve-review-btn"
+                              onClick={() => handleApproveReview(review.id)}
+                            >
+                              Goedkeuren
+                            </button>
+                          )}
+                          <button
+                            className="delete-review-btn"
+                            onClick={() => handleDeleteReview(review.id)}
+                          >
+                            Verwijderen
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}

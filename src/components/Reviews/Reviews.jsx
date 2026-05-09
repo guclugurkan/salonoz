@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "./Reviews.css";
 import { GOOGLE_REVIEWS_URL } from "../../data/reviewsData";
 
@@ -92,15 +93,13 @@ export default function Reviews() {
 
       {/* FOOTER */}
       <div className="reviews__footer is-visible" style={{ opacity: 1, transform: 'none' }}>
-        <a
-          href={GOOGLE_REVIEWS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          to="/reviews"
           className="reviews__button"
         >
           <span className="reviews__buttonText">Laat een beoordeling achter</span>
           <span className="reviews__buttonFill" />
-        </a>
+        </Link>
       </div>
 
     </section>

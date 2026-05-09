@@ -77,7 +77,7 @@ export default function Footer() {
             © 2026 SALON OZ. Alle rechten voorbehouden.
           </p>
           <div className="footer__bottomLinks">
-            <a href="#" className="footer__bottomLink">Privacybeleid</a>
+            <Link to="/reviews" className="footer__bottomLink">Klantbeoordelingen</Link>
             <Link to="/voorwaarden" className="footer__bottomLink">Algemene voorwaarden</Link>
           </div>
         </div>
