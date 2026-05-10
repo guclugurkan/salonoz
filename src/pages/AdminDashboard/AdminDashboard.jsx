@@ -1090,7 +1090,7 @@ function AdminDashboard() {
                             className={`grid-action-btn follow-up ${appointment.followUpSent ? 'sent' : ''}`}
                             onClick={() => handleWhatsAppFollowup(appointment)}
                           >
-                            {appointment.followUpSent ? 'Suivi ✓' : 'Suivi WA'}
+                            {appointment.followUpSent ? 'Opgevolgd ✓' : 'Opvolging WA'}
                           </button>
                         </>
                       )}
