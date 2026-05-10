@@ -2082,8 +2082,76 @@
   .card-header { padding: 15px !important; }
   .card-body { padding: 15px !important; }
   .client-name { font-size: 16px !important; }
-  .info-label { font-size: 9px !important; }
-  .info-value { font-size: 11px !important; }
+  /* Compact Info Grid */
+  .compact-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+    margin-bottom: 12px;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .info-item .info-label {
+    font-size: 8px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #999;
+    margin: 0;
+  }
+
+  .info-item .info-value {
+    font-size: 11px !important;
+    font-weight: 600;
+    color: #111;
+  }
+
+  /* Contact Info Row */
+  .contact-info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: #666;
+    background: #f9f9f9;
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    width: fit-content;
+  }
+
+  .contact-info-row .separator {
+    color: #ccc;
+  }
+
+  /* Notes & Rejection Compact */
+  .notes-compact, .rejection-compact {
+    font-size: 10px;
+    line-height: 1.4;
+    color: #555;
+    padding: 8px 0;
+    border-top: 1px dashed #eee;
+  }
+
+  .notes-compact strong, .rejection-compact strong {
+    color: #111;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 4px;
+  }
+
+  .rejection-compact {
+    color: #cc0000;
+    background: #fff5f5;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+  }
 
   .appointment-id-tech { display: none !important; }
 

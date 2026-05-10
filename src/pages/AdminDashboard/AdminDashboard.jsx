@@ -1013,73 +1013,50 @@ function AdminDashboard() {
                     <div className="card-divider"></div>
 
                     <div className="card-body">
-                      <div className="info-row">
-                        <span className="info-label">Dienst</span>
-                        <span className="info-value">{appointment.service}</span>
+                      <div className="compact-info-grid">
+                        <div className="info-item">
+                          <span className="info-label">Dienst</span>
+                          <span className="info-value">{appointment.service}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Medewerker</span>
+                          <span className="info-value">{appointment.staff}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Datum</span>
+                          <span className="info-value">{formatDate(appointment.date)}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Tijd</span>
+                          <span className="info-value">{appointment.time}</span>
+                        </div>
                       </div>
 
-                      <div className="info-row">
-                        <span className="info-label">Medewerker</span>
-                        <span className="info-value">{appointment.staff}</span>
-                      </div>
-
-                      <div className="info-row">
-                        <span className="info-label">Datum</span>
-                        <span className="info-value">{formatDate(appointment.date)}</span>
-                      </div>
-
-                      <div className="info-row">
-                        <span className="info-label">Tijd</span>
-                        <span className="info-value">{appointment.time}</span>
-                      </div>
-
-                      <div className="card-divider subtle"></div>
-
-                      <div className="info-row">
-                        <span className="info-label">E-mail</span>
-                        <span className="info-value">{appointment.email}</span>
-                      </div>
-
-                      <div className="info-row">
-                        <span className="info-label">Telefoon</span>
-                        <span className="info-value">{appointment.phone}</span>
+                      <div className="contact-info-row">
+                        <span>{appointment.email}</span>
+                        <span className="separator">•</span>
+                        <span>{appointment.phone}</span>
                       </div>
 
                       {appointment.notes && (
-                        <>
-                          <div className="card-divider subtle"></div>
+                        <div className="notes-compact">
                           {appointment.notes.includes('[DUO:') ? (
-                            <div className="duo-info-box">
-                              <div className="duo-info-header">
-                                <span className="duo-icon">👥</span>
-                                <strong>Duo Service Details</strong>
-                              </div>
-                              <p className="duo-details-text">
-                                {appointment.notes.match(/\[DUO: (.*?)\]/)?.[1] || "Duo details"}
-                              </p>
-                              {appointment.notes.split('] ')[1] && (
-                                <p className="duo-notes-extra">
-                                  <strong>Nota:</strong> {appointment.notes.split('] ')[1]}
-                                </p>
-                              )}
+                            <div className="duo-info-compact">
+                              <strong>👥 Duo:</strong> {appointment.notes.match(/\[DUO: (.*?)\]/)?.[1]}
+                              {appointment.notes.split('] ')[1] && ` | ${appointment.notes.split('] ')[1]}`}
                             </div>
                           ) : (
-                            <div className="info-row notes">
-                              <span className="info-label">Notities</span>
-                              <span className="info-value">{appointment.notes}</span>
+                            <div className="notes-text-compact">
+                              <strong>Note:</strong> {appointment.notes}
                             </div>
                           )}
-                        </>
+                        </div>
                       )}
 
                       {appointment.status === 'rejected' && appointment.rejectionReason && (
-                        <>
-                          <div className="card-divider subtle"></div>
-                          <div className="info-row notes rejection">
-                            <span className="info-label">Reden van weigering</span>
-                            <span className="info-value">{appointment.rejectionReason}</span>
-                          </div>
-                        </>
+                        <div className="rejection-compact">
+                          <strong>Reden:</strong> {appointment.rejectionReason}
+                        </div>
                       )}
                     </div>
 
