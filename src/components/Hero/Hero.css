@@ -226,6 +226,12 @@
     letter-spacing: 0.15em;
   }
 
+  .hero__title {
+    letter-spacing: 0.25em; /* Reduced from 0.45em for mobile */
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
   .hero__actions {
     flex-direction: column;
     align-items: center;

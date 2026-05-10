@@ -2144,6 +2144,20 @@
 
   .action-button.confirm { color: #1a7f4b !important; border-color: #1a7f4b !important; }
   .action-button.reject { color: #888 !important; border-color: #eee !important; }
+  .action-button.follow-up { 
+    background-color: #25D366 !important; 
+    color: white !important; 
+    border-color: #25D366 !important; 
+  }
+  .action-button.follow-up.sent { 
+    background-color: #666 !important; 
+    border-color: #666 !important; 
+    opacity: 0.6;
+  }
+  .action-button.whatsapp {
+    color: #25D366 !important;
+    border-color: #25D366 !important;
+  }
 
   .card-footer {
     flex-direction: column !important;

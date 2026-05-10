@@ -1118,7 +1118,6 @@ function AdminDashboard() {
                             className={`action-button follow-up ${appointment.followUpSent ? 'sent' : ''}`}
                             onClick={() => handleWhatsAppFollowup(appointment)}
                             title="Verstuur suivi via WhatsApp"
-                            style={appointment.followUpSent ? { opacity: 0.6, background: '#666' } : { background: '#25D366' }}
                           >
                             {appointment.followUpSent ? 'Suivi ✓' : 'Suivi WA'}
                           </button>

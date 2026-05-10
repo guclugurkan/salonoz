@@ -296,3 +296,30 @@
 .reviews__button:hover .reviews__buttonFill {
   transform: scaleX(1);
 }
+
+/* --------------------------------
+   Responsive — mobile
+-------------------------------- */
+@media (max-width: 480px) {
+  .reviews {
+    padding: 48px 0;
+  }
+
+  .reviews__title {
+    font-size: 30px;
+  }
+
+  .reviews__ticker {
+    padding: 24px 0;
+  }
+
+  .reviews__card {
+    width: 270px;
+    padding: 20px;
+  }
+
+  .reviews__ticker::before,
+  .reviews__ticker::after {
+    width: 60px; /* Reduced fade width for mobile */
+  }
+}
