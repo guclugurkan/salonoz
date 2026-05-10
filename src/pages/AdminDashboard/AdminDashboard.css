@@ -2373,9 +2373,134 @@
   .mini-card.status-confirmed { border-left-color: #10b981; background: #f0fdf4; }
   .mini-card.status-pending { border-left-color: #f59e0b; background: #fffcf0; }
   .mini-card.status-rejected { border-left-color: #ef4444; background: #fef2f2; }
+  /* ============================================
+     ADMIN SERVICES MOBILE
+     ============================================ */
+  .admin-services-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 15px;
+  }
+
+  .admin-services-header .confirm {
+    width: 100%;
+    text-align: center;
+  }
+
+  .category-header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px !important;
+  }
+
+  .category-title-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .category-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .cat-btn {
+    width: 100%;
+    padding: 10px !important;
+    font-size: 11px !important;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Transform Table to Cards */
+  .services-table thead {
+    display: none;
+  }
+
+  .services-table, 
+  .services-table tbody, 
+  .services-table tr, 
+  .services-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .services-table tr {
+    padding: 20px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .services-table td {
+    padding: 5px 15px !important;
+    border: none !important;
+  }
+
+  .service-name-cell {
+    margin-bottom: 10px;
+    padding-bottom: 10px !important;
+    border-bottom: 1px dashed #eee !important;
+  }
+
+  .service-name {
+    font-size: 15px !important;
+  }
+
+  .services-table td:before {
+    content: attr(data-label);
+    display: block;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    margin-bottom: 2px;
+  }
+
+  .services-table td:last-child {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 15px;
+  }
+
+  .services-table td:last-child:before { display: none; }
+
+  /* Add Service Button */
+  .add-service-btn {
+    width: calc(100% - 30px);
+    margin: 15px;
+    padding: 15px !important;
+  }
+
+  /* Modals on Mobile */
+  .modal-content {
+    padding: 20px !important;
+    margin: 10px !important;
+    max-height: 95vh !important;
+  }
+
+  .srv-modal-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .srv-block-item {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modal-button {
+    width: 100%;
+    text-align: center;
+  }
 }
 
-/* Ensure the desktop wrapper works as intended */
 .calendar-row-wrapper { display: contents; }
 
 /* ============================================

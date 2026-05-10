@@ -260,16 +260,16 @@ export default function AdminServices() {
                   <tbody>
                     {cat.services.map((srv, srvIdx) => (
                       <tr key={srv.id}>
-                        <td className="service-name-cell">
+                        <td className="service-name-cell" data-label="Service">
                           <div className="reorder-btns">
                             <button className="reorder-btn" disabled={srvIdx === 0} onClick={() => moveService(srv.id, 'up')}>▲</button>
                             <button className="reorder-btn" disabled={srvIdx === cat.services.length - 1} onClick={() => moveService(srv.id, 'down')}>▼</button>
                           </div>
                           <span className="service-name">{srv.name}</span>
                         </td>
-                        <td><span className="service-price">{srv.price}</span></td>
-                        <td><span className="service-price" style={{ color: 'var(--accent-gold)', fontWeight: '600' }}>{srv.displayPrice || srv.price}</span></td>
-                        <td>
+                        <td data-label="Prijs (Reserva.)"><span className="service-price">{srv.price}</span></td>
+                        <td data-label="Display Prijs"><span className="service-price" style={{ color: 'var(--accent-gold)', fontWeight: '600' }}>{srv.displayPrice || srv.price}</span></td>
+                        <td data-label="Blokken / Varianten">
                           {srv.variants && srv.variants.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                               <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>Heeft {srv.variants.length} varianten</span>
