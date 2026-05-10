@@ -419,7 +419,7 @@ function AdminDashboard() {
   };
 
   const handleDeleteAppointment = async (id) => {
-    if (!window.confirm("Weet u zeker que vous voulez supprimer ce rendez-vous de manière permanente ?")) return;
+    if (!window.confirm("Weet u zeker dat u deze afspraak definitief wilt verwijderen?")) return;
     
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/${id}`, {
@@ -1105,7 +1105,7 @@ function AdminDashboard() {
                         className="grid-action-btn delete" 
                         onClick={() => handleDeleteAppointment(appointment.id)}
                       >
-                        Supprimer
+                        Verwijderen
                       </button>
                     </div>
 
@@ -1198,10 +1198,14 @@ function AdminDashboard() {
                             )}
                             <button 
                               className="action-button delete" 
-                              onClick={() => handleDeleteAppointment(appointment.id)}
+                              onClick={() => {
+                                if (window.confirm('Weet u zeker dat u deze afspraak definitief wilt verwijderen?')) {
+                                  handleDeleteAppointment(appointment.id);
+                                }
+                              }}
                               title="Permanent verwijderen"
                             >
-                              Supprimer
+                              Verwijderen
                             </button>
                           </div>
                         </div>
