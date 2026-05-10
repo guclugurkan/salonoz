@@ -919,7 +919,8 @@
   gap: 8px;
 }
 
-.action-button {
+.action-button,
+.grid-action-btn {
   padding: 8px 20px;
   font-size: 11px;
   letter-spacing: 0.1em;
@@ -930,9 +931,13 @@
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.action-button.confirm {
+.action-button.confirm,
+.grid-action-btn.confirm {
   background-color: transparent;
   color: #1a7f4b;
   border-color: #1a7f4b;
@@ -954,7 +959,8 @@
   color: #ffffff;
 }
 
-.action-button.reject {
+.action-button.reject,
+.grid-action-btn.reject {
   background-color: transparent;
   color: #525252;
   border-color: #525252;
@@ -965,7 +971,8 @@
   color: #ffffff;
 }
 
-.action-button.whatsapp {
+.action-button.whatsapp,
+.grid-action-btn.whatsapp {
   background-color: transparent;
   color: #25D366;
   border-color: #25D366;
@@ -976,7 +983,8 @@
   color: #ffffff;
 }
 
-.action-button.archive {
+.action-button.archive,
+.grid-action-btn.archive {
   background-color: transparent;
   color: #888888;
   border-color: #d0d0d0;
@@ -987,7 +995,8 @@
   color: #ffffff;
 }
 
-.action-button.delete {
+.action-button.delete,
+.grid-action-btn.delete {
   background-color: transparent;
   color: #b91c1c;
   border-color: #fca5a5;
@@ -997,6 +1006,114 @@
   background-color: #b91c1c;
   color: #ffffff;
   border-color: #b91c1c;
+}
+
+/* New Actions Grid Layout */
+.card-actions-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 24px 28px;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+}
+
+.grid-action-btn {
+  height: 44px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border: 1px solid #d0d0d0;
+  background: transparent;
+  transition: all 0.3s ease;
+  color: #1a1a1a;
+}
+
+.grid-action-btn.confirm {
+  background: #1a7f4b;
+  color: white;
+  border-color: #1a7f4b;
+}
+
+.grid-action-btn.confirm:hover {
+  background: #15653b;
+  border-color: #15653b;
+}
+
+.grid-action-btn.reject {
+  color: #525252;
+  border-color: #d0d0d0;
+}
+
+.grid-action-btn.reject:hover {
+  background: #f5f5f5;
+  border-color: #1a1a1a;
+}
+
+.grid-action-btn.whatsapp {
+  background: #25D366;
+  color: white;
+  border-color: #25D366;
+}
+
+.grid-action-btn.whatsapp:hover {
+  background: #1ebd5b;
+}
+
+.grid-action-btn.follow-up {
+  color: #25D366;
+  border-color: #25D366;
+}
+
+.grid-action-btn.follow-up:hover {
+  background: #f0fdf4;
+}
+
+.grid-action-btn.follow-up.sent {
+  background: #f5f5f5;
+  color: #999;
+  border-color: #eee;
+  cursor: default;
+}
+
+.grid-action-btn.archive {
+  color: #888;
+  border-color: #d0d0d0;
+}
+
+.grid-action-btn.delete {
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.grid-action-btn.delete:hover {
+  background: #b91c1c;
+  color: white;
+}
+
+/* Mobile Overrides for Grid */
+@media (max-width: 600px) {
+  .card-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 15px 20px;
+    gap: 8px;
+    background: #fff;
+  }
+
+  .grid-action-btn {
+    height: 40px;
+    padding: 0;
+    border-radius: 8px;
+    width: 100%;
+  }
 }
 
 /* Rejection Reason Display */
@@ -2154,77 +2271,6 @@
   }
 
   .appointment-id-tech { display: none !important; }
-
-  /* New Actions Grid Layout */
-  .card-actions-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    padding: 15px 20px;
-    background: #fff;
-    border-top: 1px solid #f5f5f5;
-  }
-
-  .grid-action-btn {
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    border: 1px solid #eee;
-    background: transparent;
-    transition: all 0.2s ease;
-    width: 100%;
-  }
-
-  .grid-action-btn.confirm {
-    background: #1a7f4b !important;
-    color: white !important;
-    border-color: #1a7f4b !important;
-  }
-
-  .grid-action-btn.reject {
-    background: #fff !important;
-    color: #cc0000 !important;
-    border-color: #cc0000 !important;
-  }
-
-  .grid-action-btn.whatsapp {
-    background: #25D366 !important;
-    color: white !important;
-    border-color: #25D366 !important;
-  }
-
-  .grid-action-btn.follow-up {
-    background: #fff !important;
-    color: #25D366 !important;
-    border-color: #25D366 !important;
-  }
-
-  .grid-action-btn.follow-up.sent {
-    background: #f5f5f5 !important;
-    color: #999 !important;
-    border-color: #eee !important;
-    opacity: 0.8;
-  }
-
-  .grid-action-btn.archive {
-    background: #fff !important;
-    color: #666 !important;
-    border-color: #eee !important;
-  }
-
-  .grid-action-btn.delete {
-    background: #fff !important;
-    color: #aaa !important;
-    border-color: #f5f5f5 !important;
-    font-size: 9px;
-  }
 
   /* Stack info rows vertically */
   .info-row {
