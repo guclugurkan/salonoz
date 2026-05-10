@@ -76,7 +76,7 @@ export default function ContactPage() {
             <div className="cp__info-block">
               <h3 className="cp__info-label">Het Salon</h3>
               <p className="cp__info-text">
-                Vierhekkenstraat 3A<br />
+                Vierhekkenstraat 1A<br />
                 Drongen BE-9031
               </p>
               <a
@@ -91,7 +91,7 @@ export default function ContactPage() {
 
             <div className="cp__info-block">
               <h3 className="cp__info-label">Reservaties</h3>
-              <a href="tel:+32744414919" className="cp__info-link">0744.414.919</a>
+              <a href="tel:+32485550271" className="cp__info-link">+32 485 55 02 71</a>
               <a href="mailto:Salonoz@hotmail.com" className="cp__info-link">Salonoz@hotmail.com</a>
             </div>
 

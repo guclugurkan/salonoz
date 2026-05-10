@@ -7,7 +7,8 @@ const reviewSchema = new mongoose.Schema({
   imageUrl: { type: String },
   date: { type: Date, default: Date.now },
   category: { type: String }, // Ex: 'men', 'women'
-  isApproved: { type: Boolean, default: false }
+  isApproved: { type: Boolean, default: false },
+  source: { type: String, enum: ['site', 'google'], default: 'site' }
 });
 
 module.exports = mongoose.model("Review", reviewSchema);

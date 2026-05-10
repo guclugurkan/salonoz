@@ -20,7 +20,8 @@ const getReviews = async (req, res) => {
       rating: r.rating,
       text: r.comment,
       imageUrl: r.imageUrl,
-      isApproved: r.isApproved
+      isApproved: r.isApproved,
+      source: r.source || 'site'
     }));
 
     res.json({ success: true, data: formattedReviews });
@@ -41,7 +42,7 @@ const postReview = async (req, res) => {
   } : "No file");
 
   try {
-    const { name, rating, text } = req.body;
+    const { name, rating, text, source, date } = req.body;
     
     if (!name || !rating || !text) {
       console.log("DEBUG: Missing fields");
@@ -50,18 +51,40 @@ const postReview = async (req, res) => {
 
     const saveReview = async (url) => {
       console.log("DEBUG: Saving review to DB with URL:", url);
+      const isGoogle = source === 'google';
+      
+      let reviewDate = new Date();
+      if (date) {
+        const parsedDate = new Date(date);
+        if (!isNaN(parsedDate.getTime())) {
+          reviewDate = parsedDate;
+        }
+      }
+
       const newReview = new Review({
         author: name,
         rating: parseInt(rating),
         comment: text,
         imageUrl: url,
-        date: new Date(),
-        isApproved: false
+        date: reviewDate,
+        isApproved: isGoogle ? true : false,
+        source: source || 'site'
       });
       await newReview.save();
       console.log("DEBUG: Review saved successfully");
       return newReview;
     };
+
+    const formatReview = (r) => ({
+      id: r._id,
+      name: r.author,
+      date: r.date.toISOString().split('T')[0],
+      rating: r.rating,
+      text: r.comment,
+      imageUrl: r.imageUrl,
+      isApproved: r.isApproved,
+      source: r.source || 'site'
+    });
 
     if (req.file) {
       console.log("DEBUG: Starting Cloudinary upload...");
@@ -86,7 +109,7 @@ const postReview = async (req, res) => {
             res.status(201).json({ 
               success: true, 
               message: "Uw beoordeling is verzonden en zal worden gecontroleerd door ons team.",
-              data: newReview
+              data: formatReview(newReview)
             });
           } catch (err) {
             console.error("DEBUG: Error in saveReview callback:", err);
@@ -101,7 +124,7 @@ const postReview = async (req, res) => {
       res.status(201).json({ 
         success: true, 
         message: "Uw beoordeling is verzonden en zal worden gecontroleerd door ons team.",
-        data: newReview
+        data: formatReview(newReview)
       });
     }
   } catch (error) {

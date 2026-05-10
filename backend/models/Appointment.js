@@ -20,6 +20,7 @@ const appointmentSchema = new mongoose.Schema({
   cancelToken: { type: String },
   cancelDeadline: { type: Date },
   isArchived: { type: Boolean, default: false },
+  followUpSent: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 

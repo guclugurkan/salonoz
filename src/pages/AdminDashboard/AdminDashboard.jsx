@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './AdminDashboard.css';
+import { GOOGLE_REVIEWS_URL } from '../../data/reviewsData';
 import AdminServices from './AdminServices';
 import AdminSettings from './AdminSettings';
 import AdminStaff from './AdminStaff';
@@ -100,13 +101,14 @@ function AdminDashboard() {
   // Reviews States
   const [reviews, setReviews] = useState([]);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewTab, setReviewTab] = useState('site'); // 'site' or 'google'
   const [staffList, setStaffList] = useState([]);
 
   // Settings States
   const [settings, setSettings] = useState(null);
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
-  const [newReview, setNewReview] = useState({ name: '', date: '', rating: 5, text: '' });
+  const [newReview, setNewReview] = useState({ name: '', date: '', rating: 5, text: '', source: 'site' });
 
   // UI States
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -305,13 +307,14 @@ function AdminDashboard() {
         },
         body: JSON.stringify({
           ...newReview,
+          source: reviewTab,
           date: newReview.date || new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
         })
       });
       const result = await response.json();
       if (result.success) {
         setReviews([result.data, ...reviews]);
-        setNewReview({ name: '', date: '', rating: 5, text: '' });
+        setNewReview({ name: '', date: '', rating: 5, text: '', source: reviewTab });
         showToast('Beoordeling succesvol toegevoegd!');
       } else {
         showToast(result.message || 'Fout bij toevoegen beoordeling', 'error');
@@ -505,6 +508,35 @@ function AdminDashboard() {
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
     
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleWhatsAppFollowup = async (appointment) => {
+    let cleanPhone = appointment.phone.replace(/[^\d+]/g, '');
+    if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
+    else if (cleanPhone.startsWith('00')) cleanPhone = cleanPhone.substring(2);
+    else if (cleanPhone.startsWith('0')) cleanPhone = '32' + cleanPhone.substring(1);
+
+    const message = `Beste ${appointment.name}, bedankt voor je bezoek aan Salon Öz vandaag! We hopen dat je tevreden bent met je nieuwe look. Zou je een momentje willen nemen om een beoordeling achter te laten?\n\nSchrijf een review op onze site: https://salonoz.be/reviews\nBeoordeel ons op Google: ${GOOGLE_REVIEWS_URL}\n\nAlvast bedankt en tot de volgende keer! Groetjes, Salon Öz`;
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+
+    // Optional: Mark as sent in DB
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/${appointment.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ followUpSent: true }),
+      });
+      fetchAppointments();
+    } catch (err) {
+      console.error('Error updating followUpSent:', err);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -1073,13 +1105,24 @@ function AdminDashboard() {
                         Geboekt op {formatCreatedAt(appointment.createdAt)}
                       </span>
                       {appointment.status === 'confirmed' && (
-                        <button 
-                          className="action-button whatsapp" 
-                          onClick={() => handleWhatsApp(appointment)}
-                          title="Verstuur via WhatsApp"
-                        >
-                          WhatsApp
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button 
+                            className="action-button whatsapp" 
+                            onClick={() => handleWhatsApp(appointment)}
+                            title="Verstuur bevestiging via WhatsApp"
+                          >
+                            Bevestig
+                          </button>
+                          
+                          <button 
+                            className={`action-button follow-up ${appointment.followUpSent ? 'sent' : ''}`}
+                            onClick={() => handleWhatsAppFollowup(appointment)}
+                            title="Verstuur suivi via WhatsApp"
+                            style={appointment.followUpSent ? { opacity: 0.6, background: '#666' } : { background: '#25D366' }}
+                          >
+                            {appointment.followUpSent ? 'Suivi ✓' : 'Suivi WA'}
+                          </button>
+                        </div>
                       )}
                       <button 
                         className="action-button archive" 
@@ -1203,8 +1246,23 @@ function AdminDashboard() {
               <p className="section-subtitle">Beoordelingen toevoegen of verwijderen op de website</p>
             </div>
 
+            <div className="admin-tabs">
+              <button 
+                className={`admin-tab-btn ${reviewTab === 'site' ? 'active' : ''}`}
+                onClick={() => { setReviewTab('site'); setNewReview({...newReview, source: 'site'}); }}
+              >
+                Site Beoordelingen
+              </button>
+              <button 
+                className={`admin-tab-btn ${reviewTab === 'google' ? 'active' : ''}`}
+                onClick={() => { setReviewTab('google'); setNewReview({...newReview, source: 'google'}); }}
+              >
+                Google Beoordelingen
+              </button>
+            </div>
+
             <form className="add-review-form" onSubmit={handleReviewSubmit}>
-              <h3>Nieuwe Beoordeling Toevoegen</h3>
+              <h3>{reviewTab === 'site' ? 'Nieuwe Site Beoordeling' : 'Nieuwe Google Beoordeling'} Toevoegen</h3>
               <div className="form-grid">
                 <div className="form-group">
                   <label>Klantnaam</label>
@@ -1239,7 +1297,7 @@ function AdminDashboard() {
                 <label>Beoordelingstekst</label>
                 <textarea
                   rows="3"
-                  placeholder="Wat zei de klant?"
+                  placeholder={reviewTab === 'site' ? "Wat zei de klant?" : "Kopieer hier de Google review tekst"}
                   value={newReview.text}
                   onChange={(e) => setNewReview({ ...newReview, text: e.target.value })}
                   required
@@ -1251,11 +1309,12 @@ function AdminDashboard() {
             </form>
 
             <div className="admin-reviews-list">
-              <h3>Bestaande Beoordelingen ({reviews.length})</h3>
+              <h3>{reviewTab === 'site' ? 'Bestaande Site Beoordelingen' : 'Bestaande Google Beoordelingen'} ({reviews.filter(r => r.source === reviewTab).length})</h3>
               <div className="admin-reviews-grid">
-                {reviews.map(review => (
-                   <div key={review.id} className={`admin-review-card ${!review.isApproved ? 'pending' : ''}`}>
+                {reviews.filter(r => r.source === reviewTab).map(review => (
+                   <div key={review.id} className={`admin-review-card ${!review.isApproved ? 'pending' : ''} ${review.source === 'google' ? 'google-source' : ''}`}>
                     {!review.isApproved && <div className="pending-badge">In afwachting</div>}
+                    {review.source === 'google' && <div className="source-badge">Google</div>}
                     
                     {review.imageUrl && (
                       <div className="admin-review-img">

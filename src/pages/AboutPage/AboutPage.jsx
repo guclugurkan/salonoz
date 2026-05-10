@@ -11,8 +11,8 @@ const team = [
 
 const stats = [
   { value: "2020", label: "Opgericht" },
-  { value: "174+", label: "Beoordelingen" },
-  { value: "4.9★", label: "Gemiddelde score" },
+  { value: "200+", label: "Beoordelingen" },
+  { value: "5★", label: "Gemiddelde score" },
   { value: "3–5", label: "Professionals" },
 ];
 
@@ -159,8 +159,8 @@ export default function AboutPage() {
               <h2 className="ap__title">Onze klanten spreken voor ons</h2>
               <div className="ap__divider" />
               <p className="ap__text">
-                Onze klanten zijn onze beste ambassadeurs. Met meer dan <strong>174 geverifieerde
-                  beoordelingen</strong> en een gemiddelde score van <strong>4.9 op 5</strong>,
+                Onze klanten zijn onze beste ambassadeurs. Met meer dan <strong>200+ geverifieerde
+                  beoordelingen</strong> en een gemiddelde score van <strong>5 op 5</strong>,
                 bewijzen zij elke dag dat kwaliteit en persoonlijke aandacht het verschil maken.
               </p>
               <p className="ap__text">

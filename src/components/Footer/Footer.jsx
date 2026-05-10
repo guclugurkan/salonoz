@@ -29,15 +29,15 @@ export default function Footer() {
               <div className="footer__contactItem">
                 <MapPin className="footer__icon" />
                 <span className="footer__contactText">
-                  Vierhekkenstraat 3A<br />
+                  Vierhekkenstraat 1A<br />
                   Drongen BE-9031
                 </span>
               </div>
 
               <div className="footer__contactItem">
                 <Phone className="footer__icon" />
-                <a href="tel:+32744414919" className="footer__contactLink">
-                  0744.414.919
+                <a href="tel:+32485550271" className="footer__contactLink">
+                  +32 485 55 02 71
                 </a>
               </div>
 

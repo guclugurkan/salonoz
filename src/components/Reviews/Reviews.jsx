@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import "./Reviews.css";
 import { Link } from "react-router-dom";
 import { googleReviews, GOOGLE_REVIEWS_URL } from "../../data/reviewsData";
@@ -20,22 +21,34 @@ const GoogleIcon = () => (
 );
 
 export default function Reviews() {
-  const reviews = googleReviews;
-  const loading = false;
+  const [reviews, setReviews] = useState(googleReviews);
+  const [loading, setLoading] = useState(false);
 
-  if (loading) {
-    return (
-      <section id="reviews" className="reviews">
-        <div className="reviews__header is-visible" style={{ opacity: 1, transform: 'none' }}>
-           <h2 className="reviews__title">Wat zij zeggen</h2>
-           <p className="reviews__subtitle">Chargement des avis...</p>
-        </div>
-      </section>
-    );
-  }
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reviews`);
+      const result = await res.json();
+      if (result.success && result.data.length > 0) {
+        // We only show Google reviews or high quality ones on homepage
+        // For now, let's show what the admin has curated
+        setReviews(result.data);
+      }
+    } catch (err) {
+      console.error("Error fetching reviews:", err);
+    }
+  };
 
   const safeReviews = Array.isArray(reviews) ? reviews : [];
-  const tickerItems = safeReviews.length > 0 ? [...safeReviews, ...safeReviews, ...safeReviews] : [];
+  const googleOnly = safeReviews.filter(r => r.source === 'google' || !r.source);
+  
+  // For the ticker, we want a decent amount of items
+  const tickerItems = googleOnly.length > 0 
+    ? (googleOnly.length < 5 ? [...googleOnly, ...googleOnly, ...googleOnly] : googleOnly) 
+    : [];
 
   return (
     <section id="reviews" className="reviews">
@@ -48,7 +61,7 @@ export default function Reviews() {
         </div>
         <h2 className="reviews__title">Wat zij zeggen</h2>
         <p className="reviews__subtitle">
-          Meer dan 174 geverifieerde beoordelingen — gemiddelde score 5 / 5
+          Meer dan 200+ geverifieerde beoordelingen — gemiddelde score 5 / 5
         </p>
       </div>
 
@@ -64,10 +77,10 @@ export default function Reviews() {
                     <span className="reviews__name">{review.name}</span>
                     <span className="reviews__date">{review.date}</span>
                   </div>
-                  <GoogleIcon />
+                  {(review.source === 'google' || !review.source) && <GoogleIcon />}
                 </div>
                 <Stars count={review.rating} />
-                <p className="reviews__text">"{review.text}"</p>
+                <p className="reviews__text">"{review.text || review.comment}"</p>
               </div>
             )) : (
               <p className="reviews__subtitle" style={{ textAlign: 'center', width: '100%', opacity: 1 }}>
@@ -80,13 +93,15 @@ export default function Reviews() {
 
       {/* FOOTER */}
       <div className="reviews__footer is-visible" style={{ opacity: 1, transform: 'none' }}>
-        <Link
-          to="/reviews"
+        <a
+          href={GOOGLE_REVIEWS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
           className="reviews__button"
         >
           <span className="reviews__buttonText">Laat een beoordeling achter</span>
           <span className="reviews__buttonFill" />
-        </Link>
+        </a>
       </div>
 
     </section>
