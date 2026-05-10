@@ -722,6 +722,125 @@
   border-radius: 8px;
 }
 
+/* Clean Info Layout */
+.compact-info-grid {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-item .info-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #999;
+  font-weight: 500;
+}
+
+.info-item .info-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  text-align: right;
+}
+
+.contact-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #888;
+  background: #fcfcfc;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.card-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.card-actions-grid {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+}
+
+.grid-action-btn {
+  padding: 10px 20px;
+  min-width: 120px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Overrides */
+@media (max-width: 600px) {
+  .compact-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 15px;
+  }
+
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    border-bottom: none;
+    padding: 0;
+  }
+
+  .info-item .info-label { font-size: 8px; margin-bottom: 2px; }
+  .info-item .info-value { font-size: 11px; text-align: left; }
+
+  .card-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 15px;
+    gap: 8px;
+  }
+
+  .grid-action-btn {
+    min-width: unset;
+    height: 40px;
+    border-radius: 8px;
+  }
+}
+
 /* Card Footer */
 .card-footer {
   display: flex;
@@ -2265,9 +2384,6 @@
   }
 
   /* Compact card internals on tiny screens */
-  .card-header { padding: 15px !important; }
-  .card-body { padding: 15px !important; }
-  .client-name { font-size: 16px !important; }
   .appointment-id-tech { display: none !important; }
 
   /* Stack info rows vertically */
