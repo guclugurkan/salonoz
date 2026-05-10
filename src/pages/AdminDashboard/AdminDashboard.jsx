@@ -1008,23 +1008,6 @@ function AdminDashboard() {
                         </div>
                         <span className="appointment-id-tech">#{appointment.id}</span>
                       </div>
-
-                      {appointment.status === 'pending' && (
-                        <div className="card-actions-top">
-                          <button
-                            className="action-button confirm"
-                            onClick={() => openAcceptModal(appointment.id)}
-                          >
-                            Bevestigen
-                          </button>
-                          <button
-                            className="action-button reject"
-                            onClick={() => setRejectModal({ isOpen: true, appointmentId: appointment.id })}
-                          >
-                            Weigeren
-                          </button>
-                        </div>
-                      )}
                     </div>
 
                     <div className="card-divider"></div>
@@ -1100,43 +1083,59 @@ function AdminDashboard() {
                       )}
                     </div>
 
-                    <div className="card-footer">
-                      <span className="created-at">
-                        Geboekt op {formatCreatedAt(appointment.createdAt)}
-                      </span>
-                      {appointment.status === 'confirmed' && (
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button 
-                            className="action-button whatsapp" 
-                            onClick={() => handleWhatsApp(appointment)}
-                            title="Verstuur bevestiging via WhatsApp"
+                    <div className="card-actions-grid">
+                      {appointment.status === 'pending' && (
+                        <>
+                          <button
+                            className="grid-action-btn confirm"
+                            onClick={() => openAcceptModal(appointment.id)}
                           >
-                            Bevestig
+                            Bevestigen
                           </button>
-                          
+                          <button
+                            className="grid-action-btn reject"
+                            onClick={() => setRejectModal({ isOpen: true, appointmentId: appointment.id })}
+                          >
+                            Weigeren
+                          </button>
+                        </>
+                      )}
+
+                      {appointment.status === 'confirmed' && (
+                        <>
                           <button 
-                            className={`action-button follow-up ${appointment.followUpSent ? 'sent' : ''}`}
+                            className="grid-action-btn whatsapp" 
+                            onClick={() => handleWhatsApp(appointment)}
+                          >
+                            Bevestig WA
+                          </button>
+                          <button 
+                            className={`grid-action-btn follow-up ${appointment.followUpSent ? 'sent' : ''}`}
                             onClick={() => handleWhatsAppFollowup(appointment)}
-                            title="Verstuur suivi via WhatsApp"
                           >
                             {appointment.followUpSent ? 'Suivi ✓' : 'Suivi WA'}
                           </button>
-                        </div>
+                        </>
                       )}
+
                       <button 
-                        className="action-button archive" 
+                        className="grid-action-btn archive" 
                         onClick={() => archiveAppointment(appointment.id)}
-                        title={appointment.isArchived ? "Dearchiveren" : "Archiveren"}
                       >
                         {appointment.isArchived ? "Dearchiveren" : "Archiveren"}
                       </button>
                       <button 
-                        className="action-button delete" 
+                        className="grid-action-btn delete" 
                         onClick={() => handleDeleteAppointment(appointment.id)}
-                        title="Permanent verwijderen"
                       >
                         Supprimer
                       </button>
+                    </div>
+
+                    <div className="card-footer">
+                      <span className="created-at">
+                        Geboekt op {formatCreatedAt(appointment.createdAt)}
+                      </span>
                     </div>
                   </article>
                 ))}

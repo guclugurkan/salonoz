@@ -2087,6 +2087,77 @@
 
   .appointment-id-tech { display: none !important; }
 
+  /* New Actions Grid Layout */
+  .card-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 15px 20px;
+    background: #fff;
+    border-top: 1px solid #f5f5f5;
+  }
+
+  .grid-action-btn {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border: 1px solid #eee;
+    background: transparent;
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+
+  .grid-action-btn.confirm {
+    background: #1a7f4b !important;
+    color: white !important;
+    border-color: #1a7f4b !important;
+  }
+
+  .grid-action-btn.reject {
+    background: #fff !important;
+    color: #cc0000 !important;
+    border-color: #cc0000 !important;
+  }
+
+  .grid-action-btn.whatsapp {
+    background: #25D366 !important;
+    color: white !important;
+    border-color: #25D366 !important;
+  }
+
+  .grid-action-btn.follow-up {
+    background: #fff !important;
+    color: #25D366 !important;
+    border-color: #25D366 !important;
+  }
+
+  .grid-action-btn.follow-up.sent {
+    background: #f5f5f5 !important;
+    color: #999 !important;
+    border-color: #eee !important;
+    opacity: 0.8;
+  }
+
+  .grid-action-btn.archive {
+    background: #fff !important;
+    color: #666 !important;
+    border-color: #eee !important;
+  }
+
+  .grid-action-btn.delete {
+    background: #fff !important;
+    color: #aaa !important;
+    border-color: #f5f5f5 !important;
+    font-size: 9px;
+  }
+
   /* Stack info rows vertically */
   .info-row {
     flex-direction: column !important;
@@ -2108,62 +2179,17 @@
     word-break: break-all; /* For long emails */
   }
 
-  /* New Header Action Layout */
-  .card-header {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    padding: 20px !important;
-    gap: 12px !important;
-  }
-
-  .card-header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .info-value {
+    text-align: left !important;
+    font-weight: 500;
     width: 100%;
-  }
-
-  .card-actions-top {
-    display: flex;
-    gap: 8px;
-    width: 100%;
-  }
-
-  .action-button {
-    flex: 1; /* Make buttons equal width */
-    height: 32px !important;
-    font-size: 8.5px !important;
-    padding: 0 !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: transparent !important;
-    border-radius: 6px !important;
-    border: 1px solid #ddd !important;
-  }
-
-  .action-button.confirm { color: #1a7f4b !important; border-color: #1a7f4b !important; }
-  .action-button.reject { color: #888 !important; border-color: #eee !important; }
-  .action-button.follow-up { 
-    background-color: #25D366 !important; 
-    color: white !important; 
-    border-color: #25D366 !important; 
-  }
-  .action-button.follow-up.sent { 
-    background-color: #666 !important; 
-    border-color: #666 !important; 
-    opacity: 0.6;
-  }
-  .action-button.whatsapp {
-    color: #25D366 !important;
-    border-color: #25D366 !important;
+    word-break: break-all; /* For long emails */
   }
 
   .card-footer {
-    flex-direction: column !important;
-    gap: 12px !important;
-    padding: 15px !important;
-    background: #fafafa; /* Subtle grey for footer to separate from body */
+    padding: 15px 20px !important;
+    background: #fafafa;
+    border-top: 1px solid #f0f0f0;
   }
 
   .booking-time {
