@@ -57,14 +57,15 @@ const AdminStaff = ({ token, showToast }) => {
     setIsModalOpen(true);
   };
 
-  const handleToggleService = (serviceId) => {
+  const handleToggleService = (serviceId, variantName = null) => {
     setFormData(prev => {
       const allowed = [...prev.allowedServices];
-      const index = allowed.indexOf(serviceId);
+      const key = variantName ? `${serviceId}:${variantName}` : serviceId;
+      const index = allowed.indexOf(key);
       if (index > -1) {
         allowed.splice(index, 1);
       } else {
-        allowed.push(serviceId);
+        allowed.push(key);
       }
       return { ...prev, allowedServices: allowed };
     });
@@ -130,18 +131,29 @@ const AdminStaff = ({ token, showToast }) => {
   };
 
   const handleToggleCategory = (categoryServices) => {
-    const serviceIds = categoryServices.map(s => s.id);
-    const allSelected = serviceIds.every(id => formData.allowedServices.includes(id));
-
     setFormData(prev => {
       let allowed = [...prev.allowedServices];
+      
+      // Get all possible keys for this category (including variants)
+      const allCategoryKeys = [];
+      categoryServices.forEach(s => {
+        if (s.variants && s.variants.length > 0) {
+          s.variants.forEach(v => allCategoryKeys.push(`${s.id}:${v.name}`));
+        } else {
+          allCategoryKeys.push(s.id);
+        }
+      });
+
+      const allSelected = allCategoryKeys.every(key => allowed.includes(key));
+
       if (allSelected) {
         // Unselect all in this category
-        allowed = allowed.filter(id => !serviceIds.includes(id));
+        allowed = allowed.filter(key => !allCategoryKeys.includes(key));
       } else {
         // Select all in this category (without duplicates)
-        const newIds = serviceIds.filter(id => !allowed.includes(id));
-        allowed = [...allowed, ...newIds];
+        allCategoryKeys.forEach(key => {
+          if (!allowed.includes(key)) allowed.push(key);
+        });
       }
       return { ...prev, allowedServices: allowed };
     });
@@ -248,16 +260,35 @@ const AdminStaff = ({ token, showToast }) => {
                             Alles selecteren
                           </label>
                         </div>
-                        <div className="services-checkbox-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
+                        <div className="services-checkbox-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
                           {cat.services.map(srv => (
-                            <label key={srv.id} className="service-checkbox-item" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
-                              <input 
-                                type="checkbox" 
-                                checked={formData.allowedServices.includes(srv.id)} 
-                                onChange={() => handleToggleService(srv.id)}
-                              />
-                              <span>{srv.name}</span>
-                            </label>
+                            <div key={srv.id} className="service-selection-group" style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                              <div style={{ fontWeight: '600', fontSize: '13px', marginBottom: srv.variants?.length > 0 ? '8px' : '0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {!(srv.variants?.length > 0) && (
+                                  <input 
+                                    type="checkbox" 
+                                    checked={formData.allowedServices.includes(srv.id)} 
+                                    onChange={() => handleToggleService(srv.id)}
+                                  />
+                                )}
+                                <span>{srv.name}</span>
+                              </div>
+                              
+                              {srv.variants && srv.variants.length > 0 && (
+                                <div className="variants-checkbox-list" style={{ marginLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                  {srv.variants.map(v => (
+                                    <label key={v.name} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer', color: '#475569' }}>
+                                      <input 
+                                        type="checkbox" 
+                                        checked={formData.allowedServices.includes(`${srv.id}:${v.name}`)} 
+                                        onChange={() => handleToggleService(srv.id, v.name)}
+                                      />
+                                      <span>{v.name}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           ))}
                         </div>
                       </div>
