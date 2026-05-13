@@ -5,6 +5,7 @@ import { GOOGLE_REVIEWS_URL } from '../../data/reviewsData';
 import AdminServices from './AdminServices';
 import AdminSettings from './AdminSettings';
 import AdminStaff from './AdminStaff';
+import AdminNewAppointment from './AdminNewAppointment';
 
 // staffMembers is now dynamic
 
@@ -654,6 +655,13 @@ function AdminDashboard() {
             Afspraken
           </button>
           <button
+            className={`admin-nav-btn ${activeSection === 'new_appointment' ? 'active' : ''}`}
+            onClick={() => setActiveSection('new_appointment')}
+            style={{ backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #dcfce7' }}
+          >
+            + Nieuwe Afspraak
+          </button>
+          <button
             className={`admin-nav-btn ${activeSection === 'archive' ? 'active' : ''}`}
             onClick={() => setActiveSection('archive')}
           >
@@ -755,6 +763,17 @@ function AdminDashboard() {
 
           {activeSection === 'staff' && (
             <AdminStaff token={token} showToast={showToast} />
+          )}
+
+          {activeSection === 'new_appointment' && (
+            <AdminNewAppointment 
+              token={token} 
+              showToast={showToast} 
+              onAppointmentCreated={() => {
+                fetchAppointments();
+                setActiveSection('appointments');
+              }} 
+            />
           )}
 
         {activeSection === 'appointments' && (
