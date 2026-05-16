@@ -32,8 +32,8 @@
 -------------------------------- */
 .ap__hero {
   position: relative;
-  height: 60vh;
-  min-height: 400px;
+  height: 85vh;
+  min-height: 550px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -478,7 +478,7 @@
     padding: 0 20px;
   }
 
-  .ap__hero { height: 45vh; min-height: 280px; }
+  .ap__hero { height: 65vh; min-height: 380px; }
 
   .ap__section {
     padding: 48px 0;

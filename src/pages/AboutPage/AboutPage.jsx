@@ -35,7 +35,7 @@ export default function AboutPage() {
       {/* ── HERO ── */}
       <div className="ap__hero">
         <img
-          src="/images/salon_interior.webp"
+          src="/images/aboutbg2.jpeg"
           alt="Salon OZ Interior"
           className="ap__hero-img"
         />
@@ -57,7 +57,7 @@ export default function AboutPage() {
               <div className="ap__img-frame" />
               <div className="ap__img-wrapper">
                 <img
-                  src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80"
+                  src="/images/aboutbg1.jpeg"
                   alt="Tayyar Ozcan"
                   className="ap__img"
                   loading="lazy"
