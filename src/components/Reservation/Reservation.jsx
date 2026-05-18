@@ -14,7 +14,7 @@ const timeSlots = [
   "15:00", "15:15", "15:30", "15:45", "16:00", "16:15", "16:30", "16:45"
 ]
 
-const totalSteps = 8
+const totalSteps = 7
 
 export default function Reservation() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -37,8 +37,6 @@ export default function Reservation() {
     email: '',
     phone: '',
     notes: '',
-    subService: null,
-    subServiceName: ''
   })
 
   function addMinutes(timeStr, mins) {
@@ -208,39 +206,6 @@ export default function Reservation() {
 
   const dynamicTimeSlots = getAvailableTimeSlots();
 
-  const getPauseInfo = () => {
-    const target = formData.variant || formData.service;
-    if (!target || !target.blocks) return null;
-    
-    let elapsed = 0;
-    for (const block of target.blocks) {
-      if (block.type === 'pause' && block.duration >= 15) {
-        return {
-          duration: block.duration,
-          startTime: addMinutes(formData.time, elapsed)
-        };
-      }
-      elapsed += block.duration;
-    }
-    return null;
-  }
-
-  const getSubServices = () => {
-    const pauseInfo = getPauseInfo();
-    if (!pauseInfo) return [];
-    
-    const available = [];
-    categories.forEach(cat => {
-      cat.services.forEach(s => {
-        const duration = s.blocks ? s.blocks.reduce((acc, b) => acc + b.duration, 0) : 30;
-        if (duration <= pauseInfo.duration && s.id !== formData.service?.id) {
-          available.push({...s, categoryName: cat.name});
-        }
-      });
-    });
-    return available;
-  }
-
   useEffect(() => {
     if (!isConfirmed && formData.time && !isTimeValidForService(formData.time)) {
       setFormData(prev => ({ ...prev, time: '' }))
@@ -260,14 +225,7 @@ export default function Reservation() {
   }
 
   const handleNext = () => {
-    if (currentStep === 5 && !getPauseInfo()) {
-      setCurrentStep(7); // Skip gap filling step if no pause
-      return;
-    }
     if (currentStep === 6) {
-      setValidationError(null);
-    }
-    if (currentStep === 7) {
       const error = validateStep6();
       if (error) {
         setValidationError(error);
@@ -279,10 +237,6 @@ export default function Reservation() {
   }
 
   const handleBack = () => {
-    if (currentStep === 7 && !getPauseInfo()) {
-      setCurrentStep(5);
-      return;
-    }
     if (currentStep > 1) setCurrentStep(currentStep - 1)
   }
 
@@ -296,28 +250,7 @@ export default function Reservation() {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-      // 1. Calculate full continuous blocks if Duo is selected
-      let customBookedSlots = null;
-      let duoNote = formData.notes;
-
-      if (formData.subService) {
-        const target = formData.variant || formData.service;
-        if (target && target.blocks) {
-          const totalDuration = target.blocks.reduce((acc, b) => acc + b.duration, 0);
-          customBookedSlots = [];
-          let curr = formData.time;
-          const numSlots = Math.ceil(totalDuration / 15);
-          for (let i = 0; i < numSlots; i++) {
-            customBookedSlots.push(curr);
-            curr = addMinutes(curr, 15);
-          }
-        }
-        
-        const startTime = getPauseInfo()?.startTime || "Tijdens de pauze";
-        duoNote = `[DUO: ${formData.subService.name} voor ${formData.subServiceName || 'Partner'} - Tijd: ${startTime}] ${formData.notes}`;
-      }
-
-      // 2. Prepare main appointment data
+      // Prepare appointment data
       const appointmentData = {
         service: formData.variant ? `${formData.service?.name} (${formData.variant?.name})` : formData.service?.name,
         staff: formData.staff?.name,
@@ -326,11 +259,9 @@ export default function Reservation() {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        notes: duoNote,
-        bookedSlots: customBookedSlots,
+        notes: formData.notes,
       };
 
-      // 3. Send combined request
       const response = await fetch(`${apiUrl}/api/appointments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -365,9 +296,8 @@ export default function Reservation() {
       case 3: return formData.staff !== null
       case 4: return formData.date !== ''
       case 5: return formData.time !== ''
-      case 6: return true // Gap filling is optional
-      case 7: return formData.name && formData.email && formData.phone
-      case 8: return true
+      case 6: return formData.name && formData.email && formData.phone
+      case 7: return true
       default: return true
     }
   }
@@ -379,7 +309,7 @@ export default function Reservation() {
     return service.fromPrice ? `v.a. ${service.price} €` : `${service.price} €`;
   }
 
-  const stepLabels = ["Cat.", "Serv.", "Styl.", "Dat.", "Tijd.", "Extra", "Gegevens", "Overz."]
+  const stepLabels = ["Cat.", "Serv.", "Styl.", "Dat.", "Tijd.", "Gegevens", "Overz."]
 
   // Success screen
   if (isConfirmed) {
@@ -424,16 +354,6 @@ export default function Reservation() {
                 <span className="success-info-label">Tijdstip</span>
                 <span className="success-info-value">{formData.time}</span>
               </div>
-              {formData.subService && (
-                <div className="success-info-item" style={{ gridColumn: '1 / -1', background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <span className="success-info-label" style={{ color: '#0f172a', fontWeight: 'bold' }}>Extra Duo Service</span>
-                  <span className="success-info-value" style={{ display: 'block', marginTop: '4px' }}>
-                    {formData.subService.name} voor {formData.subServiceName || 'Partner'}
-                  </span>
-                  <span className="success-info-label" style={{ marginTop: '8px', display: 'block' }}>Starttijd Duo</span>
-                  <span className="success-info-value">{getPauseInfo()?.startTime}</span>
-                </div>
-              )}
             </div>
 
             <div className="success-contact-box">
@@ -654,55 +574,8 @@ export default function Reservation() {
             </div>
           )}
 
-          {/* STEP 6 — Gap Filling / Duo Option */}
+          {/* STEP 6 — Infos client */}
           {currentStep === 6 && (
-            <div className="step-section fade-in">
-              <h2 className="step-title">Duo Optie</h2>
-              <p className="step-subtitle">
-                U heeft een pauze van <strong>{getPauseInfo()?.duration} min</strong>. 
-                Wilt u een extra service boeken voor iemand anders (of uzelf) tijdens deze tijd?
-              </p>
-              
-              <div className="options-list" style={{ marginBottom: '20px' }}>
-                <button 
-                  className={`option-card ${!formData.subService ? 'selected' : ''}`}
-                  onClick={() => setFormData({ ...formData, subService: null })}
-                >
-                  <span className="option-name">Nee, bedankt</span>
-                </button>
-                
-                {getSubServices().map(s => (
-                  <button
-                    key={s.id}
-                    className={`option-card ${formData.subService?.id === s.id ? 'selected' : ''}`}
-                    onClick={() => setFormData({ ...formData, subService: s })}
-                  >
-                    <div>
-                      <div className="option-name">{s.name}</div>
-                      <div style={{fontSize: '10px', color: '#aaa'}}>{s.categoryName}</div>
-                    </div>
-                    <span className="option-price">{formatPrice(s)}</span>
-                  </button>
-                ))}
-              </div>
-
-              {formData.subService && (
-                <div className="form-group fade-in">
-                  <label className="form-label">Naam van de extra persoon</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    placeholder="Naam van uw partner / vriend(in)"
-                    value={formData.subServiceName} 
-                    onChange={(e) => setFormData({ ...formData, subServiceName: e.target.value })} 
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* STEP 7 — Infos client */}
-          {currentStep === 7 && (
             <div className="step-section fade-in">
               <h2 className="step-title">Uw Gegevens</h2>
               <p className="step-subtitle">Vul uw contactgegevens in</p>
@@ -736,8 +609,8 @@ export default function Reservation() {
             </div>
           )}
 
-          {/* STEP 8 — Summary */}
-          {currentStep === 8 && (
+          {/* STEP 7 — Summary */}
+          {currentStep === 7 && (
             <div className="step-section fade-in">
               <h2 className="step-title">Overzicht</h2>
               <p className="step-subtitle">Controleer uw reservatiegegevens</p>
@@ -749,11 +622,6 @@ export default function Reservation() {
                   { label: "Stylist", value: formData.staff?.name },
                   { label: "Datum", value: new Date(formData.date).toLocaleDateString('nl-BE', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) },
                   { label: "Tijdstip", value: formData.time },
-                  ...(formData.subService ? [
-                    { label: "Extra Duo Service", value: formData.subService.name },
-                    { label: "Naam Duo", value: formData.subServiceName || 'Duo' },
-                    { label: "Starttijd Duo", value: getPauseInfo()?.startTime }
-                  ] : []),
                   { label: "Naam", value: formData.name },
                   { label: "E-mail", value: formData.email },
                   { label: "Telefoon", value: formData.phone },
