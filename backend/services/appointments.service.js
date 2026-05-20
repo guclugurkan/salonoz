@@ -188,7 +188,7 @@ async function createAppointment(data) {
     email,
     phone,
     notes: notes || "",
-    status: "pending",
+    status: "confirmed",
     cancelToken,
     cancelDeadline: cancelDeadline,
     bookedSlots: generatedBookedSlots,
@@ -196,12 +196,12 @@ async function createAppointment(data) {
 
   await newAppointment.save();
 
-  const pendingEmail = getPendingAppointmentEmail(newAppointment);
+  const confirmedEmail = getConfirmedAppointmentEmail(newAppointment);
   await sendEmail({
     to: newAppointment.email,
-    subject: pendingEmail.subject,
-    text: pendingEmail.text,
-    html: pendingEmail.html,
+    subject: confirmedEmail.subject,
+    text: confirmedEmail.text,
+    html: confirmedEmail.html,
   });
 
   return {
