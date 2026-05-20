@@ -8,7 +8,6 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import Hero from "./components/Hero/Hero";
 import About from "./components/About/About";
 import Experience from "./components/Experience/Experience";
-// import Gallery from "./components/Gallery/Gallery";
 import Pricing from "./components/Pricing/Pricing";
 import Footer from "./components/Footer/Footer";
 import PageTransition from "./components/PageTransition/PageTransition";
@@ -52,7 +51,6 @@ export default function App() {
                   <Hero />
                   <About />
                   <Experience />
-                  {/* <Gallery /> */}
                   <Pricing />
                   <Reviews />
                 </>
