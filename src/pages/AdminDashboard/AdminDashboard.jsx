@@ -9,11 +9,14 @@ import AdminNewAppointment from './AdminNewAppointment';
 
 // staffMembers is now dynamic
 
-const timeSlots = [
+const allTimeSlots = [
+  '08:00', '08:15', '08:30', '08:45',
   '09:00', '09:15', '09:30', '09:45', '10:00', '10:15', '10:30', '10:45',
   '11:00', '11:15', '11:30', '11:45', '12:00', '12:15', '12:30', '12:45',
   '13:00', '13:15', '13:30', '13:45', '14:00', '14:15', '14:30', '14:45',
-  '15:00', '15:15', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45'
+  '15:00', '15:15', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45',
+  '17:00', '17:15', '17:30', '17:45', '18:00', '18:15', '18:30', '18:45',
+  '19:00', '19:15', '19:30', '19:45', '20:00', '20:15', '20:30', '20:45'
 ];
 
 function getStartOfWeek(date) {
@@ -70,6 +73,11 @@ function isDateInCurrentWeek(dateString, weekStart) {
   end.setHours(23, 59, 59, 999);
 
   return appointmentDate >= start && appointmentDate <= end;
+}
+
+function getDayName(date) {
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  return days[date.getDay()];
 }
 
 function AdminDashboard() {
@@ -572,6 +580,28 @@ function AdminDashboard() {
     return Array.from({ length: 7 }, (_, index) => addDays(currentWeekStart, index));
   }, [currentWeekStart]);
 
+  const weekCalendarTimeSlots = useMemo(() => {
+    if (!settings?.workingHours) return allTimeSlots.filter(s => s >= '09:00' && s < '17:00');
+    let minOpen = '23:59';
+    let maxClose = '00:00';
+    weekDays.forEach(day => {
+      const daySettings = settings.workingHours[getDayName(day)];
+      if (daySettings && !daySettings.closed) {
+        if (daySettings.open < minOpen) minOpen = daySettings.open;
+        if (daySettings.close > maxClose) maxClose = daySettings.close;
+      }
+    });
+    if (maxClose === '00:00') return [];
+    return allTimeSlots.filter(slot => slot >= minOpen && slot < maxClose);
+  }, [weekDays, settings]);
+
+  const dayCalendarTimeSlots = useMemo(() => {
+    if (!settings?.workingHours || !weekDays[selectedDayIndex]) return weekCalendarTimeSlots;
+    const daySettings = settings.workingHours[getDayName(weekDays[selectedDayIndex])];
+    if (!daySettings || daySettings.closed) return [];
+    return allTimeSlots.filter(slot => slot >= daySettings.open && slot < daySettings.close);
+  }, [weekDays, selectedDayIndex, settings, weekCalendarTimeSlots]);
+
   const filteredAppointments = useMemo(() => {
     return appointments.filter((appointment) => {
       const matchesStaff = appointment.staff === selectedStaff;
@@ -802,13 +832,13 @@ function AdminDashboard() {
                         </div>
                       ))}
 
-                      {timeSlots.map((time, timeIndex) => (
+                      {weekCalendarTimeSlots.map((time, timeIndex) => (
                         <div key={`row-${time}`} className="calendar-row-wrapper">
                           <div className="calendar-cell calendar-time-cell">{time}</div>
                           {weekDays.map((day) => {
                             const appointment = getAppointmentForCell(day, time);
-                            const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(day, timeSlots[timeIndex - 1])?.id === appointment.id;
-                            const isContinued = timeIndex < timeSlots.length - 1 && appointment && getAppointmentForCell(day, timeSlots[timeIndex + 1])?.id === appointment.id;
+                            const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex - 1])?.id === appointment.id;
+                            const isContinued = timeIndex < weekCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
                             
                             return (
                               <div key={`${formatDateToYMD(day)}-${time}`} className={`calendar-cell calendar-slot-cell ${appointment ? 'has-appointment' : ''}`}>
@@ -864,10 +894,10 @@ function AdminDashboard() {
                     </div>
                     
                     <div className="timeline">
-                      {timeSlots.map((time, timeIndex) => {
+                      {dayCalendarTimeSlots.map((time, timeIndex) => {
                         const appointment = getAppointmentForCell(weekDays[selectedDayIndex], time);
-                        const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(weekDays[selectedDayIndex], timeSlots[timeIndex - 1])?.id === appointment.id;
-                        const isContinued = timeIndex < timeSlots.length - 1 && appointment && getAppointmentForCell(weekDays[selectedDayIndex], timeSlots[timeIndex + 1])?.id === appointment.id;
+                        const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(weekDays[selectedDayIndex], dayCalendarTimeSlots[timeIndex - 1])?.id === appointment.id;
+                        const isContinued = timeIndex < dayCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(weekDays[selectedDayIndex], dayCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
 
                         return (
                           <div key={`timeline-${time}`} className="timeline-slot">
