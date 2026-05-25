@@ -916,7 +916,7 @@ function AdminDashboard() {
                             return (
                               <div key={`${formatDateToYMD(day)}-${time}`} className={`calendar-cell calendar-slot-cell ${appointment ? 'has-appointment' : ''}`}>
                                 {appointment ? (
-                                  <div className={`calendar-appointment status-${appointment.status || 'pending'} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''} ${appointment.notes?.includes('[DUO') ? 'is-duo' : ''}`}>
+                                  <div className={`calendar-appointment status-${appointment.status || 'pending'} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''} ${appointment.notes?.includes('[DUO') ? 'is-duo' : ''}`} onClick={() => openEditModal(appointment)} style={{ cursor: 'pointer' }}>
                                     {!isContinuation && (
                                       <>
                                         <div className="calendar-appointment-header">
@@ -977,7 +977,7 @@ function AdminDashboard() {
                             <div className="slot-time">{time}</div>
                             <div className={`slot-content ${appointment ? 'has-appointment' : ''}`}>
                               {appointment ? (
-                                <div className={`mini-card status-${appointment.status} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''}`}>
+                                <div className={`mini-card status-${appointment.status} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''}`} onClick={() => openEditModal(appointment)} style={{ cursor: 'pointer' }}>
                                   {!isContinuation && (
                                     <>
                                       <div className="mini-card-header">
