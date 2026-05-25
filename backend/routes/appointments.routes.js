@@ -9,6 +9,7 @@ const {
   postAppointment,
   cancelByToken,
   putAppointmentStatus,
+  patchAppointmentEdit,
   patchAppointmentArchive,
   deleteAppointment,
 } = require("../controllers/appointments.controller");
@@ -19,6 +20,7 @@ router.get("/appointments/public", getPublicAppointments);
 router.post("/appointments", postAppointment); // La réservation reste publique
 router.get("/appointments/cancel", cancelByToken);
 router.put("/appointments/:id", verifyToken, putAppointmentStatus);
+router.patch("/appointments/:id/edit", verifyToken, patchAppointmentEdit);
 router.patch("/appointments/:id/archive", verifyToken, patchAppointmentArchive);
 router.delete("/appointments/:id", verifyToken, deleteAppointment);
 

@@ -119,6 +119,12 @@ function AdminDashboard() {
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [newReview, setNewReview] = useState({ name: '', date: '', rating: 5, text: '', source: 'site' });
 
+  // Edit Modal States
+  const [editModal, setEditModal] = useState({ isOpen: false, appointment: null });
+  const [editForm, setEditForm] = useState({ date: '', time: '', durationMinutes: 30 });
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editWhatsapp, setEditWhatsapp] = useState({ show: false, appointment: null });
+
   // UI States
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -443,6 +449,57 @@ function AdminDashboard() {
     } catch (err) {
       console.error('Error deleting appointment:', err);
     }
+  };
+
+  const openEditModal = (appointment) => {
+    const currentDuration = appointment.bookedSlots?.length > 0
+      ? appointment.bookedSlots.length * 15
+      : 30;
+    setEditForm({ date: appointment.date, time: appointment.time, durationMinutes: currentDuration });
+    setEditModal({ isOpen: true, appointment });
+  };
+
+  const closeEditModal = () => {
+    setEditModal({ isOpen: false, appointment: null });
+  };
+
+  const handleEditSubmit = async () => {
+    setEditSubmitting(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/${editModal.appointment.id}/edit`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(editForm),
+      });
+      const result = await response.json();
+      if (result.success) {
+        await fetchAppointments();
+        const updatedAppt = { ...editModal.appointment, date: editForm.date, time: editForm.time };
+        closeEditModal();
+        setEditWhatsapp({ show: true, appointment: updatedAppt });
+        showToast('Afspraak succesvol gewijzigd!');
+      } else {
+        showToast(result.error || 'Fout bij wijzigen afspraak', 'error');
+      }
+    } catch (err) {
+      console.error('Error editing appointment:', err);
+      showToast('Er is een fout opgetreden', 'error');
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
+  const generateEditWhatsAppUrl = (appointment) => {
+    let cleanPhone = appointment.phone.replace(/[^\d+]/g, '');
+    if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
+    else if (cleanPhone.startsWith('00')) cleanPhone = cleanPhone.substring(2);
+    else if (cleanPhone.startsWith('0')) cleanPhone = '32' + cleanPhone.substring(1);
+
+    const message = `Beste ${appointment.name},\n\nWe willen u informeren dat uw afspraak bij Salon Öz is gewijzigd.\n\nNieuwe datum: ${formatDate(appointment.date)}\nNieuwe tijd: ${appointment.time}\nDienst: ${appointment.service}\n\nMet vriendelijke groeten,\nSalon Öz`;
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
   };
 
   const openRejectModal = (appointmentId) => {
@@ -1144,14 +1201,20 @@ function AdminDashboard() {
                         </>
                       )}
 
-                      <button 
-                        className="grid-action-btn archive" 
+                      <button
+                        className="grid-action-btn edit"
+                        onClick={() => openEditModal(appointment)}
+                      >
+                        Wijzigen
+                      </button>
+                      <button
+                        className="grid-action-btn archive"
                         onClick={() => archiveAppointment(appointment.id)}
                       >
                         {appointment.isArchived ? "Dearchiveren" : "Archiveren"}
                       </button>
-                      <button 
-                        className="grid-action-btn delete" 
+                      <button
+                        className="grid-action-btn delete"
                         onClick={() => handleDeleteAppointment(appointment.id)}
                       >
                         Verwijderen
@@ -1514,6 +1577,92 @@ function AdminDashboard() {
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Bezig...' : 'Bevestigen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editModal.isOpen && (
+        <div className="modal-overlay" onClick={closeEditModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3 className="modal-title">Afspraak Wijzigen</h3>
+            <p className="modal-subtitle">{editModal.appointment?.name} — {editModal.appointment?.service}</p>
+
+            <div className="edit-form-grid">
+              <div className="form-group">
+                <label>Datum</label>
+                <input
+                  type="date"
+                  value={editForm.date}
+                  onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Tijd</label>
+                <select
+                  value={editForm.time}
+                  onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
+                >
+                  {allTimeSlots.map(slot => (
+                    <option key={slot} value={slot}>{slot}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Duur (minuten)</label>
+                <select
+                  value={editForm.durationMinutes}
+                  onChange={(e) => setEditForm({ ...editForm, durationMinutes: parseInt(e.target.value) })}
+                >
+                  {[15, 30, 45, 60, 75, 90, 105, 120, 150, 180].map(d => (
+                    <option key={d} value={d}>{d} min</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button className="modal-button cancel" onClick={closeEditModal} disabled={editSubmitting}>
+                Annuleren
+              </button>
+              <button
+                className="modal-button submit"
+                onClick={handleEditSubmit}
+                disabled={editSubmitting || !editForm.date || !editForm.time}
+              >
+                {editSubmitting ? 'Bezig...' : 'Opslaan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editWhatsapp.show && (
+        <div className="modal-overlay" onClick={() => setEditWhatsapp({ show: false, appointment: null })}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3 className="modal-title">Klant informeren?</h3>
+            <p className="modal-subtitle">Stuur een WhatsApp-bericht naar {editWhatsapp.appointment?.name} over de wijziging.</p>
+
+            <div className="whatsapp-message-preview">
+              <p className="whatsapp-preview-label">Voorbeeldbericht:</p>
+              <p className="whatsapp-preview-text">
+                {`Beste ${editWhatsapp.appointment?.name},\n\nWe willen u informeren dat uw afspraak bij Salon Öz is gewijzigd.\n\nNieuwe datum: ${editWhatsapp.appointment ? formatDate(editWhatsapp.appointment.date) : ''}\nNieuwe tijd: ${editWhatsapp.appointment?.time}\nDienst: ${editWhatsapp.appointment?.service}\n\nMet vriendelijke groeten,\nSalon Öz`}
+              </p>
+            </div>
+
+            <div className="modal-actions">
+              <button className="modal-button cancel" onClick={() => setEditWhatsapp({ show: false, appointment: null })}>
+                Overslaan
+              </button>
+              <button
+                className="modal-button whatsapp-send"
+                onClick={() => {
+                  window.open(generateEditWhatsAppUrl(editWhatsapp.appointment), '_blank');
+                  setEditWhatsapp({ show: false, appointment: null });
+                }}
+              >
+                Verstuur via WhatsApp
               </button>
             </div>
           </div>

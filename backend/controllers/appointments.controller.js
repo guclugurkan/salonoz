@@ -7,6 +7,7 @@ const {
   createAppointment,
   cancelAppointmentByToken,
   updateAppointmentStatus,
+  editAppointment,
   toggleArchiveAppointment,
   deleteAppointment,
 } = require("../services/appointments.service");
@@ -128,6 +129,25 @@ async function putAppointmentStatus(req, res) {
   }
 }
 
+// PATCH /api/appointments/:id/edit
+async function patchAppointmentEdit(req, res) {
+  try {
+    const { id } = req.params;
+    const result = await editAppointment(id, req.body);
+    if (!result.success) {
+      return res.status(result.statusCode).json({ success: false, error: result.error });
+    }
+    res.status(result.statusCode).json({
+      success: true,
+      message: result.message,
+      data: result.data,
+    });
+  } catch (error) {
+    console.error("Error editing appointment:", error);
+    res.status(500).json({ success: false, error: "Failed to edit appointment" });
+  }
+}
+
 // PATCH /api/appointments/:id/archive
 async function patchAppointmentArchive(req, res) {
   try {
@@ -174,6 +194,7 @@ module.exports = {
   postAppointment,
   cancelByToken,
   putAppointmentStatus,
+  patchAppointmentEdit,
   patchAppointmentArchive,
   deleteAppointment: deleteAppointmentController,
 };

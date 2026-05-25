@@ -382,6 +382,55 @@ async function toggleArchiveAppointment(id) {
   };
 }
 
+async function editAppointment(id, data) {
+  const { date, time, durationMinutes } = data;
+
+  if (!date || !time || !durationMinutes) {
+    return { success: false, statusCode: 400, error: "date, time and durationMinutes are required." };
+  }
+
+  const duration = parseInt(durationMinutes);
+  if (isNaN(duration) || duration < 15) {
+    return { success: false, statusCode: 400, error: "durationMinutes must be at least 15." };
+  }
+
+  const appointment = await Appointment.findById(id);
+  if (!appointment) {
+    return { success: false, statusCode: 404, error: "Appointment not found." };
+  }
+
+  const newBookedSlots = calculateBookedSlots(time, [{ type: "work", duration }]);
+
+  const conflict = await Appointment.findOne({
+    _id: { $ne: id },
+    staff: appointment.staff,
+    date,
+    status: { $nin: ["cancelled", "rejected"] },
+    $or: [
+      { bookedSlots: { $in: newBookedSlots } },
+      { time: { $in: newBookedSlots }, bookedSlots: { $size: 0 } },
+      { time: { $in: newBookedSlots }, bookedSlots: { $exists: false } }
+    ]
+  });
+
+  if (conflict) {
+    return { success: false, statusCode: 409, error: "Dit tijdslot overlapt met een bestaande afspraak." };
+  }
+
+  appointment.date = date;
+  appointment.time = time;
+  appointment.bookedSlots = newBookedSlots;
+
+  const [year, month, day] = date.split("-").map(Number);
+  const [hours, minutes] = time.split(":").map(Number);
+  const appointmentDateTime = new Date(year, month - 1, day, hours, minutes);
+  appointment.cancelDeadline = new Date(appointmentDateTime.getTime() - 24 * 60 * 60 * 1000);
+
+  await appointment.save();
+
+  return { success: true, statusCode: 200, data: appointment, message: "Appointment updated successfully." };
+}
+
 async function deleteAppointment(id) {
   const appointment = await Appointment.findByIdAndDelete(id);
   if (!appointment) {
@@ -406,6 +455,7 @@ module.exports = {
   createAppointment,
   cancelAppointmentByToken,
   updateAppointmentStatus,
+  editAppointment,
   toggleArchiveAppointment,
   deleteAppointment,
   sendTestEmail,
