@@ -107,6 +107,10 @@ function AdminDashboard() {
   const [cardSearchTerm, setCardSearchTerm] = useState('');
   const [showOnlyCurrentWeek, setShowOnlyCurrentWeek] = useState(false);
 
+  // Waitlist States
+  const [waitlist, setWaitlist] = useState([]);
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
+
   // Reviews States
   const [reviews, setReviews] = useState([]);
   const [reviewLoading, setReviewLoading] = useState(false);
@@ -189,6 +193,51 @@ function AdminDashboard() {
     } catch (err) {
       console.error('Error fetching staff:', err);
     }
+  };
+
+  const fetchWaitlist = async () => {
+    setWaitlistLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/waitlist`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) setWaitlist(data.data);
+    } catch (err) {
+      console.error('Error fetching waitlist:', err);
+    } finally {
+      setWaitlistLoading(false);
+    }
+  };
+
+  const handleDeleteWaitlistEntry = async (id) => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/waitlist/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      setWaitlist(prev => prev.filter(e => e.id !== id));
+    } catch (err) {
+      console.error('Error deleting waitlist entry:', err);
+    }
+  };
+
+  const generateWaitlistWhatsAppUrl = (entry) => {
+    let cleanPhone = entry.phone.replace(/[^\d+]/g, '');
+    if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
+    else if (cleanPhone.startsWith('00')) cleanPhone = cleanPhone.substring(2);
+    else if (cleanPhone.startsWith('0')) cleanPhone = '32' + cleanPhone.substring(1);
+
+    const formattedDate = formatDate(entry.date);
+    const message = `Beste ${entry.name},\n\nEr is een plek vrijgekomen bij Salon Öz op ${formattedDate} voor ${entry.service}.\n\nWilt u een afspraak maken? Neem contact met ons op via 0485 55 02 71 of reserveer online via salonoz.be.\n\nMet vriendelijke groeten,\nSalon Öz`;
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+  };
+
+  const generateWaitlistMailtoUrl = (entry) => {
+    const formattedDate = formatDate(entry.date);
+    const subject = encodeURIComponent(`Beschikbaarheid - ${entry.service} op ${formattedDate}`);
+    const body = encodeURIComponent(`Beste ${entry.name},\n\nEr is een plek vrijgekomen bij Salon Öz op ${formattedDate} voor ${entry.service}.\n\nWilt u een afspraak maken? Neem contact met ons op via 0485 55 02 71 of reserveer online via salonoz.be.\n\nMet vriendelijke groeten,\nSalon Öz`);
+    return `mailto:${entry.email}?subject=${subject}&body=${body}`;
   };
 
   const fetchSettings = async () => {
@@ -385,6 +434,7 @@ function AdminDashboard() {
     fetchImages();
     fetchSettings();
     fetchStaff();
+    fetchWaitlist();
   }, []);
 
   const updateAppointmentStatus = async (id, newStatus, extraData = {}) => {
@@ -769,6 +819,12 @@ function AdminDashboard() {
             onClick={() => setActiveSection('archive')}
           >
             Archief
+          </button>
+          <button
+            className={`admin-nav-btn ${activeSection === 'waitlist' ? 'active' : ''}`}
+            onClick={() => { setActiveSection('waitlist'); fetchWaitlist(); }}
+          >
+            Wachtlijst {waitlist.length > 0 && <span className="waitlist-nav-badge">{waitlist.length}</span>}
           </button>
           <button
             className={`admin-nav-btn ${activeSection === 'reviews' ? 'active' : ''}`}
@@ -1247,6 +1303,94 @@ function AdminDashboard() {
               </div>
             )}
           </>
+        )}
+
+        {/* WAITLIST SECTION */}
+        {activeSection === 'waitlist' && (
+          <section className="admin-waitlist-section">
+            <div className="section-header" style={{ textAlign: 'center', marginBottom: '32px' }}>
+              <h2 className="section-title">Wachtlijst</h2>
+              <p className="section-subtitle">Klanten die wachten op een beschikbare plek</p>
+            </div>
+
+            {waitlistLoading ? (
+              <div className="state-container">
+                <div className="loading-spinner"></div>
+                <p className="state-text">Wachtlijst laden...</p>
+              </div>
+            ) : waitlist.length === 0 ? (
+              <div className="state-container">
+                <p className="state-title">Geen inschrijvingen</p>
+                <p className="state-text">Er staan momenteel geen klanten op de wachtlijst.</p>
+              </div>
+            ) : (
+              <div className="appointments-grid">
+                {waitlist.map((entry) => (
+                  <article key={entry.id} className="appointment-card waitlist-card">
+                    <div className="card-header">
+                      <div className="card-header-top">
+                        <div className="card-header-left">
+                          <h2 className="client-name">{entry.name}</h2>
+                          <span className="status-badge" style={{ background: '#fef9c3', color: '#854d0e', borderColor: '#fde047' }}>Wachtlijst</span>
+                        </div>
+                        <span className="appointment-id-tech">{formatDate(entry.date)}</span>
+                      </div>
+                    </div>
+
+                    <div className="card-divider"></div>
+
+                    <div className="card-body">
+                      <div className="compact-info-grid">
+                        <div className="info-item">
+                          <span className="info-label">Dienst</span>
+                          <span className="info-value">{entry.service}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Medewerker</span>
+                          <span className="info-value">{entry.staff}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Gewenste datum</span>
+                          <span className="info-value">{formatDate(entry.date)}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Ingeschreven op</span>
+                          <span className="info-value">{formatCreatedAt(entry.createdAt)}</span>
+                        </div>
+                      </div>
+
+                      <div className="contact-info-row">
+                        <span>{entry.email}</span>
+                        <span className="separator">•</span>
+                        <span>{entry.phone}</span>
+                      </div>
+                    </div>
+
+                    <div className="card-actions-grid">
+                      <button
+                        className="grid-action-btn whatsapp"
+                        onClick={() => window.open(generateWaitlistWhatsAppUrl(entry), '_blank')}
+                      >
+                        WhatsApp
+                      </button>
+                      <button
+                        className="grid-action-btn confirm"
+                        onClick={() => window.open(generateWaitlistMailtoUrl(entry), '_blank')}
+                      >
+                        E-mail
+                      </button>
+                      <button
+                        className="grid-action-btn delete"
+                        onClick={() => handleDeleteWaitlistEntry(entry.id)}
+                      >
+                        Verwijderen
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
         )}
 
         {/* ARCHIVE SECTION */}

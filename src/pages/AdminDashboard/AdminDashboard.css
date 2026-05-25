@@ -1674,6 +1674,20 @@
   border-color: #1d4ed8;
 }
 
+.waitlist-nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #b91c1c;
+  color: #fff;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  margin-left: 6px;
+  line-height: 1.4;
+}
+
 /* ============================================
    CALENDAR TOOLBAR
    ============================================ */

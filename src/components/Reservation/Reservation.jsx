@@ -28,6 +28,11 @@ export default function Reservation() {
   const [isLoading, setIsLoading] = useState(false)
   const [errorStatus, setErrorStatus] = useState(null)
   const [validationError, setValidationError] = useState(null)
+  const [showWaitlistForm, setShowWaitlistForm] = useState(false)
+  const [waitlistForm, setWaitlistForm] = useState({ name: '', email: '', phone: '' })
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false)
+  const [waitlistLoading, setWaitlistLoading] = useState(false)
+  const [waitlistError, setWaitlistError] = useState(null)
   const [settings, setSettings] = useState(null)
   const [staff, setStaff] = useState([])
   const [formData, setFormData] = useState({
@@ -241,6 +246,38 @@ export default function Reservation() {
 
   const handleBack = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1)
+  }
+
+  const handleWaitlistSubmit = async () => {
+    setWaitlistError(null)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!waitlistForm.name.trim()) { setWaitlistError('Vul uw naam in.'); return; }
+    if (!emailRegex.test(waitlistForm.email)) { setWaitlistError('Voer een geldig e-mailadres in.'); return; }
+    const digits = waitlistForm.phone.replace(/\D/g, '')
+    if (digits.length < 9 || digits.length > 15) { setWaitlistError('Voer een geldig telefoonnummer in.'); return; }
+
+    setWaitlistLoading(true)
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/waitlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: waitlistForm.name,
+          email: waitlistForm.email,
+          phone: waitlistForm.phone,
+          service: formData.variant ? `${formData.service?.name} (${formData.variant?.name})` : formData.service?.name,
+          staff: formData.staff?.name,
+          date: formData.date,
+        }),
+      })
+      const result = await response.json()
+      if (!response.ok || !result.success) throw new Error(result.error || 'Inschrijving mislukt')
+      setWaitlistSubmitted(true)
+    } catch (err) {
+      setWaitlistError(err.message)
+    } finally {
+      setWaitlistLoading(false)
+    }
   }
 
   const handleConfirm = async (e) => {
@@ -551,31 +588,111 @@ export default function Reservation() {
           )}
 
           {/* STEP 5 — Time */}
-          {currentStep === 5 && (
-            <div className="step-section fade-in">
-              <h2 className="step-title">Kies een Tijdstip</h2>
-              <p className="step-subtitle">Selecteer een beschikbaar tijdslot</p>
-              <div className="time-grid">
-                {dynamicTimeSlots.length === 0 ? (
-                  <p className="no-slots-text" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '20px', color: '#64748b' }}>
-                    Geen beschikbare tijdsloten voor deze dag.
-                  </p>
-                ) : dynamicTimeSlots.map(time => {
-                  const isAvailable = isTimeValidForService(time)
-                  return (
-                    <button
-                      key={time}
-                      className={`time-slot ${formData.time === time ? 'selected' : ''} ${!isAvailable ? 'booked' : ''}`}
-                      onClick={() => { if (isAvailable) setFormData({ ...formData, time }) }}
-                      disabled={!isAvailable}
-                    >
-                      {time}
-                    </button>
-                  )
-                })}
+          {currentStep === 5 && (() => {
+            const hasAnyAvailableSlot = dynamicTimeSlots.some(t => isTimeValidForService(t))
+            const isDayFullyBooked = dynamicTimeSlots.length > 0 && !hasAnyAvailableSlot
+
+            return (
+              <div className="step-section fade-in">
+                <h2 className="step-title">Kies een Tijdstip</h2>
+                <p className="step-subtitle">Selecteer een beschikbaar tijdslot</p>
+                <div className="time-grid">
+                  {dynamicTimeSlots.length === 0 ? (
+                    <p className="no-slots-text" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '20px', color: '#64748b' }}>
+                      Geen beschikbare tijdsloten voor deze dag.
+                    </p>
+                  ) : dynamicTimeSlots.map(time => {
+                    const isAvailable = isTimeValidForService(time)
+                    return (
+                      <button
+                        key={time}
+                        className={`time-slot ${formData.time === time ? 'selected' : ''} ${!isAvailable ? 'booked' : ''}`}
+                        onClick={() => { if (isAvailable) setFormData({ ...formData, time }) }}
+                        disabled={!isAvailable}
+                      >
+                        {time}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {isDayFullyBooked && (
+                  <div className="waitlist-banner">
+                    <p className="waitlist-banner__title">Deze dag is volledig volgeboekt</p>
+                    <p className="waitlist-banner__text">
+                      Schrijf u in op de wachtlijst. Als er een plek vrijkomt, nemen wij contact met u op.
+                    </p>
+
+                    {!showWaitlistForm && !waitlistSubmitted && (
+                      <button
+                        className="waitlist-banner__btn"
+                        onClick={() => setShowWaitlistForm(true)}
+                      >
+                        Op de wachtlijst
+                      </button>
+                    )}
+
+                    {showWaitlistForm && !waitlistSubmitted && (
+                      <div className="waitlist-form">
+                        <div className="waitlist-form__group">
+                          <label>Naam</label>
+                          <input
+                            type="text"
+                            placeholder="Uw volledige naam"
+                            value={waitlistForm.name}
+                            onChange={(e) => setWaitlistForm({ ...waitlistForm, name: e.target.value })}
+                          />
+                        </div>
+                        <div className="waitlist-form__group">
+                          <label>E-mailadres</label>
+                          <input
+                            type="email"
+                            placeholder="Uw e-mailadres"
+                            value={waitlistForm.email}
+                            onChange={(e) => setWaitlistForm({ ...waitlistForm, email: e.target.value })}
+                          />
+                        </div>
+                        <div className="waitlist-form__group">
+                          <label>Telefoonnummer</label>
+                          <input
+                            type="tel"
+                            placeholder="Uw telefoonnummer"
+                            value={waitlistForm.phone}
+                            onChange={(e) => setWaitlistForm({ ...waitlistForm, phone: e.target.value })}
+                          />
+                        </div>
+                        {waitlistError && (
+                          <p className="waitlist-form__error">{waitlistError}</p>
+                        )}
+                        <div className="waitlist-form__actions">
+                          <button
+                            className="waitlist-form__cancel"
+                            onClick={() => { setShowWaitlistForm(false); setWaitlistError(null); }}
+                          >
+                            Annuleren
+                          </button>
+                          <button
+                            className="waitlist-form__submit"
+                            onClick={handleWaitlistSubmit}
+                            disabled={waitlistLoading}
+                          >
+                            {waitlistLoading ? 'Bezig...' : 'Inschrijven'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {waitlistSubmitted && (
+                      <div className="waitlist-success">
+                        <span className="waitlist-success__icon">✓</span>
+                        <p>U bent ingeschreven op de wachtlijst. We contacteren u zodra er een plek vrijkomt.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* STEP 6 — Infos client */}
           {currentStep === 6 && (

@@ -12,6 +12,7 @@ const reviewsRoutes = require("./routes/reviews.routes");
 const authRoutes = require("./routes/auth.routes");
 const settingsRoutes = require("./routes/settings.routes");
 const staffRoutes = require("./routes/staff.routes");
+const waitlistRoutes = require("./routes/waitlist.routes");
 
 const { sendEmail, getTestEmail } = require("./mailer");
 
@@ -51,6 +52,7 @@ app.use("/api", contactRoutes);
 app.use("/api", reviewsRoutes);
 app.use("/api", settingsRoutes);
 app.use("/api", staffRoutes);
+app.use("/api", waitlistRoutes);
 app.use("/api/auth", authRoutes);
 
 // Test email route
