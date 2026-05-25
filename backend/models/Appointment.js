@@ -10,6 +10,7 @@ const appointmentSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   notes: { type: String, default: "" },
   bookedSlots: { type: [String], default: [] },
+  blocks: { type: [{ type: { type: String }, duration: Number }], default: [] },
   status: { 
     type: String, 
     enum: ["pending", "confirmed", "cancelled", "rejected"], 

@@ -1487,6 +1487,12 @@
   margin-bottom: 24px;
 }
 
+.edit-datetime-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
 .edit-form-grid .form-group {
   display: flex;
   flex-direction: column;
@@ -1516,6 +1522,123 @@
 .edit-form-grid .form-group input:focus,
 .edit-form-grid .form-group select:focus {
   border-color: #1a1a1a;
+}
+
+.edit-blocks-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-blocks-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.edit-block-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f9f9f9;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.edit-block-type-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  min-width: 52px;
+  text-align: center;
+}
+
+.edit-block-type-badge.work {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.edit-block-type-badge.pause {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.edit-block-type-select {
+  padding: 6px 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #1a1a1a;
+  background: #fff;
+  outline: none;
+  flex: 1;
+}
+
+.edit-block-duration-select {
+  padding: 6px 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #1a1a1a;
+  background: #fff;
+  outline: none;
+  width: 90px;
+}
+
+.edit-block-remove {
+  background: none;
+  border: none;
+  color: #b91c1c;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.edit-block-remove:hover {
+  background: #fee2e2;
+}
+
+.edit-block-add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.edit-block-add-btn {
+  flex: 1;
+  padding: 8px;
+  border: 1px dashed #d0d0d0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 12px;
+  color: #166534;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.edit-block-add-btn:hover {
+  background: #f0fdf4;
+  border-color: #166534;
+}
+
+.edit-block-add-btn.pause {
+  color: #854d0e;
+}
+
+.edit-block-add-btn.pause:hover {
+  background: #fefce8;
+  border-color: #854d0e;
 }
 
 .whatsapp-message-preview {

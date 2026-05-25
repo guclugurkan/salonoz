@@ -452,15 +452,31 @@ function AdminDashboard() {
   };
 
   const openEditModal = (appointment) => {
-    const currentDuration = appointment.bookedSlots?.length > 0
-      ? appointment.bookedSlots.length * 15
-      : 30;
-    setEditForm({ date: appointment.date, time: appointment.time, durationMinutes: currentDuration });
+    const currentBlocks = appointment.blocks?.length > 0
+      ? appointment.blocks.map(b => ({ type: b.type, duration: b.duration }))
+      : [{ type: 'work', duration: (appointment.bookedSlots?.length || 2) * 15 }];
+    setEditForm({ date: appointment.date, time: appointment.time, blocks: currentBlocks });
     setEditModal({ isOpen: true, appointment });
   };
 
   const closeEditModal = () => {
     setEditModal({ isOpen: false, appointment: null });
+  };
+
+  const updateBlock = (index, field, value) => {
+    setEditForm(prev => {
+      const newBlocks = [...prev.blocks];
+      newBlocks[index] = { ...newBlocks[index], [field]: value };
+      return { ...prev, blocks: newBlocks };
+    });
+  };
+
+  const addBlock = (type) => {
+    setEditForm(prev => ({ ...prev, blocks: [...prev.blocks, { type, duration: 30 }] }));
+  };
+
+  const removeBlock = (index) => {
+    setEditForm(prev => ({ ...prev, blocks: prev.blocks.filter((_, i) => i !== index) }));
   };
 
   const handleEditSubmit = async () => {
@@ -1590,35 +1606,67 @@ function AdminDashboard() {
             <p className="modal-subtitle">{editModal.appointment?.name} — {editModal.appointment?.service}</p>
 
             <div className="edit-form-grid">
-              <div className="form-group">
-                <label>Datum</label>
-                <input
-                  type="date"
-                  value={editForm.date}
-                  onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                />
+              <div className="edit-datetime-row">
+                <div className="form-group">
+                  <label>Datum</label>
+                  <input
+                    type="date"
+                    value={editForm.date}
+                    onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Starttijd</label>
+                  <select
+                    value={editForm.time}
+                    onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
+                  >
+                    {allTimeSlots.map(slot => (
+                      <option key={slot} value={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className="form-group">
-                <label>Tijd</label>
-                <select
-                  value={editForm.time}
-                  onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
-                >
-                  {allTimeSlots.map(slot => (
-                    <option key={slot} value={slot}>{slot}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Duur (minuten)</label>
-                <select
-                  value={editForm.durationMinutes}
-                  onChange={(e) => setEditForm({ ...editForm, durationMinutes: parseInt(e.target.value) })}
-                >
-                  {[15, 30, 45, 60, 75, 90, 105, 120, 150, 180].map(d => (
-                    <option key={d} value={d}>{d} min</option>
-                  ))}
-                </select>
+
+              <div className="edit-blocks-section">
+                <label className="edit-blocks-label">Blokken</label>
+                {editForm.blocks?.map((block, index) => (
+                  <div key={index} className="edit-block-row">
+                    <span className={`edit-block-type-badge ${block.type}`}>
+                      {block.type === 'work' ? 'Werk' : 'Pauze'}
+                    </span>
+                    <select
+                      value={block.type}
+                      onChange={(e) => updateBlock(index, 'type', e.target.value)}
+                      className="edit-block-type-select"
+                    >
+                      <option value="work">Werk</option>
+                      <option value="pause">Pauze</option>
+                    </select>
+                    <select
+                      value={block.duration}
+                      onChange={(e) => updateBlock(index, 'duration', parseInt(e.target.value))}
+                      className="edit-block-duration-select"
+                    >
+                      {[15, 30, 45, 60, 75, 90, 105, 120, 150, 180].map(d => (
+                        <option key={d} value={d}>{d} min</option>
+                      ))}
+                    </select>
+                    {editForm.blocks.length > 1 && (
+                      <button
+                        type="button"
+                        className="edit-block-remove"
+                        onClick={() => removeBlock(index)}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <div className="edit-block-add-row">
+                  <button type="button" className="edit-block-add-btn" onClick={() => addBlock('work')}>+ Werkblok</button>
+                  <button type="button" className="edit-block-add-btn pause" onClick={() => addBlock('pause')}>+ Pauze</button>
+                </div>
               </div>
             </div>
 

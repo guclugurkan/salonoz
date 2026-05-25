@@ -192,6 +192,7 @@ async function createAppointment(data) {
     cancelToken,
     cancelDeadline: cancelDeadline,
     bookedSlots: generatedBookedSlots,
+    blocks: blocks,
   });
 
   await newAppointment.save();
@@ -383,15 +384,16 @@ async function toggleArchiveAppointment(id) {
 }
 
 async function editAppointment(id, data) {
-  const { date, time, durationMinutes } = data;
+  const { date, time, blocks } = data;
 
-  if (!date || !time || !durationMinutes) {
-    return { success: false, statusCode: 400, error: "date, time and durationMinutes are required." };
+  if (!date || !time || !blocks || !Array.isArray(blocks) || blocks.length === 0) {
+    return { success: false, statusCode: 400, error: "date, time and blocks are required." };
   }
 
-  const duration = parseInt(durationMinutes);
-  if (isNaN(duration) || duration < 15) {
-    return { success: false, statusCode: 400, error: "durationMinutes must be at least 15." };
+  for (const block of blocks) {
+    if (!["work", "pause"].includes(block.type) || !block.duration || block.duration < 15) {
+      return { success: false, statusCode: 400, error: "Each block must have a valid type (work/pause) and a duration of at least 15 min." };
+    }
   }
 
   const appointment = await Appointment.findById(id);
@@ -399,7 +401,7 @@ async function editAppointment(id, data) {
     return { success: false, statusCode: 404, error: "Appointment not found." };
   }
 
-  const newBookedSlots = calculateBookedSlots(time, [{ type: "work", duration }]);
+  const newBookedSlots = calculateBookedSlots(time, blocks);
 
   const conflict = await Appointment.findOne({
     _id: { $ne: id },
@@ -420,6 +422,7 @@ async function editAppointment(id, data) {
   appointment.date = date;
   appointment.time = time;
   appointment.bookedSlots = newBookedSlots;
+  appointment.blocks = blocks;
 
   const [year, month, day] = date.split("-").map(Number);
   const [hours, minutes] = time.split(":").map(Number);
