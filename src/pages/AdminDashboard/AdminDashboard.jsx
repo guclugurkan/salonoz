@@ -110,6 +110,9 @@ function AdminDashboard() {
   // Waitlist States
   const [waitlist, setWaitlist] = useState([]);
   const [waitlistLoading, setWaitlistLoading] = useState(false);
+  const [waitlistBookModal, setWaitlistBookModal] = useState({ isOpen: false, entry: null });
+  const [waitlistBookForm, setWaitlistBookForm] = useState({ date: '', time: '' });
+  const [waitlistBookSubmitting, setWaitlistBookSubmitting] = useState(false);
 
   // Reviews States
   const [reviews, setReviews] = useState([]);
@@ -238,6 +241,65 @@ function AdminDashboard() {
     const subject = encodeURIComponent(`Beschikbaarheid - ${entry.service} op ${formattedDate}`);
     const body = encodeURIComponent(`Beste ${entry.name},\n\nEr is een plek vrijgekomen bij Salon Öz op ${formattedDate} voor ${entry.service}.\n\nWilt u een afspraak maken? Neem contact met ons op via 0485 55 02 71 of reserveer online via salonoz.be.\n\nMet vriendelijke groeten,\nSalon Öz`);
     return `mailto:${entry.email}?subject=${subject}&body=${body}`;
+  };
+
+  const openWaitlistBookModal = (entry) => {
+    setWaitlistBookForm({ date: entry.date, time: '' });
+    setWaitlistBookModal({ isOpen: true, entry });
+  };
+
+  const closeWaitlistBookModal = () => {
+    setWaitlistBookModal({ isOpen: false, entry: null });
+  };
+
+  const getAvailableSlotsForWaitlist = (date, staffName) => {
+    const occupied = appointments
+      .filter(a => a.staff === staffName && a.date === date && a.status !== 'cancelled' && a.status !== 'rejected')
+      .flatMap(a => a.bookedSlots?.length > 0 ? a.bookedSlots : [a.time]);
+    return allTimeSlots.filter(slot => !occupied.includes(slot));
+  };
+
+  const handleWaitlistBook = async () => {
+    const { entry } = waitlistBookModal;
+    if (!waitlistBookForm.date || !waitlistBookForm.time) return;
+
+    setWaitlistBookSubmitting(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          service: entry.service,
+          staff: entry.staff,
+          date: waitlistBookForm.date,
+          time: waitlistBookForm.time,
+          name: entry.name,
+          email: entry.email,
+          phone: entry.phone,
+          notes: '',
+        }),
+      });
+      const result = await response.json();
+      if (!result.success) {
+        showToast(result.error || 'Fout bij aanmaken afspraak', 'error');
+        return;
+      }
+
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/waitlist/${entry.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      setWaitlist(prev => prev.filter(e => e.id !== entry.id));
+      await fetchAppointments();
+      closeWaitlistBookModal();
+      showToast(`Afspraak aangemaakt voor ${entry.name}. Bevestigingsmail verzonden.`);
+    } catch (err) {
+      console.error('Error booking from waitlist:', err);
+      showToast('Er is een fout opgetreden', 'error');
+    } finally {
+      setWaitlistBookSubmitting(false);
+    }
   };
 
   const fetchSettings = async () => {
@@ -1368,13 +1430,19 @@ function AdminDashboard() {
 
                     <div className="card-actions-grid">
                       <button
+                        className="grid-action-btn confirm"
+                        onClick={() => openWaitlistBookModal(entry)}
+                      >
+                        Afspraak aanmaken
+                      </button>
+                      <button
                         className="grid-action-btn whatsapp"
                         onClick={() => window.open(generateWaitlistWhatsAppUrl(entry), '_blank')}
                       >
                         WhatsApp
                       </button>
                       <button
-                        className="grid-action-btn confirm"
+                        className="grid-action-btn edit"
                         onClick={() => window.open(generateWaitlistMailtoUrl(entry), '_blank')}
                       >
                         E-mail
@@ -1742,6 +1810,68 @@ function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {waitlistBookModal.isOpen && (() => {
+        const entry = waitlistBookModal.entry;
+        const availableSlots = waitlistBookForm.date
+          ? getAvailableSlotsForWaitlist(waitlistBookForm.date, entry.staff)
+          : [];
+        return (
+          <div className="modal-overlay" onClick={closeWaitlistBookModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <h3 className="modal-title">Afspraak aanmaken</h3>
+              <p className="modal-subtitle">{entry.name} — {entry.service}</p>
+
+              <div className="edit-form-grid">
+                <div className="edit-datetime-row">
+                  <div className="form-group">
+                    <label>Datum</label>
+                    <input
+                      type="date"
+                      value={waitlistBookForm.date}
+                      min={new Date().toISOString().split('T')[0]}
+                      onChange={(e) => setWaitlistBookForm({ date: e.target.value, time: '' })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Tijdstip</label>
+                    <select
+                      value={waitlistBookForm.time}
+                      onChange={(e) => setWaitlistBookForm(prev => ({ ...prev, time: e.target.value }))}
+                      disabled={!waitlistBookForm.date}
+                    >
+                      <option value="">Kies een tijdstip</option>
+                      {availableSlots.map(slot => (
+                        <option key={slot} value={slot}>{slot}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="waitlist-book-client-info">
+                  <p><strong>Klant:</strong> {entry.name}</p>
+                  <p><strong>E-mail:</strong> {entry.email}</p>
+                  <p><strong>Telefoon:</strong> {entry.phone}</p>
+                  <p><strong>Medewerker:</strong> {entry.staff}</p>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button className="modal-button cancel" onClick={closeWaitlistBookModal} disabled={waitlistBookSubmitting}>
+                  Annuleren
+                </button>
+                <button
+                  className="modal-button submit"
+                  onClick={handleWaitlistBook}
+                  disabled={waitlistBookSubmitting || !waitlistBookForm.date || !waitlistBookForm.time}
+                >
+                  {waitlistBookSubmitting ? 'Bezig...' : 'Bevestigen & boeken'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {editModal.isOpen && (
         <div className="modal-overlay" onClick={closeEditModal}>
