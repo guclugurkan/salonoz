@@ -92,6 +92,41 @@ export default function ServicesPage() {
           <p className="sp__subtitle">Ontdek het volledige aanbod van Salon OZ — gecreëerd voor elke stijl, elk haar.</p>
         </div>
 
+        {/* KERATINE EXTENSIONS */}
+        <div className={`sp__extensions ${isVisible ? "is-visible" : ""}`}>
+          <div className="sp__extensions-header">
+            <span className="sp__card-icon">⟡</span>
+            <h2 className="sp__extensions-title">Keratine Extensions</h2>
+            <p className="sp__extensions-subtitle">
+              Afspraken voor keratine extensions verlopen uitsluitend telefonisch.
+            </p>
+          </div>
+
+          <div className="sp__extensions-list">
+            {[
+              { name: "Keratine extensions vanaf 50 stuks", price: "200 €" },
+              { name: "Keratine extensions vanaf 100 stuks", price: "400 €" },
+              { name: "Keratine extensions vanaf 150 stuks", price: "600 €" },
+              { name: "Keratine extensions vanaf 200 stuks", price: "500 €" },
+              { name: "Keratine extensions vanaf 250 stuks", price: "1000 €" },
+              { name: "Extensions verwijderen", price: "100 €" },
+            ].map((item, i) => (
+              <div key={i} className="sp__extension-row">
+                <div className="sp__extension-info">
+                  <span className="sp__extension-name">{item.name}</span>
+                  <span className="sp__extension-price">{item.price}</span>
+                </div>
+                <a href="tel:+320485550271" className="sp__extension-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.25h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.81a2 2 0 0 1-.45 2.11L7.91 8.84a16 16 0 0 0 6 6l1.27-.95a2 2 0 0 1 2.11-.45c.9.33 1.85.56 2.81.69A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                  0485 55 02 71
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* MASONRY GRID */}
         <div className="sp__masonry">
           {services.map((service, index) => (
