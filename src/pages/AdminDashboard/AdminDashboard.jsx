@@ -791,7 +791,7 @@ function AdminDashboard() {
     else if (cleanPhone.startsWith('00')) cleanPhone = cleanPhone.substring(2);
     else if (cleanPhone.startsWith('0')) cleanPhone = '32' + cleanPhone.substring(1);
 
-    const message = `Beste ${appointment.name}, bedankt voor je bezoek aan Salon Öz vandaag! We hopen dat je tevreden bent met je nieuwe look. Zou je een momentje willen nemen om een beoordeling achter te laten?\n\nSchrijf een review op onze site: https://salonoz.be/reviews\nBeoordeel ons op Google: ${GOOGLE_REVIEWS_URL}\n\nAlvast bedankt en tot de volgende keer! Groetjes, Salon Öz`;
+    const message = `Beste ${appointment.name}, bedankt voor je bezoek aan Salon Öz vandaag! We hopen dat je tevreden bent met je nieuwe look. Zou je een momentje willen nemen om een beoordeling achter te laten?\n\nBeoordeel ons op Google: ${GOOGLE_REVIEWS_URL}\nSchrijf een review op onze site: https://salonoz.be/reviews\n\nAlvast bedankt en tot de volgende keer! Groetjes, Salon Öz`;
     
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
