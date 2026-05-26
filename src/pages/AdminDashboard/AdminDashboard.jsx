@@ -253,10 +253,23 @@ function AdminDashboard() {
   };
 
   const getAvailableSlotsForWaitlist = (date, staffName) => {
+    if (!date) return [];
+
+    const [year, month, day] = date.split('-').map(Number);
+    const dayName = getDayName(new Date(year, month - 1, day));
+
+    let slots = allTimeSlots;
+    if (settings?.workingHours) {
+      const daySettings = settings.workingHours[dayName];
+      if (!daySettings || daySettings.closed) return [];
+      slots = allTimeSlots.filter(s => s >= daySettings.open && s < daySettings.close);
+    }
+
     const occupied = appointments
       .filter(a => a.staff === staffName && a.date === date && a.status !== 'cancelled' && a.status !== 'rejected')
       .flatMap(a => a.bookedSlots?.length > 0 ? a.bookedSlots : [a.time]);
-    return allTimeSlots.filter(slot => !occupied.includes(slot));
+
+    return slots.map(time => ({ time, isOccupied: occupied.includes(time) }));
   };
 
   const handleWaitlistBook = async () => {
@@ -1813,9 +1826,7 @@ function AdminDashboard() {
 
       {waitlistBookModal.isOpen && (() => {
         const entry = waitlistBookModal.entry;
-        const availableSlots = waitlistBookForm.date
-          ? getAvailableSlotsForWaitlist(waitlistBookForm.date, entry.staff)
-          : [];
+        const daySlots = getAvailableSlotsForWaitlist(waitlistBookForm.date, entry.staff);
         return (
           <div className="modal-overlay" onClick={closeWaitlistBookModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -1823,29 +1834,37 @@ function AdminDashboard() {
               <p className="modal-subtitle">{entry.name} — {entry.service}</p>
 
               <div className="edit-form-grid">
-                <div className="edit-datetime-row">
-                  <div className="form-group">
-                    <label>Datum</label>
-                    <input
-                      type="date"
-                      value={waitlistBookForm.date}
-                      min={new Date().toISOString().split('T')[0]}
-                      onChange={(e) => setWaitlistBookForm({ date: e.target.value, time: '' })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Tijdstip</label>
-                    <select
-                      value={waitlistBookForm.time}
-                      onChange={(e) => setWaitlistBookForm(prev => ({ ...prev, time: e.target.value }))}
-                      disabled={!waitlistBookForm.date}
-                    >
-                      <option value="">Kies een tijdstip</option>
-                      {availableSlots.map(slot => (
-                        <option key={slot} value={slot}>{slot}</option>
+                <div className="form-group">
+                  <label>Datum</label>
+                  <input
+                    type="date"
+                    value={waitlistBookForm.date}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setWaitlistBookForm({ date: e.target.value, time: '' })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Tijdstip</label>
+                  {!waitlistBookForm.date ? (
+                    <p className="waitlist-slots-hint">Selecteer eerst een datum</p>
+                  ) : daySlots.length === 0 ? (
+                    <p className="waitlist-slots-hint">Geen beschikbare uren op deze dag</p>
+                  ) : (
+                    <div className="waitlist-time-grid">
+                      {daySlots.map(({ time, isOccupied }) => (
+                        <button
+                          key={time}
+                          type="button"
+                          className={`waitlist-time-slot ${waitlistBookForm.time === time ? 'selected' : ''} ${isOccupied ? 'occupied' : ''}`}
+                          onClick={() => { if (!isOccupied) setWaitlistBookForm(prev => ({ ...prev, time })); }}
+                          disabled={isOccupied}
+                        >
+                          {time}
+                        </button>
                       ))}
-                    </select>
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="waitlist-book-client-info">
