@@ -19,6 +19,13 @@ const allTimeSlots = [
   '19:00', '19:15', '19:30', '19:45', '20:00', '20:15', '20:30', '20:45'
 ];
 
+function addMinutes(timeStr, mins) {
+  const [h, m] = timeStr.split(':').map(Number);
+  const date = new Date(2000, 0, 1, h, m);
+  date.setMinutes(date.getMinutes() + mins);
+  return date.toTimeString().substring(0, 5);
+}
+
 function getStartOfWeek(date) {
   const currentDate = new Date(date);
   const day = currentDate.getDay();
@@ -106,6 +113,9 @@ function AdminDashboard() {
   const [cardStatusFilter, setCardStatusFilter] = useState('all');
   const [cardSearchTerm, setCardSearchTerm] = useState('');
   const [showOnlyCurrentWeek, setShowOnlyCurrentWeek] = useState(false);
+
+  // Categories (for service blocks lookup)
+  const [categoriesData, setCategoriesData] = useState([]);
 
   // Waitlist States
   const [waitlist, setWaitlist] = useState([]);
@@ -198,6 +208,37 @@ function AdminDashboard() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/categories`);
+      const data = await response.json();
+      if (data.success) setCategoriesData(data.data || []);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+    }
+  };
+
+  const getServiceBlocks = (serviceName) => {
+    let baseServiceName = serviceName;
+    let variantName = null;
+    if (serviceName.includes(' (') && serviceName.endsWith(')')) {
+      const lastParen = serviceName.lastIndexOf(' (');
+      baseServiceName = serviceName.substring(0, lastParen);
+      variantName = serviceName.substring(lastParen + 2, serviceName.length - 1);
+    }
+    for (const category of categoriesData) {
+      const service = category.services?.find(s => s.name === baseServiceName);
+      if (service) {
+        if (variantName && service.variants?.length > 0) {
+          const variant = service.variants.find(v => v.name === variantName);
+          if (variant?.blocks?.length > 0) return variant.blocks;
+        }
+        if (service.blocks?.length > 0) return service.blocks;
+      }
+    }
+    return [{ type: 'work', duration: 30 }];
+  };
+
   const fetchWaitlist = async () => {
     setWaitlistLoading(true);
     try {
@@ -252,24 +293,48 @@ function AdminDashboard() {
     setWaitlistBookModal({ isOpen: false, entry: null });
   };
 
-  const getAvailableSlotsForWaitlist = (date, staffName) => {
+  const getAvailableSlotsForWaitlist = (date, staffName, serviceName) => {
     if (!date) return [];
 
     const [year, month, day] = date.split('-').map(Number);
     const dayName = getDayName(new Date(year, month - 1, day));
 
     let slots = allTimeSlots;
+    let closeTime = '23:59';
+
     if (settings?.workingHours) {
       const daySettings = settings.workingHours[dayName];
       if (!daySettings || daySettings.closed) return [];
       slots = allTimeSlots.filter(s => s >= daySettings.open && s < daySettings.close);
+      closeTime = daySettings.close;
     }
 
     const occupied = appointments
       .filter(a => a.staff === staffName && a.date === date && a.status !== 'cancelled' && a.status !== 'rejected')
       .flatMap(a => a.bookedSlots?.length > 0 ? a.bookedSlots : [a.time]);
 
-    return slots.map(time => ({ time, isOccupied: occupied.includes(time) }));
+    const blocks = serviceName ? getServiceBlocks(serviceName) : [{ type: 'work', duration: 30 }];
+
+    return slots.map(time => {
+      let currentTime = time;
+      let valid = true;
+
+      for (const block of blocks) {
+        const numIntervals = Math.ceil(block.duration / 15);
+        for (let i = 0; i < numIntervals; i++) {
+          if (block.type === 'work' && occupied.includes(currentTime)) {
+            valid = false;
+            break;
+          }
+          currentTime = addMinutes(currentTime, 15);
+        }
+        if (!valid) break;
+      }
+
+      if (valid && currentTime > closeTime) valid = false;
+
+      return { time, isOccupied: !valid };
+    });
   };
 
   const handleWaitlistBook = async () => {
@@ -510,6 +575,7 @@ function AdminDashboard() {
     fetchSettings();
     fetchStaff();
     fetchWaitlist();
+    fetchCategories();
   }, []);
 
   const updateAppointmentStatus = async (id, newStatus, extraData = {}) => {
@@ -1826,7 +1892,7 @@ function AdminDashboard() {
 
       {waitlistBookModal.isOpen && (() => {
         const entry = waitlistBookModal.entry;
-        const daySlots = getAvailableSlotsForWaitlist(waitlistBookForm.date, entry.staff);
+        const daySlots = getAvailableSlotsForWaitlist(waitlistBookForm.date, entry.staff, entry.service);
         return (
           <div className="modal-overlay" onClick={closeWaitlistBookModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
