@@ -93,7 +93,7 @@ async function sendTestEmail() {
 }
 
 async function createAppointment(data) {
-  const { service, staff, date, time, name, email, phone, notes } = data;
+  const { service, staff, date, time, name, email, phone, notes, adminOverride } = data;
   console.log(`[BACKEND] Creation request: ${service} for ${name} at ${time} on ${date}. BookedSlots provided: ${data.bookedSlots ? 'YES' : 'NO'}`);
 
   const errors = validateAppointment(data);
@@ -155,19 +155,21 @@ async function createAppointment(data) {
     };
   }
 
-  // Anti-spam / Anti-doublon : 1 RDV max par jour par e-mail
-  const userConflict = await Appointment.findOne({
-    email,
-    date,
-    status: { $nin: ["cancelled", "rejected"] }
-  });
+  // Anti-spam / Anti-doublon : 1 RDV max par jour par e-mail (sauf override admin)
+  if (!adminOverride) {
+    const userConflict = await Appointment.findOne({
+      email,
+      date,
+      status: { $nin: ["cancelled", "rejected"] }
+    });
 
-  if (userConflict) {
-    return {
-      success: false,
-      statusCode: 409,
-      error: "Vous avez déjà un rendez-vous réservé à cette date.",
-    };
+    if (userConflict) {
+      return {
+        success: false,
+        statusCode: 409,
+        error: "Vous avez déjà un rendez-vous réservé à cette date.",
+      };
+    }
   }
 
   // Génère un token unique pour l'annulation

@@ -284,9 +284,10 @@ function AdminDashboard() {
     return `mailto:${entry.email}?subject=${subject}&body=${body}`;
   };
 
-  const openWaitlistBookModal = (entry) => {
-    setWaitlistBookForm({ date: entry.date, time: '' });
+  const openWaitlistBookModal = async (entry) => {
     setWaitlistBookModal({ isOpen: true, entry });
+    setWaitlistBookForm({ date: entry.date, time: '' });
+    await fetchAppointments();
   };
 
   const closeWaitlistBookModal = () => {
@@ -355,6 +356,7 @@ function AdminDashboard() {
           email: entry.email,
           phone: entry.phone,
           notes: '',
+          adminOverride: true,
         }),
       });
       const result = await response.json();
