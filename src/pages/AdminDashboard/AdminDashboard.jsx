@@ -6,6 +6,7 @@ import AdminServices from './AdminServices';
 import AdminSettings from './AdminSettings';
 import AdminStaff from './AdminStaff';
 import AdminNewAppointment from './AdminNewAppointment';
+import AdminClients from './AdminClients';
 
 // staffMembers is now dynamic
 
@@ -970,6 +971,12 @@ function AdminDashboard() {
             Wachtlijst {waitlist.length > 0 && <span className="waitlist-nav-badge">{waitlist.length}</span>}
           </button>
           <button
+            className={`admin-nav-btn ${activeSection === 'clients' ? 'active' : ''}`}
+            onClick={() => setActiveSection('clients')}
+          >
+            Klanten
+          </button>
+          <button
             className={`admin-nav-btn ${activeSection === 'reviews' ? 'active' : ''}`}
             onClick={() => setActiveSection('reviews')}
           >
@@ -1068,14 +1075,18 @@ function AdminDashboard() {
           )}
 
           {activeSection === 'new_appointment' && (
-            <AdminNewAppointment 
-              token={token} 
-              showToast={showToast} 
+            <AdminNewAppointment
+              token={token}
+              showToast={showToast}
               onAppointmentCreated={() => {
                 fetchAppointments();
                 setActiveSection('appointments');
-              }} 
+              }}
             />
+          )}
+
+          {activeSection === 'clients' && (
+            <AdminClients token={token} showToast={showToast} />
           )}
 
         {activeSection === 'appointments' && (

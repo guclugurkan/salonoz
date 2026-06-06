@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const Appointment = require("../models/Appointment");
 const Service = require("../models/Service");
+const Client = require("../models/Client");
 
 function addMinutes(timeStr, mins) {
   const [h, m] = timeStr.split(':').map(Number);
@@ -198,6 +199,17 @@ async function createAppointment(data) {
   });
 
   await newAppointment.save();
+
+  // Upsert client : si l'email existe on incrémente le compteur, sinon on crée
+  try {
+    await Client.findOneAndUpdate(
+      { email: email.toLowerCase().trim() },
+      { $set: { name, phone }, $inc: { appointmentCount: 1 } },
+      { upsert: true, new: true }
+    );
+  } catch (clientErr) {
+    console.error("[CLIENT UPSERT] Erreur:", clientErr.message);
+  }
 
   const confirmedEmail = getConfirmedAppointmentEmail(newAppointment);
   await sendEmail({
