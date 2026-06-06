@@ -204,17 +204,25 @@ async function createAppointment(data) {
 
   await newAppointment.save();
 
-  // Upsert client si email fourni
-  if (email && email.trim()) {
-    try {
+  // Upsert client : par email si fourni, sinon par nom+téléphone
+  try {
+    if (email && email.trim()) {
       await Client.findOneAndUpdate(
         { email: email.toLowerCase().trim() },
         { $set: { name, phone: phone || "" }, $inc: { appointmentCount: 1 } },
         { upsert: true, new: true }
       );
-    } catch (clientErr) {
-      console.error("[CLIENT UPSERT] Erreur:", clientErr.message);
+    } else if (name && name.trim()) {
+      const query = { name: { $regex: new RegExp(`^${name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } };
+      if (phone && phone.trim()) query.phone = phone.trim();
+      await Client.findOneAndUpdate(
+        query,
+        { $set: { name, email: "", phone: phone || "" }, $inc: { appointmentCount: 1 } },
+        { upsert: true, new: true }
+      );
     }
+  } catch (clientErr) {
+    console.error("[CLIENT UPSERT] Erreur:", clientErr.message);
   }
 
   // Envoi du mail de confirmation uniquement si demandé et si email fourni
