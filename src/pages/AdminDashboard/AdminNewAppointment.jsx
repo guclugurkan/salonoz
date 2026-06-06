@@ -10,6 +10,7 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
   const [clientSuggestions, setClientSuggestions] = useState([]);
   const [searchingClients, setSearchingClients] = useState(false);
   const searchTimeout = useRef(null);
+  const [sendEmail, setSendEmail] = useState(false);
 
   const [formData, setFormData] = useState({
     category: null,
@@ -81,14 +82,14 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.service || !formData.staff || !formData.date || !formData.time) {
-      showToast('Vul alle verplichte velden in', 'error');
+    if (!formData.name.trim()) {
+      showToast('Vul de naam van de klant in', 'error');
       return;
     }
 
     const appointmentData = {
-      service: formData.variant ? `${formData.service.name} (${formData.variant.name})` : formData.service.name,
-      staff: formData.staff.name,
+      service: formData.service ? (formData.variant ? `${formData.service.name} (${formData.variant.name})` : formData.service.name) : '',
+      staff: formData.staff?.name || '',
       date: formData.date,
       time: formData.time,
       name: formData.name,
@@ -97,6 +98,7 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
       notes: formData.notes,
       status: 'confirmed',
       adminOverride: true,
+      sendConfirmationEmail: sendEmail,
     };
 
     try {
@@ -113,6 +115,7 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
         showToast('Afspraak succesvol toegevoegd');
         setFormData({ category: null, service: null, variant: null, staff: null, date: '', time: '', name: '', email: '', phone: '', notes: '' });
         setClientSearch('');
+        setSendEmail(false);
         if (onAppointmentCreated) onAppointmentCreated();
       } else {
         showToast(data.error || 'Fout bij het toevoegen', 'error');
@@ -351,6 +354,16 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
               onChange={e => setFormData({ ...formData, notes: e.target.value })}
             ></textarea>
           </div>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', cursor: 'pointer', fontSize: '14px', color: '#374151' }}>
+            <input
+              type="checkbox"
+              checked={sendEmail}
+              onChange={e => setSendEmail(e.target.checked)}
+              style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#1a1a1a' }}
+            />
+            Stuur bevestigingsmail naar de klant
+          </label>
 
           <button type="submit" className="action-button confirm" style={{ width: '100%', height: '50px', fontSize: '14px' }}>
             Afspraak Bevestigen & Toevoegen

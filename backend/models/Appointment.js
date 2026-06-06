@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 
 const appointmentSchema = new mongoose.Schema({
-  service: { type: String, required: true },
-  staff: { type: String, required: true },
-  date: { type: String, required: true },
-  time: { type: String, required: true },
+  service: { type: String, default: "" },
+  staff: { type: String, default: "" },
+  date: { type: String, default: "" },
+  time: { type: String, default: "" },
   name: { type: String, required: true },
-  email: { type: String, required: true },
-  phone: { type: String, required: true },
+  email: { type: String, default: "" },
+  phone: { type: String, default: "" },
   notes: { type: String, default: "" },
   bookedSlots: { type: [String], default: [] },
   blocks: { type: [{ type: { type: String }, duration: Number }], default: [] },

@@ -94,70 +94,73 @@ async function sendTestEmail() {
 }
 
 async function createAppointment(data) {
-  const { service, staff, date, time, name, email, phone, notes, adminOverride } = data;
+  const { service, staff, date, time, name, email, phone, notes, adminOverride, sendConfirmationEmail } = data;
   console.log(`[BACKEND] Creation request: ${service} for ${name} at ${time} on ${date}. BookedSlots provided: ${data.bookedSlots ? 'YES' : 'NO'}`);
 
-  const errors = validateAppointment(data);
-  if (errors.length > 0) {
-    return {
-      success: false,
-      statusCode: 400,
-      error: errors.join(" "),
-    };
+  if (adminOverride) {
+    // Côté admin : seul le nom est obligatoire
+    if (!name || name.trim() === "") {
+      return { success: false, statusCode: 400, error: "Name is required." };
+    }
+  } else {
+    const errors = validateAppointment(data);
+    if (errors.length > 0) {
+      return { success: false, statusCode: 400, error: errors.join(" ") };
+    }
   }
 
   // Find the service in DB to get its blocks
   let blocks = [];
-  let serviceName = service;
+  let serviceName = service || "";
   let variantName = null;
 
-  // Si le nom contient des parenthèses à la fin, on extrait le service et la variante
-  if (service.includes(" (") && service.endsWith(")")) {
-    const lastParenIndex = service.lastIndexOf(" (");
-    serviceName = service.substring(0, lastParenIndex);
-    variantName = service.substring(lastParenIndex + 2, service.length - 1);
+  if (serviceName && serviceName.includes(" (") && serviceName.endsWith(")")) {
+    const lastParenIndex = serviceName.lastIndexOf(" (");
+    variantName = serviceName.substring(lastParenIndex + 2, serviceName.length - 1);
+    serviceName = serviceName.substring(0, lastParenIndex);
   }
 
-  const serviceObj = await Service.findOne({ name: serviceName });
-
-  if (serviceObj) {
-    if (variantName && serviceObj.variants && serviceObj.variants.length > 0) {
-      const variant = serviceObj.variants.find(v => v.name === variantName);
-      if (variant && variant.blocks && variant.blocks.length > 0) {
-        blocks = variant.blocks;
+  if (serviceName) {
+    const serviceObj = await Service.findOne({ name: serviceName });
+    if (serviceObj) {
+      if (variantName && serviceObj.variants && serviceObj.variants.length > 0) {
+        const variant = serviceObj.variants.find(v => v.name === variantName);
+        if (variant && variant.blocks && variant.blocks.length > 0) {
+          blocks = variant.blocks;
+        }
+      }
+      if (blocks.length === 0 && serviceObj.blocks && serviceObj.blocks.length > 0) {
+        blocks = serviceObj.blocks;
       }
     }
-    
-    // Si pas de variante ou blocs de variante vides, on prend les blocs du service
-    if (blocks.length === 0 && serviceObj.blocks && serviceObj.blocks.length > 0) {
-      blocks = serviceObj.blocks;
-    }
   }
 
-  const generatedBookedSlots = data.bookedSlots || calculateBookedSlots(time, blocks);
+  const generatedBookedSlots = data.bookedSlots || (time ? calculateBookedSlots(time, blocks) : []);
 
-  // Check conflicts using bookedSlots
-  const conflict = await Appointment.findOne({
-    staff,
-    date,
-    status: { $nin: ["cancelled", "rejected"] },
-    $or: [
-      { bookedSlots: { $in: generatedBookedSlots } },
-      { time: { $in: generatedBookedSlots }, bookedSlots: { $size: 0 } },
-      { time: { $in: generatedBookedSlots }, bookedSlots: { $exists: false } }
-    ]
-  });
+  // Vérification conflit uniquement si staff + date + time sont renseignés
+  if (staff && date && time && generatedBookedSlots.length > 0) {
+    const conflict = await Appointment.findOne({
+      staff,
+      date,
+      status: { $nin: ["cancelled", "rejected"] },
+      $or: [
+        { bookedSlots: { $in: generatedBookedSlots } },
+        { time: { $in: generatedBookedSlots }, bookedSlots: { $size: 0 } },
+        { time: { $in: generatedBookedSlots }, bookedSlots: { $exists: false } }
+      ]
+    });
 
-  if (conflict) {
-    return {
-      success: false,
-      statusCode: 409,
-      error: "This time slot is already booked for the selected staff member.",
-    };
+    if (conflict) {
+      return {
+        success: false,
+        statusCode: 409,
+        error: "This time slot is already booked for the selected staff member.",
+      };
+    }
   }
 
   // Anti-spam / Anti-doublon : 1 RDV max par jour par e-mail (sauf override admin)
-  if (!adminOverride) {
+  if (!adminOverride && email && date) {
     const userConflict = await Appointment.findOne({
       email,
       date,
@@ -173,51 +176,66 @@ async function createAppointment(data) {
     }
   }
 
-  // Génère un token unique pour l'annulation
+  // Deadline d'annulation = date+heure du RDV - 24h (si date + time fournis)
   const cancelToken = crypto.randomUUID();
-
-  // Deadline d'annulation = date+heure du RDV - 24h
-  const [year, month, day] = date.split("-").map(Number);
-  const [hours, minutes] = time.split(":").map(Number);
-  const appointmentDateTime = new Date(year, month - 1, day, hours, minutes);
-  const cancelDeadline = new Date(appointmentDateTime.getTime() - 24 * 60 * 60 * 1000);
+  let cancelDeadline = null;
+  if (date && time) {
+    const [year, month, day] = date.split("-").map(Number);
+    const [hours, minutes] = time.split(":").map(Number);
+    const appointmentDateTime = new Date(year, month - 1, day, hours, minutes);
+    cancelDeadline = new Date(appointmentDateTime.getTime() - 24 * 60 * 60 * 1000);
+  }
 
   const newAppointment = new Appointment({
-    service,
-    staff,
-    date,
-    time,
+    service: service || "",
+    staff: staff || "",
+    date: date || "",
+    time: time || "",
     name,
-    email,
-    phone,
+    email: email || "",
+    phone: phone || "",
     notes: notes || "",
     status: "confirmed",
     cancelToken,
-    cancelDeadline: cancelDeadline,
+    cancelDeadline,
     bookedSlots: generatedBookedSlots,
-    blocks: blocks,
+    blocks,
   });
 
   await newAppointment.save();
 
-  // Upsert client : si l'email existe on incrémente le compteur, sinon on crée
-  try {
-    await Client.findOneAndUpdate(
-      { email: email.toLowerCase().trim() },
-      { $set: { name, phone }, $inc: { appointmentCount: 1 } },
-      { upsert: true, new: true }
-    );
-  } catch (clientErr) {
-    console.error("[CLIENT UPSERT] Erreur:", clientErr.message);
+  // Upsert client si email fourni
+  if (email && email.trim()) {
+    try {
+      await Client.findOneAndUpdate(
+        { email: email.toLowerCase().trim() },
+        { $set: { name, phone: phone || "" }, $inc: { appointmentCount: 1 } },
+        { upsert: true, new: true }
+      );
+    } catch (clientErr) {
+      console.error("[CLIENT UPSERT] Erreur:", clientErr.message);
+    }
   }
 
-  const confirmedEmail = getConfirmedAppointmentEmail(newAppointment);
-  await sendEmail({
-    to: newAppointment.email,
-    subject: confirmedEmail.subject,
-    text: confirmedEmail.text,
-    html: confirmedEmail.html,
-  });
+  // Envoi du mail de confirmation uniquement si demandé et si email fourni
+  if (sendConfirmationEmail && email && email.trim()) {
+    const confirmedEmail = getConfirmedAppointmentEmail(newAppointment);
+    await sendEmail({
+      to: newAppointment.email,
+      subject: confirmedEmail.subject,
+      text: confirmedEmail.text,
+      html: confirmedEmail.html,
+    });
+  } else if (!adminOverride && email && email.trim()) {
+    // Côté public : on envoie toujours le mail
+    const confirmedEmail = getConfirmedAppointmentEmail(newAppointment);
+    await sendEmail({
+      to: newAppointment.email,
+      subject: confirmedEmail.subject,
+      text: confirmedEmail.text,
+      html: confirmedEmail.html,
+    });
+  }
 
   return {
     success: true,
