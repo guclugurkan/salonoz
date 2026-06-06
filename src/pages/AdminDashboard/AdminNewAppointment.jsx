@@ -4,6 +4,7 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
   const [categories, setCategories] = useState([]);
   const [staff, setStaff] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Recherche client
@@ -30,24 +31,42 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
 
   const fetchData = async () => {
     try {
-      const [catRes, staffRes, apptRes] = await Promise.all([
+      const [catRes, staffRes, apptRes, settingsRes] = await Promise.all([
         fetch(`${API}/api/categories`),
         fetch(`${API}/api/staff`),
         fetch(`${API}/api/appointments`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API}/api/settings`),
       ]);
       const catData = await catRes.json();
       const staffData = await staffRes.json();
       const apptData = await apptRes.json();
+      const settingsData = await settingsRes.json();
 
       if (catData.success) setCategories(catData.data);
       if (staffData.success) setStaff(staffData.data);
       if (apptData.success) setAppointments(apptData.data);
+      if (settingsData.success) setSettings(settingsData.data);
     } catch (err) {
       console.error(err);
       showToast('Fout bij het laden van gegevens', 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const addMinutes = (timeStr, mins) => {
+    if (!timeStr) return '';
+    const [h, m] = timeStr.split(':').map(Number);
+    const date = new Date(2000, 0, 1, h, m);
+    date.setMinutes(date.getMinutes() + mins);
+    return date.toTimeString().substring(0, 5);
+  };
+
+  const getDayName = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    return days[date.getDay()];
   };
 
   const getOccupiedSlots = () => {
@@ -60,6 +79,38 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
         a.status !== 'rejected'
       )
       .flatMap(a => (a.bookedSlots && a.bookedSlots.length > 0) ? a.bookedSlots : [a.time]);
+  };
+
+  const isTimeValidForService = (startTime, occupiedSlots) => {
+    // Si pas de service sélectionné, on bloque juste les créneaux occupés
+    if (!formData.service) {
+      return !occupiedSlots.includes(startTime);
+    }
+
+    if (occupiedSlots.includes(startTime)) return false;
+
+    const targetService = formData.variant ? formData.variant : formData.service;
+    const blocks = targetService.blocks && targetService.blocks.length > 0
+      ? targetService.blocks
+      : [{ duration: 30, type: 'work' }];
+
+    let currentTime = startTime;
+    for (const block of blocks) {
+      const numIntervals = Math.ceil(block.duration / 15);
+      for (let i = 0; i < numIntervals; i++) {
+        if (block.type === 'work' && occupiedSlots.includes(currentTime)) return false;
+        currentTime = addMinutes(currentTime, 15);
+      }
+    }
+
+    // Vérifier que le service se termine avant l'heure de fermeture
+    if (settings && formData.date) {
+      const dayName = getDayName(formData.date);
+      const daySettings = settings.workingHours?.[dayName];
+      if (daySettings && currentTime > daySettings.close) return false;
+    }
+
+    return true;
   };
 
   useEffect(() => {
@@ -252,24 +303,24 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
                     '13:00', '13:15', '13:30', '13:45', '14:00', '14:15', '14:30', '14:45',
                     '15:00', '15:15', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45'
                   ].map(t => {
-                    const isOccupied = occupiedSlots.includes(t);
+                    const isValid = isTimeValidForService(t, occupiedSlots);
                     const isSelected = formData.time === t;
                     return (
                       <button
                         key={t}
                         type="button"
-                        disabled={isOccupied}
-                        onClick={() => !isOccupied && setFormData({ ...formData, time: t })}
+                        disabled={!isValid}
+                        onClick={() => isValid && setFormData({ ...formData, time: t })}
                         style={{
                           padding: '8px 5px',
                           fontSize: '12px',
-                          border: `1px solid ${isOccupied ? '#fecaca' : '#eee'}`,
+                          border: `1px solid ${!isValid ? '#fecaca' : '#eee'}`,
                           borderRadius: '6px',
-                          background: isSelected ? '#1a1a1a' : isOccupied ? '#fef2f2' : '#fff',
-                          color: isSelected ? '#fff' : isOccupied ? '#ef4444' : '#1a1a1a',
-                          cursor: isOccupied ? 'not-allowed' : 'pointer',
-                          textDecoration: isOccupied ? 'line-through' : 'none',
-                          opacity: isOccupied ? 0.6 : 1,
+                          background: isSelected ? '#1a1a1a' : !isValid ? '#fef2f2' : '#fff',
+                          color: isSelected ? '#fff' : !isValid ? '#ef4444' : '#1a1a1a',
+                          cursor: !isValid ? 'not-allowed' : 'pointer',
+                          textDecoration: !isValid ? 'line-through' : 'none',
+                          opacity: !isValid ? 0.6 : 1,
                         }}
                       >
                         {t}
