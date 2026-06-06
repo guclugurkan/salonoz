@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
   const [categories, setCategories] = useState([]);
   const [staff, setStaff] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Recherche client
@@ -29,21 +30,36 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
 
   const fetchData = async () => {
     try {
-      const [catRes, staffRes] = await Promise.all([
+      const [catRes, staffRes, apptRes] = await Promise.all([
         fetch(`${API}/api/categories`),
-        fetch(`${API}/api/staff`)
+        fetch(`${API}/api/staff`),
+        fetch(`${API}/api/appointments`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
       const catData = await catRes.json();
       const staffData = await staffRes.json();
+      const apptData = await apptRes.json();
 
       if (catData.success) setCategories(catData.data);
       if (staffData.success) setStaff(staffData.data);
+      if (apptData.success) setAppointments(apptData.data);
     } catch (err) {
       console.error(err);
       showToast('Fout bij het laden van gegevens', 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const getOccupiedSlots = () => {
+    if (!formData.staff || !formData.date) return [];
+    return appointments
+      .filter(a =>
+        a.staff === formData.staff.name &&
+        a.date === formData.date &&
+        a.status !== 'cancelled' &&
+        a.status !== 'rejected'
+      )
+      .flatMap(a => (a.bookedSlots && a.bookedSlots.length > 0) ? a.bookedSlots : [a.time]);
   };
 
   useEffect(() => {
@@ -226,32 +242,43 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
 
           <div className="form-group" style={{ marginBottom: '20px' }}>
             <label className="info-label">Tijdstip</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
-              {[
-                '09:00', '09:15', '09:30', '09:45', '10:00', '10:15', '10:30', '10:45',
-                '11:00', '11:15', '11:30', '11:45', '12:00', '12:15', '12:30', '12:45',
-                '13:00', '13:15', '13:30', '13:45', '14:00', '14:15', '14:30', '14:45',
-                '15:00', '15:15', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45'
-              ].map(t => (
-                <button
-                  key={t}
-                  type="button"
-                  className={`time-slot ${formData.time === t ? 'selected' : ''}`}
-                  onClick={() => setFormData({ ...formData, time: t })}
-                  style={{
-                    padding: '8px 5px',
-                    fontSize: '12px',
-                    border: '1px solid #eee',
-                    borderRadius: '6px',
-                    background: formData.time === t ? '#1a1a1a' : '#fff',
-                    color: formData.time === t ? '#fff' : '#1a1a1a',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
+            {(() => {
+              const occupiedSlots = getOccupiedSlots();
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
+                  {[
+                    '09:00', '09:15', '09:30', '09:45', '10:00', '10:15', '10:30', '10:45',
+                    '11:00', '11:15', '11:30', '11:45', '12:00', '12:15', '12:30', '12:45',
+                    '13:00', '13:15', '13:30', '13:45', '14:00', '14:15', '14:30', '14:45',
+                    '15:00', '15:15', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45'
+                  ].map(t => {
+                    const isOccupied = occupiedSlots.includes(t);
+                    const isSelected = formData.time === t;
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        disabled={isOccupied}
+                        onClick={() => !isOccupied && setFormData({ ...formData, time: t })}
+                        style={{
+                          padding: '8px 5px',
+                          fontSize: '12px',
+                          border: `1px solid ${isOccupied ? '#fecaca' : '#eee'}`,
+                          borderRadius: '6px',
+                          background: isSelected ? '#1a1a1a' : isOccupied ? '#fef2f2' : '#fff',
+                          color: isSelected ? '#fff' : isOccupied ? '#ef4444' : '#1a1a1a',
+                          cursor: isOccupied ? 'not-allowed' : 'pointer',
+                          textDecoration: isOccupied ? 'line-through' : 'none',
+                          opacity: isOccupied ? 0.6 : 1,
+                        }}
+                      >
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
 
           <div className="form-divider" style={{ height: '1px', background: '#eee', margin: '30px 0' }}></div>
@@ -315,7 +342,6 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
                 placeholder="Naam van de klant"
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                required
               />
             </div>
             <div className="form-group">
@@ -327,7 +353,6 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
                 placeholder="Telefoonnummer"
                 value={formData.phone}
                 onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                required
               />
             </div>
           </div>
