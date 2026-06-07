@@ -161,7 +161,6 @@ function AdminDashboard() {
   const [draggingId, setDraggingId] = useState(null);
   const [dragOver, setDragOver] = useState(null); // { date, time }
   const [resizingId, setResizingId] = useState(null);
-  const [resizePreview, setResizePreview] = useState(null); // { appointmentId, date, currentSlots, previewSlots }
 
   // Quick Create Modal States
   const [quickCreate, setQuickCreate] = useState({ isOpen: false, date: '', time: '', staff: '' });
@@ -825,6 +824,31 @@ function AdminDashboard() {
       }));
     };
 
+    // Met à jour l'overlay directement dans le DOM — zéro re-render React
+    const updateOverlay = (appointmentId, extraSlots) => {
+      const overlay = document.querySelector(`[data-resize-overlay="${appointmentId}"]`);
+      const rowEl = document.querySelector('.calendar-row-wrapper');
+      const rowHeight = rowEl ? rowEl.getBoundingClientRect().height : 40;
+      if (!overlay) return;
+      if (extraSlots === 0) { overlay.style.display = 'none'; return; }
+      overlay.style.display = 'flex';
+      overlay.style.height = `${Math.abs(extraSlots) * rowHeight}px`;
+      if (extraSlots > 0) {
+        overlay.style.top = '100%';
+        overlay.style.bottom = 'auto';
+        overlay.style.background = 'rgba(251,191,36,0.35)';
+        overlay.style.borderColor = '#f59e0b';
+        overlay.style.color = '#92400e';
+      } else {
+        overlay.style.top = 'auto';
+        overlay.style.bottom = '7px';
+        overlay.style.background = 'rgba(0,0,0,0.15)';
+        overlay.style.borderColor = '#94a3b8';
+        overlay.style.color = '#475569';
+      }
+      overlay.textContent = extraSlots > 0 ? `+${extraSlots * 15} min` : `${extraSlots * 15} min`;
+    };
+
     const onMouseMove = (e) => {
       if (!resizeDataRef.current) return;
       const rowEl = document.querySelector('.calendar-row-wrapper');
@@ -832,22 +856,12 @@ function AdminDashboard() {
       const deltaY = e.clientY - resizeDataRef.current.startY;
       resizeDataRef.current.extraSlots = Math.round(deltaY / rowHeight);
 
-      if (rafId !== null) return; // throttle à 60fps max
+      if (rafId !== null) return;
       rafId = requestAnimationFrame(() => {
         rafId = null;
         const data = resizeDataRef.current;
         if (!data) return;
-        const appt = appointmentsRef.current.find(a => a.id === data.appointmentId);
-        if (!appt) return;
-        const blocks = normalizeBlocks(appt);
-        const last = blocks[blocks.length - 1];
-        last.duration = Math.max(15, last.duration + data.extraSlots * 15);
-        setResizePreview({
-          appointmentId: data.appointmentId,
-          date: appt.date,
-          currentSlots: appt.bookedSlots?.length > 0 ? appt.bookedSlots : [appt.time],
-          previewSlots: calculateBookedSlotsClient(appt.time, blocks),
-        });
+        updateOverlay(data.appointmentId, data.extraSlots);
       });
     };
 
@@ -858,8 +872,11 @@ function AdminDashboard() {
       document.body.style.userSelect = '';
       const data = resizeDataRef.current;
       resizeDataRef.current = null;
+      if (data) {
+        const overlay = document.querySelector(`[data-resize-overlay="${data.appointmentId}"]`);
+        if (overlay) overlay.style.display = 'none';
+      }
       setResizingId(null);
-      setResizePreview(null);
       if (!data || data.extraSlots === 0) return;
 
       const appt = appointmentsRef.current.find(a => a.id === data.appointmentId);
@@ -1369,8 +1386,6 @@ function AdminDashboard() {
                             const isContinued = timeIndex < weekCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
                             const isDragOver = dragOver?.date === dateStr && dragOver?.time === time;
                             const isResizingThis = resizingId === appointment?.id;
-                            const isResizeFading = isResizingThis && resizePreview && !resizePreview.previewSlots.includes(time);
-                            const isResizePreviewCell = !appointment && resizePreview?.date === dateStr && resizePreview.previewSlots.includes(time) && !resizePreview.currentSlots.includes(time);
                             const apptColor = appointment ? getAppointmentColor(appointment.service) : null;
 
                             return (
@@ -1407,7 +1422,7 @@ function AdminDashboard() {
                                           ? { background: apptColor.bg, borderColor: apptColor.border, color: apptColor.text }
                                           : {}),
                                       cursor: isResizingThis ? 'ns-resize' : 'grab',
-                                      opacity: draggingId === appointment.id ? 0.4 : (isResizeFading ? 0.2 : 1),
+                                      opacity: draggingId === appointment.id ? 0.4 : 1,
                                       position: 'relative',
                                       userSelect: 'none',
                                       transition: 'background 0.1s, opacity 0.1s',
@@ -1430,6 +1445,23 @@ function AdminDashboard() {
                                     )}
                                     {!isContinued && (
                                       <>
+                                        {/* Overlay preview — mis à jour directement via DOM, zéro re-render */}
+                                        <div
+                                          data-resize-overlay={appointment.id}
+                                          style={{
+                                            display: 'none',
+                                            position: 'absolute',
+                                            left: 0, right: 0,
+                                            zIndex: 20,
+                                            pointerEvents: 'none',
+                                            border: '2px dashed',
+                                            borderRadius: '4px',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '11px',
+                                            fontWeight: '700',
+                                          }}
+                                        />
                                         <div
                                           onMouseDown={(e) => {
                                             e.stopPropagation();
@@ -1454,15 +1486,6 @@ function AdminDashboard() {
                                       </>
                                     )}
                                   </div>
-                                ) : isResizePreviewCell ? (
-                                  <div style={{
-                                    background: 'rgba(251,191,36,0.3)',
-                                    border: '1px dashed #f59e0b',
-                                    borderRadius: '4px',
-                                    height: '80%',
-                                    margin: '2px',
-                                    pointerEvents: 'none',
-                                  }} />
                                 ) : (
                                   <span
                                     className="calendar-slot-empty"
