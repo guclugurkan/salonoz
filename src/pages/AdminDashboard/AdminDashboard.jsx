@@ -812,6 +812,7 @@ function AdminDashboard() {
   appointmentsRef.current = appointments;
   const handleResizeSubmitRef = React.useRef(null);
   handleResizeSubmitRef.current = handleResizeSubmit;
+  const isResizingRef = React.useRef(false);
 
   React.useEffect(() => {
     const onMouseMove = (e) => {
@@ -824,6 +825,9 @@ function AdminDashboard() {
     };
 
     const onMouseUp = async () => {
+      isResizingRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
       const state = resizeStateRef.current;
       if (!state) return;
       setResizeState(null);
@@ -1369,8 +1373,9 @@ function AdminDashboard() {
                                 {appointment ? (
                                   <div
                                     className={`calendar-appointment status-${appointment.status || 'pending'} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''} ${appointment.notes?.includes('[DUO') ? 'is-duo' : ''}`}
-                                    draggable={!resizeState}
+                                    draggable={true}
                                     onDragStart={(e) => {
+                                      if (isResizingRef.current) { e.preventDefault(); e.stopPropagation(); return; }
                                       e.dataTransfer.setData('appointmentId', appointment.id);
                                       e.dataTransfer.effectAllowed = 'move';
                                       setDraggingId(appointment.id);
@@ -1416,6 +1421,9 @@ function AdminDashboard() {
                                           onMouseDown={(e) => {
                                             e.stopPropagation();
                                             e.preventDefault();
+                                            isResizingRef.current = true;
+                                            document.body.style.cursor = 'ns-resize';
+                                            document.body.style.userSelect = 'none';
                                             setResizeState({ appointmentId: appointment.id, startY: e.clientY, extraSlots: 0 });
                                           }}
                                           style={{
