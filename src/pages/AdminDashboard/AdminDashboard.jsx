@@ -160,7 +160,7 @@ function AdminDashboard() {
   // Drag & Drop / Resize States
   const [draggingId, setDraggingId] = useState(null);
   const [dragOver, setDragOver] = useState(null); // { date, time }
-  const [resizeState, setResizeState] = useState(null); // { appointmentId, startY, extraSlots }
+  const [resizingId, setResizingId] = useState(null); // just the id being resized, no per-move state
 
   // Quick Create Modal States
   const [quickCreate, setQuickCreate] = useState({ isOpen: false, date: '', time: '', staff: '' });
@@ -805,9 +805,8 @@ function AdminDashboard() {
     } catch { showToast('Netwerkfout', 'error'); }
   };
 
-  // Global mouse events pour le resize
-  const resizeStateRef = React.useRef(resizeState);
-  resizeStateRef.current = resizeState;
+  // Global mouse events pour le resize — resizeDataRef stocke tout, AUCUN setState pendant mousemove
+  const resizeDataRef = React.useRef(null); // { appointmentId, startY, extraSlots }
   const appointmentsRef = React.useRef(appointments);
   appointmentsRef.current = appointments;
   const handleResizeSubmitRef = React.useRef(null);
@@ -816,32 +815,32 @@ function AdminDashboard() {
 
   React.useEffect(() => {
     const onMouseMove = (e) => {
-      if (!resizeStateRef.current) return;
+      if (!resizeDataRef.current) return;
       const rowEl = document.querySelector('.calendar-row-wrapper');
       const rowHeight = rowEl ? rowEl.getBoundingClientRect().height : 40;
-      const deltaY = e.clientY - resizeStateRef.current.startY;
-      const extraSlots = Math.round(deltaY / rowHeight);
-      setResizeState(prev => prev ? { ...prev, extraSlots } : null);
+      const deltaY = e.clientY - resizeDataRef.current.startY;
+      resizeDataRef.current.extraSlots = Math.round(deltaY / rowHeight);
+      // Pas de setState ici — zéro re-render pendant le drag
     };
 
     const onMouseUp = async () => {
       isResizingRef.current = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
-      const state = resizeStateRef.current;
-      if (!state) return;
-      setResizeState(null);
-      if (state.extraSlots === 0) return;
+      const data = resizeDataRef.current;
+      resizeDataRef.current = null;
+      setResizingId(null);
+      if (!data || data.extraSlots === 0) return;
 
-      const appt = appointmentsRef.current.find(a => a.id === state.appointmentId);
+      const appt = appointmentsRef.current.find(a => a.id === data.appointmentId);
       if (!appt) return;
 
       const blocks = (appt.blocks?.length > 0 ? appt.blocks : [{ type: 'work', duration: 30 }])
         .map(b => ({ type: b.type, duration: b.duration }));
       const last = blocks[blocks.length - 1];
-      last.duration = Math.max(15, last.duration + state.extraSlots * 15);
+      last.duration = Math.max(15, last.duration + data.extraSlots * 15);
 
-      await handleResizeSubmitRef.current(state.appointmentId, appt.date, appt.time, blocks);
+      await handleResizeSubmitRef.current(data.appointmentId, appt.date, appt.time, blocks);
     };
 
     window.addEventListener('mousemove', onMouseMove);
@@ -1124,17 +1123,6 @@ function AdminDashboard() {
   ]);
 
 
-  const resizePreview = useMemo(() => {
-    if (!resizeState) return null;
-    const appt = filteredAppointments.find(a => a.id === resizeState.appointmentId);
-    if (!appt || !appt.time) return null;
-    const blocks = (appt.blocks?.length > 0 ? appt.blocks : [{ type: 'work', duration: 30 }])
-      .map(b => ({ type: b.type, duration: b.duration }));
-    const last = blocks[blocks.length - 1];
-    last.duration = Math.max(15, last.duration + resizeState.extraSlots * 15);
-    return { appointmentId: appt.id, date: appt.date, slots: calculateBookedSlotsClient(appt.time, blocks) };
-  }, [resizeState, filteredAppointments]);
-
   const getAppointmentForCell = (dayDate, time) => {
     const dayKey = formatDateToYMD(dayDate);
 
@@ -1350,9 +1338,7 @@ function AdminDashboard() {
                             const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex - 1])?.id === appointment.id;
                             const isContinued = timeIndex < weekCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
                             const isDragOver = dragOver?.date === dateStr && dragOver?.time === time;
-                            const isResizingThis = resizeState?.appointmentId === appointment?.id;
-                            const isResizePreviewCell = !appointment && resizePreview?.date === dateStr && resizePreview?.slots.includes(time);
-                            const isResizeShrink = isResizingThis && resizePreview && !resizePreview.slots.includes(time);
+                            const isResizingThis = resizingId === appointment?.id;
                             const apptColor = appointment ? getAppointmentColor(appointment.service) : null;
 
                             return (
@@ -1381,7 +1367,7 @@ function AdminDashboard() {
                                       setDraggingId(appointment.id);
                                     }}
                                     onDragEnd={() => { setDraggingId(null); setDragOver(null); }}
-                                    onClick={() => { if (!resizeState) openEditModal(appointment); }}
+                                    onClick={() => { if (!resizingId) openEditModal(appointment); }}
                                     style={{
                                       ...(isResizingThis
                                         ? { background: '#fbbf24', borderColor: '#d97706', color: '#78350f' }
@@ -1389,7 +1375,7 @@ function AdminDashboard() {
                                           ? { background: apptColor.bg, borderColor: apptColor.border, color: apptColor.text }
                                           : {}),
                                       cursor: isResizingThis ? 'ns-resize' : 'grab',
-                                      opacity: draggingId === appointment.id ? 0.4 : (isResizeShrink ? 0.25 : 1),
+                                      opacity: draggingId === appointment.id ? 0.4 : 1,
                                       position: 'relative',
                                       userSelect: 'none',
                                       transition: 'background 0.1s, opacity 0.1s',
@@ -1412,11 +1398,6 @@ function AdminDashboard() {
                                     )}
                                     {!isContinued && (
                                       <>
-                                        {isResizingThis && resizeState.extraSlots !== 0 && (
-                                          <div style={{ position: 'absolute', top: '2px', right: '4px', fontSize: '10px', fontWeight: '700', color: '#78350f', background: 'rgba(255,255,255,0.7)', borderRadius: '3px', padding: '1px 4px', pointerEvents: 'none' }}>
-                                            {resizeState.extraSlots > 0 ? `+${resizeState.extraSlots * 15} min` : `${resizeState.extraSlots * 15} min`}
-                                          </div>
-                                        )}
                                         <div
                                           onMouseDown={(e) => {
                                             e.stopPropagation();
@@ -1424,7 +1405,8 @@ function AdminDashboard() {
                                             isResizingRef.current = true;
                                             document.body.style.cursor = 'ns-resize';
                                             document.body.style.userSelect = 'none';
-                                            setResizeState({ appointmentId: appointment.id, startY: e.clientY, extraSlots: 0 });
+                                            resizeDataRef.current = { appointmentId: appointment.id, startY: e.clientY, extraSlots: 0 };
+                                            setResizingId(appointment.id);
                                           }}
                                           style={{
                                             position: 'absolute', bottom: 0, left: 0, right: 0,
@@ -1440,21 +1422,6 @@ function AdminDashboard() {
                                       </>
                                     )}
                                   </div>
-                                ) : isResizePreviewCell ? (
-                                  <div style={{
-                                    background: 'rgba(251,191,36,0.25)',
-                                    border: '1px dashed #f59e0b',
-                                    borderRadius: '4px',
-                                    height: '80%',
-                                    margin: '2px',
-                                    pointerEvents: 'none',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '10px',
-                                    color: '#92400e',
-                                    fontWeight: '600',
-                                  }}>+</div>
                                 ) : (
                                   <span
                                     className="calendar-slot-empty"
