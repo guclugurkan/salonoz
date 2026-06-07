@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './AdminDashboard.css';
 import { GOOGLE_REVIEWS_URL } from '../../data/reviewsData';
@@ -142,6 +142,11 @@ function AdminDashboard() {
   const [editForm, setEditForm] = useState({ date: '', time: '', durationMinutes: 30 });
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editWhatsapp, setEditWhatsapp] = useState({ show: false, appointment: null });
+
+  // Drag & Drop / Resize States
+  const [draggingId, setDraggingId] = useState(null);
+  const [dragOver, setDragOver] = useState(null); // { date, time }
+  const [resizeState, setResizeState] = useState(null); // { appointmentId, startY, extraSlots }
 
   // Quick Create Modal States
   const [quickCreate, setQuickCreate] = useState({ isOpen: false, date: '', time: '', staff: '' });
@@ -729,6 +734,76 @@ function AdminDashboard() {
     finally { setQuickSubmitting(false); }
   };
 
+  const handleDrop = async (appointmentId, newDate, newTime) => {
+    const appt = appointments.find(a => a.id === appointmentId);
+    if (!appt || (appt.date === newDate && appt.time === newTime)) return;
+    const blocks = appt.blocks?.length > 0 ? appt.blocks : [{ type: 'work', duration: 30 }];
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/${appointmentId}/edit`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ date: newDate, time: newTime, blocks }),
+      });
+      const data = await res.json();
+      if (data.success) { showToast('Afspraak verplaatst!'); fetchAppointments(); }
+      else showToast(data.error || 'Fout bij verplaatsen', 'error');
+    } catch { showToast('Netwerkfout', 'error'); }
+  };
+
+  const handleResizeSubmit = async (id, date, time, blocks) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/${id}/edit`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ date, time, blocks }),
+      });
+      const data = await res.json();
+      if (data.success) { showToast('Duur bijgewerkt!'); fetchAppointments(); }
+      else showToast(data.error || 'Fout bij aanpassen', 'error');
+    } catch { showToast('Netwerkfout', 'error'); }
+  };
+
+  // Global mouse events pour le resize
+  const resizeStateRef = React.useRef(resizeState);
+  resizeStateRef.current = resizeState;
+  const appointmentsRef = React.useRef(appointments);
+  appointmentsRef.current = appointments;
+
+  React.useEffect(() => {
+    const onMouseMove = (e) => {
+      if (!resizeStateRef.current) return;
+      const rowEl = document.querySelector('.calendar-row-wrapper');
+      const rowHeight = rowEl ? rowEl.getBoundingClientRect().height : 40;
+      const deltaY = e.clientY - resizeStateRef.current.startY;
+      const extraSlots = Math.round(deltaY / rowHeight);
+      setResizeState(prev => prev ? { ...prev, extraSlots } : null);
+    };
+
+    const onMouseUp = async () => {
+      const state = resizeStateRef.current;
+      if (!state) return;
+      setResizeState(null);
+      if (state.extraSlots === 0) return;
+
+      const appt = appointmentsRef.current.find(a => a.id === state.appointmentId);
+      if (!appt) return;
+
+      const blocks = (appt.blocks?.length > 0 ? appt.blocks : [{ type: 'work', duration: 30 }])
+        .map(b => ({ ...b }));
+      const last = blocks[blocks.length - 1];
+      last.duration = Math.max(15, last.duration + state.extraSlots * 15);
+
+      await handleResizeSubmit(state.appointmentId, appt.date, appt.time, blocks);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, []);
+
   const handleSendConfirmationEmail = async (appointment) => {
     if (!appointment.email) { showToast('Geen e-mailadres voor deze klant', 'error'); return; }
     setSendingConfirmation(true);
@@ -1211,14 +1286,46 @@ function AdminDashboard() {
                         <div key={`row-${time}`} className="calendar-row-wrapper">
                           <div className="calendar-cell calendar-time-cell">{time}</div>
                           {weekDays.map((day) => {
+                            const dateStr = formatDateToYMD(day);
                             const appointment = getAppointmentForCell(day, time);
                             const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex - 1])?.id === appointment.id;
                             const isContinued = timeIndex < weekCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
-                            
+                            const isDragOver = dragOver?.date === dateStr && dragOver?.time === time;
+                            const isResizing = resizeState?.appointmentId === appointment?.id;
+
                             return (
-                              <div key={`${formatDateToYMD(day)}-${time}`} className={`calendar-cell calendar-slot-cell ${appointment ? 'has-appointment' : ''}`}>
+                              <div
+                                key={`${dateStr}-${time}`}
+                                className={`calendar-cell calendar-slot-cell ${appointment ? 'has-appointment' : ''}`}
+                                style={{ background: isDragOver && !appointment ? 'rgba(26,26,26,0.07)' : undefined }}
+                                onDragOver={(e) => { e.preventDefault(); setDragOver({ date: dateStr, time }); }}
+                                onDragLeave={() => setDragOver(null)}
+                                onDrop={(e) => {
+                                  e.preventDefault();
+                                  const id = e.dataTransfer.getData('appointmentId');
+                                  setDragOver(null);
+                                  setDraggingId(null);
+                                  if (id) handleDrop(id, dateStr, time);
+                                }}
+                              >
                                 {appointment ? (
-                                  <div className={`calendar-appointment status-${appointment.status || 'pending'} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''} ${appointment.notes?.includes('[DUO') ? 'is-duo' : ''}`} onClick={() => openEditModal(appointment)} style={{ cursor: 'pointer' }}>
+                                  <div
+                                    className={`calendar-appointment status-${appointment.status || 'pending'} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''} ${appointment.notes?.includes('[DUO') ? 'is-duo' : ''}`}
+                                    draggable={!resizeState}
+                                    onDragStart={(e) => {
+                                      e.dataTransfer.setData('appointmentId', appointment.id);
+                                      e.dataTransfer.effectAllowed = 'move';
+                                      setDraggingId(appointment.id);
+                                    }}
+                                    onDragEnd={() => { setDraggingId(null); setDragOver(null); }}
+                                    onClick={() => { if (!resizeState) openEditModal(appointment); }}
+                                    style={{
+                                      cursor: isResizing ? 'ns-resize' : 'grab',
+                                      opacity: draggingId === appointment.id ? 0.4 : 1,
+                                      position: 'relative',
+                                      userSelect: 'none',
+                                    }}
+                                  >
                                     {!isContinuation && (
                                       <>
                                         <div className="calendar-appointment-header">
@@ -1234,12 +1341,30 @@ function AdminDashboard() {
                                         </span>
                                       </>
                                     )}
+                                    {!isContinued && (
+                                      <div
+                                        onMouseDown={(e) => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          setResizeState({ appointmentId: appointment.id, startY: e.clientY, extraSlots: 0 });
+                                        }}
+                                        style={{
+                                          position: 'absolute', bottom: 0, left: 0, right: 0,
+                                          height: '7px', cursor: 'ns-resize',
+                                          background: 'rgba(0,0,0,0.18)', borderRadius: '0 0 4px 4px',
+                                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        }}
+                                        title="Sleep om duur aan te passen"
+                                      >
+                                        <div style={{ width: '20px', height: '2px', background: 'rgba(255,255,255,0.6)', borderRadius: '1px' }} />
+                                      </div>
+                                    )}
                                   </div>
                                 ) : (
                                   <span
                                     className="calendar-slot-empty"
                                     style={{ cursor: 'pointer', display: 'block', width: '100%', height: '100%' }}
-                                    onClick={() => openQuickCreate(formatDateToYMD(day), time)}
+                                    onClick={() => openQuickCreate(dateStr, time)}
                                     title="Klik om een afspraak toe te voegen"
                                   >+</span>
                                 )}
