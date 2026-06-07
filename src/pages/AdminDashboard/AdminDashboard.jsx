@@ -27,6 +27,20 @@ function addMinutes(timeStr, mins) {
   return date.toTimeString().substring(0, 5);
 }
 
+function calculateBookedSlotsClient(startTime, blocks) {
+  if (!blocks || blocks.length === 0) return [startTime];
+  let currentTime = startTime;
+  const slots = [];
+  for (const block of blocks) {
+    const numIntervals = Math.ceil(block.duration / 15);
+    for (let i = 0; i < numIntervals; i++) {
+      if (block.type === 'work') slots.push(currentTime);
+      currentTime = addMinutes(currentTime, 15);
+    }
+  }
+  return slots;
+}
+
 function getStartOfWeek(date) {
   const currentDate = new Date(date);
   const day = currentDate.getDay();
@@ -156,6 +170,7 @@ function AdminDashboard() {
   const [quickSubmitting, setQuickSubmitting] = useState(false);
   const [sendConfirmOnCreate, setSendConfirmOnCreate] = useState(false);
   const [sendingConfirmation, setSendingConfirmation] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   // UI States
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -231,6 +246,32 @@ function AdminDashboard() {
     } catch (err) {
       console.error('Error fetching categories:', err);
     }
+  };
+
+  const getAppointmentColor = (serviceName) => {
+    if (!serviceName || !categoriesData.length) return null;
+    let baseServiceName = serviceName;
+    if (serviceName.includes(' (') && serviceName.endsWith(')')) {
+      baseServiceName = serviceName.substring(0, serviceName.lastIndexOf(' ('));
+    }
+    for (const cat of categoriesData) {
+      if (cat.services?.some(s => s.name === baseServiceName)) {
+        const n = (cat.name || '').toLowerCase();
+        if (n.includes('heren') || n.includes('man') || n.includes('homme') || n.includes('jongen')) {
+          return { bg: '#dbeafe', border: '#60a5fa', text: '#1e3a8a' };
+        }
+        if (n.includes('dame') || n.includes('vrouw') || n.includes('femme') || n.includes('meisje')) {
+          return { bg: '#fce7f3', border: '#f472b6', text: '#9d174d' };
+        }
+        if (n.includes('kind') || n.includes('enfant') || n.includes('child')) {
+          return { bg: '#fef9c3', border: '#facc15', text: '#713f12' };
+        }
+        if (n.includes('keratine') || n.includes('extension') || n.includes('soin') || n.includes('traitement')) {
+          return { bg: '#f0fdf4', border: '#4ade80', text: '#14532d' };
+        }
+      }
+    }
+    return null;
   };
 
   const getServiceBlocks = (serviceName) => {
@@ -669,6 +710,7 @@ function AdminDashboard() {
 
   const closeEditModal = () => {
     setEditModal({ isOpen: false, appointment: null });
+    setDeleteConfirm(false);
   };
 
   const openQuickCreate = (date, time) => {
@@ -768,6 +810,8 @@ function AdminDashboard() {
   resizeStateRef.current = resizeState;
   const appointmentsRef = React.useRef(appointments);
   appointmentsRef.current = appointments;
+  const handleResizeSubmitRef = React.useRef(null);
+  handleResizeSubmitRef.current = handleResizeSubmit;
 
   React.useEffect(() => {
     const onMouseMove = (e) => {
@@ -789,11 +833,11 @@ function AdminDashboard() {
       if (!appt) return;
 
       const blocks = (appt.blocks?.length > 0 ? appt.blocks : [{ type: 'work', duration: 30 }])
-        .map(b => ({ ...b }));
+        .map(b => ({ type: b.type, duration: b.duration }));
       const last = blocks[blocks.length - 1];
       last.duration = Math.max(15, last.duration + state.extraSlots * 15);
 
-      await handleResizeSubmit(state.appointmentId, appt.date, appt.time, blocks);
+      await handleResizeSubmitRef.current(state.appointmentId, appt.date, appt.time, blocks);
     };
 
     window.addEventListener('mousemove', onMouseMove);
@@ -1076,6 +1120,17 @@ function AdminDashboard() {
   ]);
 
 
+  const resizePreview = useMemo(() => {
+    if (!resizeState) return null;
+    const appt = filteredAppointments.find(a => a.id === resizeState.appointmentId);
+    if (!appt || !appt.time) return null;
+    const blocks = (appt.blocks?.length > 0 ? appt.blocks : [{ type: 'work', duration: 30 }])
+      .map(b => ({ type: b.type, duration: b.duration }));
+    const last = blocks[blocks.length - 1];
+    last.duration = Math.max(15, last.duration + resizeState.extraSlots * 15);
+    return { appointmentId: appt.id, date: appt.date, slots: calculateBookedSlotsClient(appt.time, blocks) };
+  }, [resizeState, filteredAppointments]);
+
   const getAppointmentForCell = (dayDate, time) => {
     const dayKey = formatDateToYMD(dayDate);
 
@@ -1291,7 +1346,10 @@ function AdminDashboard() {
                             const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex - 1])?.id === appointment.id;
                             const isContinued = timeIndex < weekCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
                             const isDragOver = dragOver?.date === dateStr && dragOver?.time === time;
-                            const isResizing = resizeState?.appointmentId === appointment?.id;
+                            const isResizingThis = resizeState?.appointmentId === appointment?.id;
+                            const isResizePreviewCell = !appointment && resizePreview?.date === dateStr && resizePreview?.slots.includes(time);
+                            const isResizeShrink = isResizingThis && resizePreview && !resizePreview.slots.includes(time);
+                            const apptColor = appointment ? getAppointmentColor(appointment.service) : null;
 
                             return (
                               <div
@@ -1320,10 +1378,16 @@ function AdminDashboard() {
                                     onDragEnd={() => { setDraggingId(null); setDragOver(null); }}
                                     onClick={() => { if (!resizeState) openEditModal(appointment); }}
                                     style={{
-                                      cursor: isResizing ? 'ns-resize' : 'grab',
-                                      opacity: draggingId === appointment.id ? 0.4 : 1,
+                                      ...(isResizingThis
+                                        ? { background: '#fbbf24', borderColor: '#d97706', color: '#78350f' }
+                                        : apptColor
+                                          ? { background: apptColor.bg, borderColor: apptColor.border, color: apptColor.text }
+                                          : {}),
+                                      cursor: isResizingThis ? 'ns-resize' : 'grab',
+                                      opacity: draggingId === appointment.id ? 0.4 : (isResizeShrink ? 0.25 : 1),
                                       position: 'relative',
                                       userSelect: 'none',
+                                      transition: 'background 0.1s, opacity 0.1s',
                                     }}
                                   >
                                     {!isContinuation && (
@@ -1342,24 +1406,47 @@ function AdminDashboard() {
                                       </>
                                     )}
                                     {!isContinued && (
-                                      <div
-                                        onMouseDown={(e) => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          setResizeState({ appointmentId: appointment.id, startY: e.clientY, extraSlots: 0 });
-                                        }}
-                                        style={{
-                                          position: 'absolute', bottom: 0, left: 0, right: 0,
-                                          height: '7px', cursor: 'ns-resize',
-                                          background: 'rgba(0,0,0,0.18)', borderRadius: '0 0 4px 4px',
-                                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        }}
-                                        title="Sleep om duur aan te passen"
-                                      >
-                                        <div style={{ width: '20px', height: '2px', background: 'rgba(255,255,255,0.6)', borderRadius: '1px' }} />
-                                      </div>
+                                      <>
+                                        {isResizingThis && resizeState.extraSlots !== 0 && (
+                                          <div style={{ position: 'absolute', top: '2px', right: '4px', fontSize: '10px', fontWeight: '700', color: '#78350f', background: 'rgba(255,255,255,0.7)', borderRadius: '3px', padding: '1px 4px', pointerEvents: 'none' }}>
+                                            {resizeState.extraSlots > 0 ? `+${resizeState.extraSlots * 15} min` : `${resizeState.extraSlots * 15} min`}
+                                          </div>
+                                        )}
+                                        <div
+                                          onMouseDown={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            setResizeState({ appointmentId: appointment.id, startY: e.clientY, extraSlots: 0 });
+                                          }}
+                                          style={{
+                                            position: 'absolute', bottom: 0, left: 0, right: 0,
+                                            height: '7px', cursor: 'ns-resize',
+                                            background: isResizingThis ? 'rgba(120,53,15,0.4)' : 'rgba(0,0,0,0.18)',
+                                            borderRadius: '0 0 4px 4px',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                          }}
+                                          title="Sleep om duur aan te passen"
+                                        >
+                                          <div style={{ width: '20px', height: '2px', background: 'rgba(255,255,255,0.6)', borderRadius: '1px' }} />
+                                        </div>
+                                      </>
                                     )}
                                   </div>
+                                ) : isResizePreviewCell ? (
+                                  <div style={{
+                                    background: 'rgba(251,191,36,0.25)',
+                                    border: '1px dashed #f59e0b',
+                                    borderRadius: '4px',
+                                    height: '80%',
+                                    margin: '2px',
+                                    pointerEvents: 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '10px',
+                                    color: '#92400e',
+                                    fontWeight: '600',
+                                  }}>+</div>
                                 ) : (
                                   <span
                                     className="calendar-slot-empty"
@@ -2287,7 +2374,42 @@ function AdminDashboard() {
               </div>
             )}
 
+            {deleteConfirm ? (
+              <div style={{ margin: '16px 0 0', padding: '12px 14px', background: '#fef2f2', borderRadius: '10px', border: '1px solid #fca5a5', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '13px', color: '#991b1b', flex: 1 }}>Afspraak definitief verwijderen? Dit kan niet ongedaan worden.</span>
+                <button
+                  onClick={async () => {
+                    const id = editModal.appointment?.id;
+                    closeEditModal();
+                    try {
+                      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                      });
+                      if (response.ok) { fetchAppointments(); showToast('Afspraak verwijderd'); }
+                      else showToast('Fout bij verwijderen', 'error');
+                    } catch { showToast('Netwerkfout', 'error'); }
+                  }}
+                  style={{ padding: '6px 14px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '7px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap' }}
+                >
+                  Definitief verwijderen
+                </button>
+                <button
+                  onClick={() => setDeleteConfirm(false)}
+                  style={{ padding: '6px 12px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '7px', cursor: 'pointer', fontSize: '12px', whiteSpace: 'nowrap' }}
+                >
+                  Annuleren
+                </button>
+              </div>
+            ) : null}
+
             <div className="modal-actions">
+              <button
+                onClick={() => setDeleteConfirm(true)}
+                style={{ padding: '7px 14px', fontSize: '12px', background: '#fff', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '8px', cursor: 'pointer', marginRight: 'auto' }}
+              >
+                Verwijderen
+              </button>
               <button className="modal-button cancel" onClick={closeEditModal} disabled={editSubmitting}>
                 Annuleren
               </button>
