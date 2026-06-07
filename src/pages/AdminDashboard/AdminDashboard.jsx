@@ -849,7 +849,7 @@ function AdminDashboard() {
       overlay.textContent = extraSlots > 0 ? `+${extraSlots * 15} min` : `${extraSlots * 15} min`;
     };
 
-    const onMouseMove = (e) => {
+    const onPointerMove = (e) => {
       if (!resizeDataRef.current) return;
       const rowEl = document.querySelector('.calendar-row-wrapper');
       const rowHeight = rowEl ? rowEl.getBoundingClientRect().height : 40;
@@ -865,7 +865,7 @@ function AdminDashboard() {
       });
     };
 
-    const onMouseUp = async () => {
+    const onPointerUp = async () => {
       if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
       isResizingRef.current = false;
       document.body.style.cursor = '';
@@ -889,12 +889,12 @@ function AdminDashboard() {
       await handleResizeSubmitRef.current(data.appointmentId, appt.date, appt.time, blocks);
     };
 
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
     };
   }, []);
 
@@ -1463,9 +1463,10 @@ function AdminDashboard() {
                                           }}
                                         />
                                         <div
-                                          onMouseDown={(e) => {
+                                          onPointerDown={(e) => {
                                             e.stopPropagation();
                                             e.preventDefault();
+                                            e.currentTarget.setPointerCapture(e.pointerId);
                                             isResizingRef.current = true;
                                             document.body.style.cursor = 'ns-resize';
                                             document.body.style.userSelect = 'none';
@@ -1478,6 +1479,7 @@ function AdminDashboard() {
                                             background: isResizingThis ? 'rgba(120,53,15,0.4)' : 'rgba(0,0,0,0.18)',
                                             borderRadius: '0 0 4px 4px',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            touchAction: 'none',
                                           }}
                                           title="Sleep om duur aan te passen"
                                         >
