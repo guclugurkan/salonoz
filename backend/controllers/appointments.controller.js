@@ -10,6 +10,7 @@ const {
   editAppointment,
   toggleArchiveAppointment,
   deleteAppointment,
+  sendConfirmationEmailToClient,
 } = require("../services/appointments.service");
 
 // GET /api/services
@@ -185,6 +186,21 @@ async function deleteAppointmentController(req, res) {
   }
 }
 
+// PATCH /api/appointments/:id/send-confirmation
+async function sendConfirmationEmailController(req, res) {
+  try {
+    const { id } = req.params;
+    const result = await sendConfirmationEmailToClient(id);
+    if (!result.success) {
+      return res.status(result.statusCode).json({ success: false, error: result.error });
+    }
+    res.status(result.statusCode).json({ success: true, message: result.message, data: result.data });
+  } catch (error) {
+    console.error("Error sending confirmation email:", error);
+    res.status(500).json({ success: false, error: "Failed to send confirmation email" });
+  }
+}
+
 module.exports = {
   getServices,
   getStaff,
@@ -197,4 +213,5 @@ module.exports = {
   patchAppointmentEdit,
   patchAppointmentArchive,
   deleteAppointment: deleteAppointmentController,
+  sendConfirmationEmail: sendConfirmationEmailController,
 };

@@ -143,6 +143,15 @@ function AdminDashboard() {
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editWhatsapp, setEditWhatsapp] = useState({ show: false, appointment: null });
 
+  // Quick Create Modal States
+  const [quickCreate, setQuickCreate] = useState({ isOpen: false, date: '', time: '', staff: '' });
+  const [quickForm, setQuickForm] = useState({ name: '', email: '', phone: '', service: '', notes: '' });
+  const [quickClientSearch, setQuickClientSearch] = useState('');
+  const [quickClientSuggestions, setQuickClientSuggestions] = useState([]);
+  const [quickSubmitting, setQuickSubmitting] = useState(false);
+  const [sendConfirmOnCreate, setSendConfirmOnCreate] = useState(false);
+  const [sendingConfirmation, setSendingConfirmation] = useState(false);
+
   // UI States
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -657,6 +666,89 @@ function AdminDashboard() {
     setEditModal({ isOpen: false, appointment: null });
   };
 
+  const openQuickCreate = (date, time) => {
+    setQuickCreate({ isOpen: true, date, time, staff: selectedStaff });
+    setQuickForm({ name: '', email: '', phone: '', service: '', notes: '' });
+    setQuickClientSearch('');
+    setQuickClientSuggestions([]);
+    setSendConfirmOnCreate(false);
+  };
+
+  const closeQuickCreate = () => {
+    setQuickCreate({ isOpen: false, date: '', time: '', staff: '' });
+  };
+
+  const handleQuickClientSearch = async (q) => {
+    setQuickClientSearch(q);
+    if (!q.trim()) { setQuickClientSuggestions([]); return; }
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/clients/search?q=${encodeURIComponent(q)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) setQuickClientSuggestions(data.data);
+    } catch { setQuickClientSuggestions([]); }
+  };
+
+  const handleQuickClientSelect = (client) => {
+    setQuickForm(prev => ({ ...prev, name: client.name, email: client.email, phone: client.phone }));
+    setQuickClientSearch(client.name);
+    setQuickClientSuggestions([]);
+  };
+
+  const handleQuickSubmit = async () => {
+    if (!quickForm.name.trim()) { showToast('Vul de naam in', 'error'); return; }
+    setQuickSubmitting(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          name: quickForm.name,
+          email: quickForm.email,
+          phone: quickForm.phone,
+          service: quickForm.service,
+          notes: quickForm.notes,
+          staff: quickCreate.staff,
+          date: quickCreate.date,
+          time: quickCreate.time,
+          status: 'confirmed',
+          adminOverride: true,
+          sendConfirmationEmail: sendConfirmOnCreate,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Afspraak aangemaakt!');
+        closeQuickCreate();
+        fetchAppointments();
+      } else {
+        showToast(data.error || 'Fout bij aanmaken', 'error');
+      }
+    } catch { showToast('Netwerkfout', 'error'); }
+    finally { setQuickSubmitting(false); }
+  };
+
+  const handleSendConfirmationEmail = async (appointment) => {
+    if (!appointment.email) { showToast('Geen e-mailadres voor deze klant', 'error'); return; }
+    setSendingConfirmation(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/appointments/${appointment.id}/send-confirmation`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Mail verzonden!');
+        fetchAppointments();
+        setEditModal(prev => ({ ...prev, appointment: { ...prev.appointment, confirmationSent: true, confirmationSentAt: new Date().toISOString() } }));
+      } else {
+        showToast(data.error || 'Fout bij verzenden', 'error');
+      }
+    } catch { showToast('Netwerkfout', 'error'); }
+    finally { setSendingConfirmation(false); }
+  };
+
   const updateBlock = (index, field, value) => {
     setEditForm(prev => {
       const newBlocks = [...prev.blocks];
@@ -1144,7 +1236,12 @@ function AdminDashboard() {
                                     )}
                                   </div>
                                 ) : (
-                                  <span className="calendar-slot-empty">—</span>
+                                  <span
+                                    className="calendar-slot-empty"
+                                    style={{ cursor: 'pointer', display: 'block', width: '100%', height: '100%' }}
+                                    onClick={() => openQuickCreate(formatDateToYMD(day), time)}
+                                    title="Klik om een afspraak toe te voegen"
+                                  >+</span>
                                 )}
                               </div>
                             );
@@ -2042,6 +2139,29 @@ function AdminDashboard() {
               </div>
             </div>
 
+            {/* Bouton mail de confirmation */}
+            {editModal.appointment?.email && (
+              <div style={{ margin: '16px 0 0', padding: '14px', background: editModal.appointment?.confirmationSent ? '#f0fdf4' : '#f8fafc', borderRadius: '10px', border: `1px solid ${editModal.appointment?.confirmationSent ? '#bbf7d0' : '#e2e8f0'}` }}>
+                {editModal.appointment?.confirmationSent ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontSize: '13px' }}>
+                    <span style={{ fontSize: '16px' }}>✓</span>
+                    <span>Bevestigingsmail al verzonden{editModal.appointment?.confirmationSentAt ? ` op ${new Date(editModal.appointment.confirmationSentAt).toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' })}` : ''}</span>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                    <span style={{ fontSize: '13px', color: '#64748b' }}>Nog geen bevestigingsmail verstuurd</span>
+                    <button
+                      onClick={() => handleSendConfirmationEmail(editModal.appointment)}
+                      disabled={sendingConfirmation}
+                      style={{ padding: '7px 14px', fontSize: '12px', background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    >
+                      {sendingConfirmation ? 'Bezig...' : '📧 Stuur bevestigingsmail'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="modal-actions">
               <button className="modal-button cancel" onClick={closeEditModal} disabled={editSubmitting}>
                 Annuleren
@@ -2083,6 +2203,99 @@ function AdminDashboard() {
                 }}
               >
                 Verstuur via WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Quick Create Modal */}
+      {quickCreate.isOpen && (
+        <div className="modal-overlay" onClick={closeQuickCreate}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <h3 className="modal-title">Nieuwe Afspraak</h3>
+            <p className="modal-subtitle">{quickCreate.staff} · {quickCreate.date} · {quickCreate.time}</p>
+
+            {/* Recherche client */}
+            <div style={{ position: 'relative', marginBottom: '14px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Klant zoeken</label>
+              <input
+                type="text"
+                placeholder="Zoek bestaande klant..."
+                value={quickClientSearch}
+                onChange={e => handleQuickClientSearch(e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }}
+              />
+              {quickClientSuggestions.length > 0 && (
+                <ul style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 200, listStyle: 'none', margin: '4px 0 0', padding: '4px 0', maxHeight: '180px', overflowY: 'auto' }}>
+                  {quickClientSuggestions.map(c => (
+                    <li key={c._id} onClick={() => handleQuickClientSelect(c)}
+                      style={{ padding: '9px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', fontSize: '13px', borderBottom: '1px solid #f8fafc' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span style={{ fontWeight: '500' }}>{c.name}</span>
+                      <span style={{ color: '#94a3b8' }}>{c.phone}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Naam *</label>
+                <input type="text" placeholder="Naam klant" value={quickForm.name}
+                  onChange={e => setQuickForm(p => ({ ...p, name: e.target.value }))}
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Telefoon</label>
+                <input type="tel" placeholder="Telefoonnummer" value={quickForm.phone}
+                  onChange={e => setQuickForm(p => ({ ...p, phone: e.target.value }))}
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>E-mail</label>
+              <input type="email" placeholder="E-mailadres" value={quickForm.email}
+                onChange={e => setQuickForm(p => ({ ...p, email: e.target.value }))}
+                style={{ width: '100%', padding: '10px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Service</label>
+              <select value={quickForm.service} onChange={e => setQuickForm(p => ({ ...p, service: e.target.value }))}
+                style={{ width: '100%', padding: '10px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', background: '#fff' }}>
+                <option value="">— Geen service —</option>
+                {categoriesData.map(cat => (
+                  <optgroup key={cat.id} label={cat.name}>
+                    {cat.services?.map(srv => (
+                      srv.variants?.length > 0
+                        ? srv.variants.map(v => <option key={`${srv.id}-${v.name}`} value={`${srv.name} (${v.name})`}>{srv.name} ({v.name})</option>)
+                        : <option key={srv.id} value={srv.name}>{srv.name}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Opmerkingen</label>
+              <textarea placeholder="Optionele opmerkingen..." value={quickForm.notes}
+                onChange={e => setQuickForm(p => ({ ...p, notes: e.target.value }))}
+                rows={2} style={{ width: '100%', padding: '10px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', resize: 'vertical', boxSizing: 'border-box' }} />
+            </div>
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#374151', cursor: 'pointer', marginBottom: '20px' }}>
+              <input type="checkbox" checked={sendConfirmOnCreate} onChange={e => setSendConfirmOnCreate(e.target.checked)} style={{ accentColor: '#1a1a1a' }} />
+              Stuur bevestigingsmail naar de klant
+            </label>
+
+            <div className="modal-actions">
+              <button className="modal-button cancel" onClick={closeQuickCreate} disabled={quickSubmitting}>Annuleren</button>
+              <button className="modal-button submit" onClick={handleQuickSubmit} disabled={quickSubmitting}>
+                {quickSubmitting ? 'Bezig...' : 'Afspraak Aanmaken'}
               </button>
             </div>
           </div>

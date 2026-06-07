@@ -474,6 +474,34 @@ async function editAppointment(id, data) {
   return { success: true, statusCode: 200, data: appointment, message: "Appointment updated successfully." };
 }
 
+async function sendConfirmationEmailToClient(id) {
+  const appointment = await Appointment.findById(id);
+  if (!appointment) {
+    return { success: false, statusCode: 404, error: "Appointment not found." };
+  }
+  if (!appointment.email) {
+    return { success: false, statusCode: 400, error: "Geen e-mailadres voor deze klant." };
+  }
+
+  const confirmedEmail = getConfirmedAppointmentEmail(appointment);
+  const sent = await sendEmail({
+    to: appointment.email,
+    subject: confirmedEmail.subject,
+    text: confirmedEmail.text,
+    html: confirmedEmail.html,
+  });
+
+  if (!sent) {
+    return { success: false, statusCode: 500, error: "Fout bij verzenden van e-mail." };
+  }
+
+  appointment.confirmationSent = true;
+  appointment.confirmationSentAt = new Date();
+  await appointment.save();
+
+  return { success: true, statusCode: 200, data: appointment, message: "Mail verzonden." };
+}
+
 async function deleteAppointment(id) {
   const appointment = await Appointment.findByIdAndDelete(id);
   if (!appointment) {
@@ -501,6 +529,7 @@ module.exports = {
   editAppointment,
   toggleArchiveAppointment,
   deleteAppointment,
+  sendConfirmationEmailToClient,
   sendTestEmail,
   calculateBookedSlots,
 };

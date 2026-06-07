@@ -12,6 +12,7 @@ const {
   patchAppointmentEdit,
   patchAppointmentArchive,
   deleteAppointment,
+  sendConfirmationEmail,
 } = require("../controllers/appointments.controller");
 
 router.get("/services", getServices);
@@ -22,6 +23,7 @@ router.get("/appointments/cancel", cancelByToken);
 router.put("/appointments/:id", verifyToken, putAppointmentStatus);
 router.patch("/appointments/:id/edit", verifyToken, patchAppointmentEdit);
 router.patch("/appointments/:id/archive", verifyToken, patchAppointmentArchive);
+router.patch("/appointments/:id/send-confirmation", verifyToken, sendConfirmationEmail);
 router.delete("/appointments/:id", verifyToken, deleteAppointment);
 
 module.exports = router;
