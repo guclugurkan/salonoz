@@ -25,6 +25,7 @@ export default function Header() {
     { label: "Gallery",     to: "/gallery" },
     { label: "Contact",     to: "/contact" },
     { label: "Reviews",     to: "/reviews" },
+    { label: "Voorwaarden", to: "/voorwaarden" },
   ];
 
   return (

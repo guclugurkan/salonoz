@@ -109,6 +109,39 @@ export default function PricingPage() {
           <h1 className="pp__title">Diensten</h1>
         </div>
 
+        {/* Pricing info sections */}
+        <div className={`pp__info-sections ${isVisible ? "is-visible" : ""}`}>
+          <div className="pp__info-section">
+            <h2 className="pp__info-title">Tarieven & Prijsinformatie</h2>
+            <p>Onze prijzen zijn richtprijzen <strong>vanaf</strong> en kunnen variëren afhankelijk van de gekozen techniek, de haarlengte, haardikte en het benodigde productverbruik.</p>
+            <p>Wenst u vooraf een exacte prijsinschatting? Neem gerust contact met ons op via sociale media, telefonisch of kom vrijblijvend langs voor een <strong>gratis consultatie</strong>.</p>
+          </div>
+
+          <div className="pp__info-section">
+            <h2 className="pp__info-title">Kleuringen & technische behandelingen</h2>
+            <p>Behandelingen zoals balayage, ombre, sombre en babylights zijn maatwerk. De uiteindelijke prijs is afhankelijk van:</p>
+            <ul className="pp__info-list">
+              <li>Haarlengte en haardikte</li>
+              <li>Hoeveelheid product die nodig is</li>
+              <li>Eventuele extra toners of nabehandelingen</li>
+              <li>Gewenste oplichting en eindresultaat</li>
+            </ul>
+            <p className="pp__info-note">Kleurproducten worden nauwkeurig afgewogen op basis van het effectief gebruikte product. Bij langer of dikker haar kan een supplement aangerekend worden.</p>
+          </div>
+
+          <div className="pp__info-section">
+            <h2 className="pp__info-title">Inbegrepen in de prijs</h2>
+            <p>Volgende zaken zijn <strong>steeds inbegrepen</strong>:</p>
+            <ul className="pp__info-list pp__info-list--inline">
+              <li>Wassen</li>
+              <li>Standaard verzorging</li>
+              <li>Stylingproducten</li>
+              <li>Basisafwerking / styling</li>
+            </ul>
+            <p className="pp__info-note">Extra verzorgingen of bijkomende stylingdiensten worden afzonderlijk aangerekend.</p>
+          </div>
+        </div>
+
         {/* Accordion */}
         {loading ? (
           <div className="state-container">
