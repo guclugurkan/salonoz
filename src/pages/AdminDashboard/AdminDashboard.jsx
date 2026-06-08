@@ -160,7 +160,6 @@ function AdminDashboard() {
   // Drag & Drop / Resize States
   const [draggingId, setDraggingId] = useState(null);
   const [dragOver, setDragOver] = useState(null); // { date, time }
-  const [resizingId, setResizingId] = useState(null);
 
   // Quick Create Modal States
   const [quickCreate, setQuickCreate] = useState({ isOpen: false, date: '', time: '', staff: '' });
@@ -875,8 +874,15 @@ function AdminDashboard() {
       if (data) {
         const overlay = document.querySelector(`[data-resize-overlay="${data.appointmentId}"]`);
         if (overlay) overlay.style.display = 'none';
+        // Restaurer la couleur originale du bloc
+        const apptDiv = document.querySelector(`[data-appt-id="${data.appointmentId}"]`);
+        if (apptDiv) {
+          apptDiv.style.background = '';
+          apptDiv.style.borderColor = '';
+          apptDiv.style.color = '';
+          apptDiv.style.cursor = '';
+        }
       }
-      setResizingId(null);
       if (!data || data.extraSlots === 0) return;
 
       const appt = appointmentsRef.current.find(a => a.id === data.appointmentId);
@@ -1385,7 +1391,6 @@ function AdminDashboard() {
                             const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex - 1])?.id === appointment.id;
                             const isContinued = timeIndex < weekCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(day, weekCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
                             const isDragOver = dragOver?.date === dateStr && dragOver?.time === time;
-                            const isResizingThis = resizingId === appointment?.id;
                             const apptColor = appointment ? getAppointmentColor(appointment.service) : null;
 
                             return (
@@ -1405,6 +1410,7 @@ function AdminDashboard() {
                               >
                                 {appointment ? (
                                   <div
+                                    data-appt-id={appointment.id}
                                     className={`calendar-appointment status-${appointment.status || 'pending'} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''} ${appointment.notes?.includes('[DUO') ? 'is-duo' : ''}`}
                                     draggable={true}
                                     onDragStart={(e) => {
@@ -1414,18 +1420,15 @@ function AdminDashboard() {
                                       setDraggingId(appointment.id);
                                     }}
                                     onDragEnd={() => { setDraggingId(null); setDragOver(null); }}
-                                    onClick={() => { if (!resizingId) openEditModal(appointment); }}
+                                    onClick={() => { if (!isResizingRef.current) openEditModal(appointment); }}
                                     style={{
-                                      ...(isResizingThis
-                                        ? { background: '#fbbf24', borderColor: '#d97706', color: '#78350f' }
-                                        : apptColor
-                                          ? { background: apptColor.bg, borderColor: apptColor.border, color: apptColor.text }
-                                          : {}),
-                                      cursor: isResizingThis ? 'ns-resize' : 'grab',
+                                      ...(apptColor
+                                        ? { background: apptColor.bg, borderColor: apptColor.border, color: apptColor.text }
+                                        : {}),
                                       opacity: draggingId === appointment.id ? 0.4 : 1,
                                       position: 'relative',
                                       userSelect: 'none',
-                                      transition: 'background 0.1s, opacity 0.1s',
+                                      transition: 'opacity 0.1s',
                                     }}
                                   >
                                     {!isContinuation && (
@@ -1471,12 +1474,20 @@ function AdminDashboard() {
                                             document.body.style.cursor = 'ns-resize';
                                             document.body.style.userSelect = 'none';
                                             resizeDataRef.current = { appointmentId: appointment.id, startY: e.clientY, extraSlots: 0 };
-                                            setResizingId(appointment.id);
+                                            // Couleur ambre directement en DOM — aucun setState, aucun re-render
+                                            const apptDiv = document.querySelector(`[data-appt-id="${appointment.id}"]`);
+                                            if (apptDiv) {
+                                              apptDiv.style.background = '#fbbf24';
+                                              apptDiv.style.borderColor = '#d97706';
+                                              apptDiv.style.color = '#78350f';
+                                              apptDiv.style.cursor = 'ns-resize';
+                                            }
                                           }}
+                                          onClick={(e) => e.stopPropagation()}
                                           style={{
                                             position: 'absolute', bottom: 0, left: 0, right: 0,
                                             height: '7px', cursor: 'ns-resize',
-                                            background: isResizingThis ? 'rgba(120,53,15,0.4)' : 'rgba(0,0,0,0.18)',
+                                            background: 'rgba(0,0,0,0.18)',
                                             borderRadius: '0 0 4px 4px',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             touchAction: 'none',
