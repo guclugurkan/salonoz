@@ -35,6 +35,7 @@ export default function Reservation() {
   const [waitlistError, setWaitlistError] = useState(null)
   const [settings, setSettings] = useState(null)
   const [staff, setStaff] = useState([])
+  const [rulesAccepted, setRulesAccepted] = useState(false)
   const [formData, setFormData] = useState({
     category: null,
     service: null,
@@ -425,6 +426,48 @@ export default function Reservation() {
               Nieuwe Reservatie Boeken
             </button>
             <a href="/" className="btn-secondary success-btn-home">Terug naar Home</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!rulesAccepted) {
+    return (
+      <div className="reservation-page">
+        <div className="rules-modal">
+          <div className="rules-modal__header">
+            <h1 className="rules-modal__salon">SALON OZ</h1>
+            <h2 className="rules-modal__title">Salonregels & Annulatiebeleid</h2>
+          </div>
+          <div className="rules-modal__body">
+            <div className="rules-modal__section">
+              <h3>📅 Afspraken</h3>
+              <ul>
+                <li>Online reservaties zijn pas definitief na bevestiging per e-mail.</li>
+                <li>Gelieve op tijd aanwezig te zijn voor uw afspraak.</li>
+              </ul>
+            </div>
+            <div className="rules-modal__section">
+              <h3>❌ Annulatie</h3>
+              <ul>
+                <li>Annuleren kan tot <strong>24u voor uw afspraak</strong> via de link in uw bevestigingsmail.</li>
+                <li>Bij grote behandelingen: telefonisch via <a href="tel:+320485550271">0485 55 02 71</a>.</li>
+                <li>Niet opdagen of te laat annuleren: het <strong>volledige bedrag wordt aangerekend</strong>.</li>
+              </ul>
+            </div>
+            <div className="rules-modal__section">
+              <h3>💳 Betaling</h3>
+              <ul>
+                <li>Betaling ter plaatse via cash of Payconiq.</li>
+              </ul>
+            </div>
+          </div>
+          <div className="rules-modal__footer">
+            <p className="rules-modal__notice">Door op "Ik ga akkoord" te klikken, bevestigt u dat u deze regels heeft gelezen en accepteert.</p>
+            <button className="rules-modal__btn" onClick={() => setRulesAccepted(true)}>
+              Ik ga akkoord
+            </button>
           </div>
         </div>
       </div>

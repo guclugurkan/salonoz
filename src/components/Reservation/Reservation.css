@@ -1058,6 +1058,131 @@
   flex-shrink: 0;
 }
 
+/* --------------------------------
+   Rules Modal (pre-reservation)
+-------------------------------- */
+.rules-modal {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  overflow: hidden;
+  font-family: "Inter", sans-serif;
+}
+
+.rules-modal__header {
+  background: #111;
+  color: #fff;
+  padding: 32px 32px 24px;
+  text-align: center;
+}
+
+.rules-modal__salon {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #d4af7a;
+  margin: 0 0 10px;
+}
+
+.rules-modal__title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: #fff;
+}
+
+.rules-modal__body {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rules-modal__section h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #111;
+  margin: 0 0 10px;
+}
+
+.rules-modal__section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rules-modal__section ul li {
+  font-size: 13px;
+  color: #444;
+  padding-left: 14px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.rules-modal__section ul li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
+  color: #999;
+}
+
+.rules-modal__section a {
+  color: #111;
+  font-weight: 600;
+}
+
+.rules-modal__footer {
+  padding: 20px 32px 28px;
+  border-top: 1px solid #f0f0f0;
+  text-align: center;
+}
+
+.rules-modal__notice {
+  font-size: 11px;
+  color: #999;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.rules-modal__btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.rules-modal__btn:hover {
+  background: #333;
+}
+
+@media (max-width: 640px) {
+  .rules-modal__header {
+    padding: 24px 20px 18px;
+  }
+  .rules-modal__body {
+    padding: 20px 20px;
+  }
+  .rules-modal__footer {
+    padding: 16px 20px 24px;
+  }
+}
+
 .waitlist-success p {
   font-size: 13px;
   color: #166534;
