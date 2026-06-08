@@ -177,9 +177,8 @@ export default function Reservation() {
 
     // Check if the service ends before closing time
     if (settings) {
-      const dayName = getDayName(formData.date);
-      const daySettings = settings.workingHours[dayName];
-      if (daySettings && currentStartTime > daySettings.close) {
+      const { close } = getEffectiveHours(formData.date, settings);
+      if (close && currentStartTime > close) {
         return false;
       }
     }
@@ -189,27 +188,31 @@ export default function Reservation() {
 
   const getDayName = (dateStr) => {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    const date = new Date(dateStr + 'T00:00:00');
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     return days[date.getDay()];
   }
 
+  const getEffectiveHours = (dateStr, s) => {
+    if (!dateStr || !s) return { open: null, close: null, isClosed: false };
+    const override = s.dateOverrides?.find(o => o.date === dateStr);
+    if (override) return { open: override.open, close: override.close, isClosed: override.isClosed || false };
+    const dayName = getDayName(dateStr);
+    const daySettings = s.workingHours?.[dayName];
+    if (!daySettings || daySettings.closed) return { open: null, close: null, isClosed: true };
+    return { open: daySettings.open, close: daySettings.close, isClosed: false };
+  }
+
   const getAvailableTimeSlots = () => {
     if (!formData.date || !settings) return timeSlots;
-    
-    // Check if date is in closedDays
+
     if (settings.closedDays && settings.closedDays.includes(formData.date)) return [];
-    
-    const dayName = getDayName(formData.date);
-    const daySettings = settings.workingHours[dayName];
-    
-    if (!daySettings || daySettings.closed) return [];
-    
-    const { open, close } = daySettings;
-    
-    return timeSlots.filter(slot => {
-      return slot >= open && slot < close;
-    });
+
+    const { open, close, isClosed } = getEffectiveHours(formData.date, settings);
+
+    if (isClosed || !open || !close) return [];
+
+    return timeSlots.filter(slot => slot >= open && slot < close);
   }
 
   const dynamicTimeSlots = getAvailableTimeSlots();
