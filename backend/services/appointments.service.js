@@ -424,17 +424,23 @@ async function toggleArchiveAppointment(id) {
 }
 
 async function editAppointment(id, data) {
-  const { date, time, blocks } = data;
+  const { date, time, blocks: rawBlocks } = data;
 
-  if (!date || !time || !blocks || !Array.isArray(blocks) || blocks.length === 0) {
+  if (!date || !time || !rawBlocks || !Array.isArray(rawBlocks) || rawBlocks.length === 0) {
     return { success: false, statusCode: 400, error: "date, time and blocks are required." };
   }
 
-  for (const block of blocks) {
-    if (!["work", "pause"].includes(block.type) || !block.duration || block.duration < 15) {
-      return { success: false, statusCode: 400, error: "Each block must have a valid type (work/pause) and a duration of at least 15 min." };
+  // Normalize blocks — handle any type/duration inconsistency coming from the client
+  const blocks = rawBlocks.map(b => {
+    let type = 'work';
+    if (typeof b.type === 'string' && ['work', 'pause'].includes(b.type)) {
+      type = b.type;
+    } else if (b.type && typeof b.type === 'object' && typeof b.type.type === 'string' && ['work', 'pause'].includes(b.type.type)) {
+      type = b.type.type;
     }
-  }
+    const duration = (typeof b.duration === 'number' && b.duration >= 15) ? b.duration : 30;
+    return { type, duration };
+  });
 
   const appointment = await Appointment.findById(id);
   if (!appointment) {
