@@ -2811,6 +2811,17 @@
     padding-bottom: 0;
   }
 
+  .timeline-slot.is-drag-target .slot-content {
+    background: rgba(251, 191, 36, 0.25);
+    border-radius: 6px;
+    outline: 2px dashed #f59e0b;
+  }
+
+  .timeline-slot.is-drag-target .slot-time {
+    color: #92400e;
+    font-weight: 800;
+  }
+
   .mini-card.is-continuation {
     margin-top: 0;
     border-top: none;

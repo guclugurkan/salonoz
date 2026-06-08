@@ -835,6 +835,8 @@ function AdminDashboard() {
   appointmentsRef.current = appointments;
   const handleResizeSubmitRef = React.useRef(null);
   handleResizeSubmitRef.current = handleResizeSubmit;
+  const handleDropRef = React.useRef(null);
+  handleDropRef.current = handleDrop;
   const isResizingRef = React.useRef(false);
 
   const handleSendConfirmationEmail = async (appointment) => {
@@ -1528,13 +1530,111 @@ function AdminDashboard() {
                         const appointment = getAppointmentForCell(weekDays[selectedDayIndex], time);
                         const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(weekDays[selectedDayIndex], dayCalendarTimeSlots[timeIndex - 1])?.id === appointment.id;
                         const isContinued = timeIndex < dayCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(weekDays[selectedDayIndex], dayCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
+                        const mobileApptColor = appointment ? getAppointmentColor(appointment.service) : null;
 
                         return (
-                          <div key={`timeline-${time}`} className="timeline-slot">
+                          <div key={`timeline-${time}`} className="timeline-slot" data-mobile-time={time}>
                             <div className="slot-time">{time}</div>
                             <div className={`slot-content ${appointment ? 'has-appointment' : ''}`}>
                               {appointment ? (
-                                <div className={`mini-card status-${appointment.status} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''}`} onClick={() => openEditModal(appointment)} style={{ cursor: 'pointer' }}>
+                                <div
+                                  data-appt-id={appointment.id}
+                                  className={`mini-card status-${appointment.status} ${isContinuation ? 'is-continuation' : ''} ${isContinued ? 'is-continued' : ''}`}
+                                  style={{
+                                    cursor: 'pointer',
+                                    position: 'relative',
+                                    touchAction: 'pan-y',
+                                    ...(mobileApptColor ? { background: mobileApptColor.bg, borderColor: mobileApptColor.border, color: mobileApptColor.text } : {}),
+                                  }}
+                                  onPointerDown={(e) => {
+                                    if (e.target.closest('[data-resize-handle]')) return;
+                                    e.stopPropagation();
+                                    const card = e.currentTarget;
+                                    const startX = e.clientX;
+                                    const startY = e.clientY;
+                                    const apptId = appointment.id;
+                                    const pointerId = e.pointerId;
+                                    let dragMode = false;
+                                    let cancelled = false;
+                                    let ghost = null;
+                                    let lastTargetSlot = null;
+
+                                    const cleanup = () => {
+                                      clearTimeout(timer);
+                                      card.removeEventListener('pointermove', onMove);
+                                      card.removeEventListener('pointerup', onUp);
+                                      card.removeEventListener('pointercancel', onCancel);
+                                      if (ghost) { ghost.remove(); ghost = null; }
+                                      if (lastTargetSlot) { lastTargetSlot.classList.remove('is-drag-target'); lastTargetSlot = null; }
+                                      document.querySelectorAll(`[data-appt-id="${apptId}"]`).forEach(d => { d.style.opacity = ''; });
+                                    };
+
+                                    const onCancel = () => { cancelled = true; cleanup(); };
+
+                                    const onMove = (ev) => {
+                                      if (!dragMode) {
+                                        if (Math.abs(ev.clientX - startX) > 8 || Math.abs(ev.clientY - startY) > 8) {
+                                          cancelled = true;
+                                          clearTimeout(timer);
+                                        }
+                                        return;
+                                      }
+                                      if (ghost) {
+                                        ghost.style.left = `${ev.clientX - ghost.offsetWidth / 2}px`;
+                                        ghost.style.top = `${ev.clientY - 40}px`;
+                                      }
+                                      const els = document.elementsFromPoint(ev.clientX, ev.clientY);
+                                      let found = null;
+                                      for (const el of els) {
+                                        const slot = el.closest('[data-mobile-time]');
+                                        if (slot) { found = slot; break; }
+                                      }
+                                      if (found !== lastTargetSlot) {
+                                        if (lastTargetSlot) lastTargetSlot.classList.remove('is-drag-target');
+                                        lastTargetSlot = found;
+                                        if (lastTargetSlot) lastTargetSlot.classList.add('is-drag-target');
+                                      }
+                                    };
+
+                                    const onUp = async (ev) => {
+                                      const wasDrag = dragMode;
+                                      const targetSlot = lastTargetSlot;
+                                      cleanup();
+                                      isResizingRef.current = false;
+                                      if (wasDrag && targetSlot) {
+                                        const targetTime = targetSlot.dataset.mobileTime;
+                                        const dateStr = formatDateToYMD(weekDays[selectedDayIndex]);
+                                        await handleDropRef.current(apptId, dateStr, targetTime);
+                                      } else if (!wasDrag && !cancelled) {
+                                        openEditModal(appointment);
+                                      }
+                                    };
+
+                                    var timer = setTimeout(() => {
+                                      dragMode = true;
+                                      isResizingRef.current = true;
+                                      try { card.setPointerCapture(pointerId); } catch {}
+                                      if (navigator.vibrate) navigator.vibrate(30);
+                                      ghost = document.createElement('div');
+                                      ghost.textContent = `${appointment.name} · ${appointment.time}`;
+                                      Object.assign(ghost.style, {
+                                        position: 'fixed', zIndex: '9999',
+                                        background: '#fbbf24', color: '#78350f',
+                                        padding: '8px 14px', borderRadius: '8px',
+                                        pointerEvents: 'none', fontWeight: '600', fontSize: '13px',
+                                        boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                                        border: '2px solid #d97706', whiteSpace: 'nowrap',
+                                        left: `${startX}px`, top: `${startY - 40}px`,
+                                      });
+                                      document.body.appendChild(ghost);
+                                      document.querySelectorAll(`[data-appt-id="${apptId}"]`).forEach(d => { d.style.opacity = '0.4'; });
+                                    }, 500);
+
+                                    card.addEventListener('pointermove', onMove);
+                                    card.addEventListener('pointerup', onUp);
+                                    card.addEventListener('pointercancel', onCancel);
+                                  }}
+                                >
                                   {!isContinuation && (
                                     <>
                                       <div className="mini-card-header">
@@ -1547,6 +1647,79 @@ function AdminDashboard() {
                                         </span>
                                       </div>
                                       <div className="mini-card-service">{appointment.service}</div>
+                                    </>
+                                  )}
+                                  {!isContinued && (
+                                    <>
+                                      <div
+                                        data-resize-overlay={appointment.id}
+                                        style={{
+                                          display: 'none', position: 'absolute', left: 0, right: 0,
+                                          zIndex: 20, pointerEvents: 'none', border: '2px dashed',
+                                          borderRadius: '4px', alignItems: 'center', justifyContent: 'center',
+                                          fontSize: '11px', fontWeight: '700',
+                                        }}
+                                      />
+                                      <div
+                                        data-resize-handle
+                                        onClick={(e) => e.stopPropagation()}
+                                        onPointerDown={(e) => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          const handle = e.currentTarget;
+                                          handle.setPointerCapture(e.pointerId);
+                                          isResizingRef.current = true;
+                                          const apptId = appointment.id;
+                                          const startY = e.clientY;
+                                          let extraSlots = 0;
+                                          let rafId = null;
+                                          const slotEl = handle.closest('.timeline-slot') || document.querySelector('.timeline-slot');
+                                          const rowHeight = slotEl ? slotEl.getBoundingClientRect().height : 60;
+                                          document.querySelectorAll(`[data-appt-id="${apptId}"]`).forEach(d => {
+                                            d.style.background = '#fbbf24';
+                                            d.style.borderColor = '#d97706';
+                                            d.style.color = '#78350f';
+                                          });
+                                          const onMove = (ev) => {
+                                            extraSlots = Math.round((ev.clientY - startY) / rowHeight);
+                                            if (rafId !== null) return;
+                                            rafId = requestAnimationFrame(() => {
+                                              rafId = null;
+                                              updateResizeOverlay(apptId, extraSlots, rowHeight);
+                                            });
+                                          };
+                                          const onUp = async () => {
+                                            if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+                                            handle.removeEventListener('pointermove', onMove);
+                                            handle.removeEventListener('pointerup', onUp);
+                                            isResizingRef.current = false;
+                                            const overlay = document.querySelector(`[data-resize-overlay="${apptId}"]`);
+                                            if (overlay) overlay.style.display = 'none';
+                                            document.querySelectorAll(`[data-appt-id="${apptId}"]`).forEach(d => {
+                                              d.style.background = ''; d.style.borderColor = ''; d.style.color = '';
+                                            });
+                                            if (extraSlots === 0) return;
+                                            const appt = appointmentsRef.current.find(a => a.id === apptId);
+                                            if (!appt) return;
+                                            const blocks = normalizeResizeBlocks(appt);
+                                            const last = blocks[blocks.length - 1];
+                                            last.duration = Math.max(15, last.duration + extraSlots * 15);
+                                            await handleResizeSubmitRef.current(apptId, appt.date, appt.time, blocks);
+                                          };
+                                          handle.addEventListener('pointermove', onMove);
+                                          handle.addEventListener('pointerup', onUp);
+                                        }}
+                                        style={{
+                                          position: 'absolute', bottom: 0, left: 0, right: 0,
+                                          height: '16px', cursor: 'ns-resize',
+                                          background: 'rgba(0,0,0,0.12)',
+                                          borderRadius: '0 0 8px 8px',
+                                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                          touchAction: 'none',
+                                        }}
+                                      >
+                                        <div style={{ width: '28px', height: '3px', background: 'rgba(255,255,255,0.7)', borderRadius: '2px' }} />
+                                      </div>
                                     </>
                                   )}
                                 </div>
