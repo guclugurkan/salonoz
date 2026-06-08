@@ -1669,10 +1669,13 @@ function AdminDashboard() {
                                           const handle = e.currentTarget;
                                           handle.setPointerCapture(e.pointerId);
                                           isResizingRef.current = true;
+                                          document.body.style.userSelect = 'none';
                                           const apptId = appointment.id;
                                           const startY = e.clientY;
                                           let extraSlots = 0;
+                                          let lastClientY = e.clientY;
                                           let rafId = null;
+                                          let badge = null;
                                           const slotEl = handle.closest('.timeline-slot') || document.querySelector('.timeline-slot');
                                           const rowHeight = slotEl ? slotEl.getBoundingClientRect().height : 60;
                                           document.querySelectorAll(`[data-appt-id="${apptId}"]`).forEach(d => {
@@ -1680,12 +1683,42 @@ function AdminDashboard() {
                                             d.style.borderColor = '#d97706';
                                             d.style.color = '#78350f';
                                           });
+
+                                          const updateBadge = (slots, clientY) => {
+                                            if (!badge) {
+                                              badge = document.createElement('div');
+                                              Object.assign(badge.style, {
+                                                position: 'fixed', zIndex: '9999', pointerEvents: 'none',
+                                                padding: '5px 14px', borderRadius: '8px', fontSize: '13px',
+                                                fontWeight: '700', border: '2px dashed', whiteSpace: 'nowrap',
+                                                transform: 'translateX(-50%)',
+                                                boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+                                              });
+                                              document.body.appendChild(badge);
+                                            }
+                                            if (slots === 0) { badge.style.display = 'none'; return; }
+                                            badge.style.display = 'block';
+                                            badge.style.left = '50%';
+                                            badge.style.top = `${clientY - 44}px`;
+                                            if (slots > 0) {
+                                              badge.style.background = 'rgba(251,191,36,0.95)';
+                                              badge.style.borderColor = '#f59e0b';
+                                              badge.style.color = '#92400e';
+                                            } else {
+                                              badge.style.background = 'rgba(30,30,30,0.85)';
+                                              badge.style.borderColor = '#94a3b8';
+                                              badge.style.color = '#fff';
+                                            }
+                                            badge.textContent = slots > 0 ? `+${slots * 15} min` : `${slots * 15} min`;
+                                          };
+
                                           const onMove = (ev) => {
+                                            lastClientY = ev.clientY;
                                             extraSlots = Math.round((ev.clientY - startY) / rowHeight);
                                             if (rafId !== null) return;
                                             rafId = requestAnimationFrame(() => {
                                               rafId = null;
-                                              updateResizeOverlay(apptId, extraSlots, rowHeight);
+                                              updateBadge(extraSlots, lastClientY);
                                             });
                                           };
                                           const onUp = async () => {
@@ -1693,8 +1726,8 @@ function AdminDashboard() {
                                             handle.removeEventListener('pointermove', onMove);
                                             handle.removeEventListener('pointerup', onUp);
                                             isResizingRef.current = false;
-                                            const overlay = document.querySelector(`[data-resize-overlay="${apptId}"]`);
-                                            if (overlay) overlay.style.display = 'none';
+                                            document.body.style.userSelect = '';
+                                            if (badge) { badge.remove(); badge = null; }
                                             document.querySelectorAll(`[data-appt-id="${apptId}"]`).forEach(d => {
                                               d.style.background = ''; d.style.borderColor = ''; d.style.color = '';
                                             });
@@ -1724,7 +1757,11 @@ function AdminDashboard() {
                                   )}
                                 </div>
                               ) : (
-                                <div className="slot-empty">Beschikbaar</div>
+                                <div
+                                  className="slot-empty"
+                                  style={{ cursor: 'pointer', flex: 1 }}
+                                  onClick={() => openQuickCreate(formatDateToYMD(weekDays[selectedDayIndex]), time)}
+                                >+</div>
                               )}
                             </div>
                           </div>

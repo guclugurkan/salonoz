@@ -204,22 +204,26 @@ async function createAppointment(data) {
 
   await newAppointment.save();
 
-  // Upsert client : par email si fourni, sinon par nom+téléphone
+  // Upsert client : par email si fourni, sinon par nom
   try {
+    let existingClient = null;
     if (email && email.trim()) {
-      await Client.findOneAndUpdate(
-        { email: email.toLowerCase().trim() },
-        { $set: { name, phone: phone || "" }, $inc: { appointmentCount: 1 } },
-        { upsert: true, new: true }
-      );
+      existingClient = await Client.findOne({ email: email.toLowerCase().trim() });
     } else if (name && name.trim()) {
-      const query = { name: { $regex: new RegExp(`^${name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } };
-      if (phone && phone.trim()) query.phone = phone.trim();
-      await Client.findOneAndUpdate(
-        query,
-        { $set: { name, email: "", phone: phone || "" }, $inc: { appointmentCount: 1 } },
-        { upsert: true, new: true }
-      );
+      existingClient = await Client.findOne({
+        name: { $regex: new RegExp(`^${name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+      });
+    }
+
+    if (existingClient) {
+      await Client.findByIdAndUpdate(existingClient._id, { $inc: { appointmentCount: 1 } });
+    } else if (name && name.trim()) {
+      await Client.create({
+        name: name.trim(),
+        email: email ? email.toLowerCase().trim() : "",
+        phone: phone ? phone.trim() : "",
+        appointmentCount: 1,
+      });
     }
   } catch (clientErr) {
     console.error("[CLIENT UPSERT] Erreur:", clientErr.message);

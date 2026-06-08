@@ -2617,14 +2617,21 @@
 
   .slot-empty {
     flex: 1;
-    border: 1px dashed #f0f0f0;
+    border: 1px dashed #e5e7eb;
     border-radius: 8px;
-    color: #ddd;
-    font-size: 9px;
+    color: #9ca3af;
+    font-size: 16px;
+    font-weight: 300;
     display: flex;
     align-items: center;
-    padding-left: 12px;
+    justify-content: center;
     background: #fdfdfd;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .slot-empty:hover {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #16a34a;
   }
 
   /* Compact Appointment Mini-Cards */
