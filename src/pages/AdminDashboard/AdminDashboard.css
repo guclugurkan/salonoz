@@ -2113,7 +2113,8 @@
   transition: all 0.2s ease;
 }
 
-.calendar-appointment:hover {
+.calendar-appointment:hover,
+.calendar-appointment.is-hovered {
   filter: brightness(0.93);
 }
 

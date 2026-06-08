@@ -41,6 +41,34 @@ function calculateBookedSlotsClient(startTime, blocks) {
   return slots;
 }
 
+function normalizeResizeBlocks(appt) {
+  const raw = appt.blocks?.length > 0 ? appt.blocks : [{ type: 'work', duration: 30 }];
+  return raw.map(b => ({
+    type: ['work', 'pause'].includes(b.type) ? b.type : 'work',
+    duration: (typeof b.duration === 'number' && b.duration >= 15) ? b.duration : 30,
+  }));
+}
+
+function updateResizeOverlay(appointmentId, extraSlots) {
+  const overlay = document.querySelector(`[data-resize-overlay="${appointmentId}"]`);
+  const rowEl = document.querySelector('.calendar-row-wrapper');
+  const rowHeight = rowEl ? rowEl.getBoundingClientRect().height : 40;
+  if (!overlay) return;
+  if (extraSlots === 0) { overlay.style.display = 'none'; return; }
+  overlay.style.display = 'flex';
+  overlay.style.height = `${Math.abs(extraSlots) * rowHeight}px`;
+  if (extraSlots > 0) {
+    overlay.style.top = '100%'; overlay.style.bottom = 'auto';
+    overlay.style.background = 'rgba(251,191,36,0.35)';
+    overlay.style.borderColor = '#f59e0b'; overlay.style.color = '#92400e';
+  } else {
+    overlay.style.top = 'auto'; overlay.style.bottom = '7px';
+    overlay.style.background = 'rgba(0,0,0,0.15)';
+    overlay.style.borderColor = '#94a3b8'; overlay.style.color = '#475569';
+  }
+  overlay.textContent = extraSlots > 0 ? `+${extraSlots * 15} min` : `${extraSlots * 15} min`;
+}
+
 function getStartOfWeek(date) {
   const currentDate = new Date(date);
   const day = currentDate.getDay();
@@ -805,104 +833,11 @@ function AdminDashboard() {
   };
 
   // Global mouse events pour le resize — resizeDataRef stocke tout, AUCUN setState pendant mousemove
-  const resizeDataRef = React.useRef(null); // { appointmentId, startY, extraSlots }
   const appointmentsRef = React.useRef(appointments);
   appointmentsRef.current = appointments;
   const handleResizeSubmitRef = React.useRef(null);
   handleResizeSubmitRef.current = handleResizeSubmit;
   const isResizingRef = React.useRef(false);
-
-  React.useEffect(() => {
-    let rafId = null;
-
-    const normalizeBlocks = (appt) => {
-      const raw = appt.blocks?.length > 0 ? appt.blocks : [{ type: 'work', duration: 30 }];
-      return raw.map(b => ({
-        type: ['work', 'pause'].includes(b.type) ? b.type : 'work',
-        duration: (typeof b.duration === 'number' && b.duration >= 15) ? b.duration : 30,
-      }));
-    };
-
-    // Met à jour l'overlay directement dans le DOM — zéro re-render React
-    const updateOverlay = (appointmentId, extraSlots) => {
-      const overlay = document.querySelector(`[data-resize-overlay="${appointmentId}"]`);
-      const rowEl = document.querySelector('.calendar-row-wrapper');
-      const rowHeight = rowEl ? rowEl.getBoundingClientRect().height : 40;
-      if (!overlay) return;
-      if (extraSlots === 0) { overlay.style.display = 'none'; return; }
-      overlay.style.display = 'flex';
-      overlay.style.height = `${Math.abs(extraSlots) * rowHeight}px`;
-      if (extraSlots > 0) {
-        overlay.style.top = '100%';
-        overlay.style.bottom = 'auto';
-        overlay.style.background = 'rgba(251,191,36,0.35)';
-        overlay.style.borderColor = '#f59e0b';
-        overlay.style.color = '#92400e';
-      } else {
-        overlay.style.top = 'auto';
-        overlay.style.bottom = '7px';
-        overlay.style.background = 'rgba(0,0,0,0.15)';
-        overlay.style.borderColor = '#94a3b8';
-        overlay.style.color = '#475569';
-      }
-      overlay.textContent = extraSlots > 0 ? `+${extraSlots * 15} min` : `${extraSlots * 15} min`;
-    };
-
-    const onPointerMove = (e) => {
-      if (!resizeDataRef.current) return;
-      const rowEl = document.querySelector('.calendar-row-wrapper');
-      const rowHeight = rowEl ? rowEl.getBoundingClientRect().height : 40;
-      const deltaY = e.clientY - resizeDataRef.current.startY;
-      resizeDataRef.current.extraSlots = Math.round(deltaY / rowHeight);
-
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        const data = resizeDataRef.current;
-        if (!data) return;
-        updateOverlay(data.appointmentId, data.extraSlots);
-      });
-    };
-
-    const onPointerUp = async () => {
-      if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
-      isResizingRef.current = false;
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      const data = resizeDataRef.current;
-      resizeDataRef.current = null;
-      if (data) {
-        const overlay = document.querySelector(`[data-resize-overlay="${data.appointmentId}"]`);
-        if (overlay) overlay.style.display = 'none';
-        // Restaurer la couleur originale du bloc
-        const apptDiv = document.querySelector(`[data-appt-id="${data.appointmentId}"]`);
-        if (apptDiv) {
-          apptDiv.style.background = '';
-          apptDiv.style.borderColor = '';
-          apptDiv.style.color = '';
-          apptDiv.style.cursor = '';
-        }
-      }
-      if (!data || data.extraSlots === 0) return;
-
-      const appt = appointmentsRef.current.find(a => a.id === data.appointmentId);
-      if (!appt) return;
-
-      const blocks = normalizeBlocks(appt);
-      const last = blocks[blocks.length - 1];
-      last.duration = Math.max(15, last.duration + data.extraSlots * 15);
-
-      await handleResizeSubmitRef.current(data.appointmentId, appt.date, appt.time, blocks);
-    };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-    return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-    };
-  }, []);
 
   const handleSendConfirmationEmail = async (appointment) => {
     if (!appointment.email) { showToast('Geen e-mailadres voor deze klant', 'error'); return; }
@@ -1421,6 +1356,14 @@ function AdminDashboard() {
                                     }}
                                     onDragEnd={() => { setDraggingId(null); setDragOver(null); }}
                                     onClick={() => { if (!isResizingRef.current) openEditModal(appointment); }}
+                                    onMouseEnter={() => {
+                                      document.querySelectorAll(`[data-appt-id="${appointment.id}"]`).forEach(el => el.classList.add('is-hovered'));
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      if (!e.relatedTarget?.closest(`[data-appt-id="${appointment.id}"]`)) {
+                                        document.querySelectorAll(`[data-appt-id="${appointment.id}"]`).forEach(el => el.classList.remove('is-hovered'));
+                                      }
+                                    }}
                                     style={{
                                       ...(apptColor
                                         ? { background: apptColor.bg, borderColor: apptColor.border, color: apptColor.text }
@@ -1469,19 +1412,62 @@ function AdminDashboard() {
                                           onPointerDown={(e) => {
                                             e.stopPropagation();
                                             e.preventDefault();
-                                            e.currentTarget.setPointerCapture(e.pointerId);
+                                            const handle = e.currentTarget;
+                                            handle.setPointerCapture(e.pointerId);
                                             isResizingRef.current = true;
                                             document.body.style.cursor = 'ns-resize';
                                             document.body.style.userSelect = 'none';
-                                            resizeDataRef.current = { appointmentId: appointment.id, startY: e.clientY, extraSlots: 0 };
-                                            // Couleur ambre directement en DOM — aucun setState, aucun re-render
-                                            const apptDiv = document.querySelector(`[data-appt-id="${appointment.id}"]`);
-                                            if (apptDiv) {
-                                              apptDiv.style.background = '#fbbf24';
-                                              apptDiv.style.borderColor = '#d97706';
-                                              apptDiv.style.color = '#78350f';
-                                              apptDiv.style.cursor = 'ns-resize';
-                                            }
+
+                                            const apptId = appointment.id;
+                                            const startY = e.clientY;
+                                            let extraSlots = 0;
+                                            let rafId = null;
+
+                                            // Couleur ambre sur TOUTES les cellules du bloc
+                                            document.querySelectorAll(`[data-appt-id="${apptId}"]`).forEach(div => {
+                                              div.style.background = '#fbbf24';
+                                              div.style.borderColor = '#d97706';
+                                              div.style.color = '#78350f';
+                                              div.style.cursor = 'ns-resize';
+                                            });
+
+                                            const onMove = (ev) => {
+                                              const rowEl = document.querySelector('.calendar-row-wrapper');
+                                              const rowHeight = rowEl ? rowEl.getBoundingClientRect().height : 40;
+                                              extraSlots = Math.round((ev.clientY - startY) / rowHeight);
+                                              if (rafId !== null) return;
+                                              rafId = requestAnimationFrame(() => {
+                                                rafId = null;
+                                                updateResizeOverlay(apptId, extraSlots);
+                                              });
+                                            };
+
+                                            const onUp = async () => {
+                                              if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+                                              handle.removeEventListener('pointermove', onMove);
+                                              handle.removeEventListener('pointerup', onUp);
+                                              isResizingRef.current = false;
+                                              document.body.style.cursor = '';
+                                              document.body.style.userSelect = '';
+                                              const overlay = document.querySelector(`[data-resize-overlay="${apptId}"]`);
+                                              if (overlay) overlay.style.display = 'none';
+                                              document.querySelectorAll(`[data-appt-id="${apptId}"]`).forEach(div => {
+                                                div.style.background = '';
+                                                div.style.borderColor = '';
+                                                div.style.color = '';
+                                                div.style.cursor = '';
+                                              });
+                                              if (extraSlots === 0) return;
+                                              const appt = appointmentsRef.current.find(a => a.id === apptId);
+                                              if (!appt) return;
+                                              const blocks = normalizeResizeBlocks(appt);
+                                              const last = blocks[blocks.length - 1];
+                                              last.duration = Math.max(15, last.duration + extraSlots * 15);
+                                              await handleResizeSubmitRef.current(apptId, appt.date, appt.time, blocks);
+                                            };
+
+                                            handle.addEventListener('pointermove', onMove);
+                                            handle.addEventListener('pointerup', onUp);
                                           }}
                                           onClick={(e) => e.stopPropagation()}
                                           style={{
