@@ -4,12 +4,17 @@
    Base
 -------------------------------- */
 .reservation-page {
-
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding: 120px 24px 80px;
   position: relative;
+}
+
+.reservation-page.rules-screen {
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px;
 }
 
 /* Fixed background image */
@@ -1062,13 +1067,16 @@
    Rules Modal (pre-reservation)
 -------------------------------- */
 .rules-modal {
+  position: relative;
+  z-index: 1;
   background: #fff;
   border-radius: 16px;
   max-width: 520px;
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
   overflow: hidden;
   font-family: "Inter", sans-serif;
+  margin: auto;
 }
 
 .rules-modal__header {

@@ -434,7 +434,7 @@ export default function Reservation() {
 
   if (!rulesAccepted) {
     return (
-      <div className="reservation-page">
+      <div className="reservation-page rules-screen">
         <div className="rules-modal">
           <div className="rules-modal__header">
             <h1 className="rules-modal__salon">SALON OZ</h1>
