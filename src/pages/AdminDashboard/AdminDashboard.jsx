@@ -49,10 +49,8 @@ function normalizeResizeBlocks(appt) {
   }));
 }
 
-function updateResizeOverlay(appointmentId, extraSlots) {
+function updateResizeOverlay(appointmentId, extraSlots, rowHeight) {
   const overlay = document.querySelector(`[data-resize-overlay="${appointmentId}"]`);
-  const rowEl = document.querySelector('.calendar-row-wrapper');
-  const rowHeight = rowEl ? rowEl.getBoundingClientRect().height : 40;
   if (!overlay) return;
   if (extraSlots === 0) { overlay.style.display = 'none'; return; }
   overlay.style.display = 'flex';
@@ -1423,6 +1421,10 @@ function AdminDashboard() {
                                             let extraSlots = 0;
                                             let rafId = null;
 
+                                            // Hauteur réelle d'une cellule — .calendar-row-wrapper a display:contents donc height=0
+                                            const cellEl = handle.closest('.calendar-slot-cell') || document.querySelector('.calendar-slot-cell');
+                                            const rowHeight = cellEl ? cellEl.getBoundingClientRect().height : 40;
+
                                             // Couleur ambre sur TOUTES les cellules du bloc
                                             document.querySelectorAll(`[data-appt-id="${apptId}"]`).forEach(div => {
                                               div.style.background = '#fbbf24';
@@ -1432,13 +1434,11 @@ function AdminDashboard() {
                                             });
 
                                             const onMove = (ev) => {
-                                              const rowEl = document.querySelector('.calendar-row-wrapper');
-                                              const rowHeight = rowEl ? rowEl.getBoundingClientRect().height : 40;
                                               extraSlots = Math.round((ev.clientY - startY) / rowHeight);
                                               if (rafId !== null) return;
                                               rafId = requestAnimationFrame(() => {
                                                 rafId = null;
-                                                updateResizeOverlay(apptId, extraSlots);
+                                                updateResizeOverlay(apptId, extraSlots, rowHeight);
                                               });
                                             };
 
