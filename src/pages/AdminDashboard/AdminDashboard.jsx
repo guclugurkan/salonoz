@@ -1018,7 +1018,7 @@ function AdminDashboard() {
     }
     
     // Format message in Dutch
-    const message = `Beste ${appointment.name},\n\nUw afspraak bij SALON OZ is bevestigd.\n\nDatum: ${formatDate(appointment.date)}\nTijd: ${appointment.time}\nDienst: ${appointment.service}\n\nGelieve indien mogelijk contant te betalen in het salon.\n\nWe kijken ernaar uit u te verwelkomen!`;
+    const message = `Beste ${appointment.name},\n\nUw afspraak bij SALON OZ is bevestigd.\n\nDatum: ${formatDate(appointment.date)}\nTijd: ${appointment.time}\nDienst: ${appointment.service}\n\nWe kijken ernaar uit u te verwelkomen!`;
     
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
