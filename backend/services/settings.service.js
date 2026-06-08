@@ -21,11 +21,13 @@ async function updateSettings(data) {
       settings = new Settings(data);
     } else {
       if (data.workingHours) {
-        // Deep merge or replace
         settings.workingHours = { ...settings.workingHours.toObject(), ...data.workingHours };
       }
       if (data.closedDays) {
         settings.closedDays = data.closedDays;
+      }
+      if (data.dateOverrides) {
+        settings.dateOverrides = data.dateOverrides;
       }
     }
     return await settings.save();
@@ -35,7 +37,27 @@ async function updateSettings(data) {
   }
 }
 
+async function setDateOverride(date, open, close, isClosed = false) {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) settings = await Settings.create({});
+
+    const existing = settings.dateOverrides.findIndex(o => o.date === date);
+    if (existing >= 0) {
+      settings.dateOverrides[existing] = { date, open, close, isClosed };
+    } else {
+      settings.dateOverrides.push({ date, open, close, isClosed });
+    }
+    settings.markModified('dateOverrides');
+    return await settings.save();
+  } catch (error) {
+    console.error("Error in setDateOverride service:", error);
+    throw error;
+  }
+}
+
 module.exports = {
   getSettings,
-  updateSettings
+  updateSettings,
+  setDateOverride,
 };

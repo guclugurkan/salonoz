@@ -6,6 +6,13 @@ const daySettingsSchema = new mongoose.Schema({
   closed: { type: Boolean, default: false }
 }, { _id: false });
 
+const dateOverrideSchema = new mongoose.Schema({
+  date: { type: String, required: true }, // "YYYY-MM-DD"
+  open: { type: String, default: null },
+  close: { type: String, default: null },
+  isClosed: { type: Boolean, default: false },
+}, { _id: false });
+
 const settingsSchema = new mongoose.Schema({
   workingHours: {
     monday: { type: daySettingsSchema, default: () => ({ open: "09:00", close: "18:00", closed: false }) },
@@ -17,6 +24,7 @@ const settingsSchema = new mongoose.Schema({
     sunday: { type: daySettingsSchema, default: () => ({ open: "09:00", close: "16:00", closed: false }) },
   },
   closedDays: [{ type: String }], // Array of "YYYY-MM-DD"
+  dateOverrides: { type: [dateOverrideSchema], default: [] }, // Per-date working hours overrides
 }, { timestamps: true });
 
 module.exports = mongoose.model('Settings', settingsSchema);

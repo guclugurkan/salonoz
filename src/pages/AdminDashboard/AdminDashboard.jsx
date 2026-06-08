@@ -67,6 +67,28 @@ function updateResizeOverlay(appointmentId, extraSlots, rowHeight) {
   overlay.textContent = extraSlots > 0 ? `+${extraSlots * 15} min` : `${extraSlots * 15} min`;
 }
 
+const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+function getEffectiveHoursForDate(date, settings) {
+  if (!settings) return null;
+  const dateStr = typeof date === 'string' ? date : formatDateToYMD(date);
+  const override = settings.dateOverrides?.find(o => o.date === dateStr);
+  if (override) {
+    return { open: override.open, close: override.close, isClosed: override.isClosed || false };
+  }
+  const dayName = DAY_NAMES[typeof date === 'string' ? new Date(date + 'T00:00:00').getDay() : date.getDay()];
+  const daySettings = settings.workingHours?.[dayName];
+  if (!daySettings || daySettings.closed) return { open: null, close: null, isClosed: true };
+  return { open: daySettings.open, close: daySettings.close, isClosed: false };
+}
+
+function isSlotOutside(time, hours) {
+  if (!hours) return false;
+  if (hours.isClosed) return true;
+  if (!hours.open || !hours.close) return false;
+  return time < hours.open || time >= hours.close;
+}
+
 function getStartOfWeek(date) {
   const currentDate = new Date(date);
   const day = currentDate.getDay();
@@ -499,6 +521,22 @@ function AdminDashboard() {
       showToast('Fout bij bijwerken instellingen', 'error');
     } finally {
       setIsSavingSettings(false);
+    }
+  };
+
+  const saveWorkingHoursOverride = async (dateStr, open, close) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/settings/date-override`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ date: dateStr, open, close, isClosed: false }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSettings(data.data);
+      }
+    } catch (err) {
+      console.error('Error saving working hours override:', err);
     }
   };
 
@@ -1054,21 +1092,21 @@ function AdminDashboard() {
     let minOpen = '23:59';
     let maxClose = '00:00';
     weekDays.forEach(day => {
-      const daySettings = settings.workingHours[getDayName(day)];
-      if (daySettings && !daySettings.closed) {
-        if (daySettings.open < minOpen) minOpen = daySettings.open;
-        if (daySettings.close > maxClose) maxClose = daySettings.close;
+      const hours = getEffectiveHoursForDate(day, settings);
+      if (hours && !hours.isClosed && hours.open && hours.close) {
+        if (hours.open < minOpen) minOpen = hours.open;
+        if (hours.close > maxClose) maxClose = hours.close;
       }
     });
-    if (maxClose === '00:00') return [];
+    if (maxClose === '00:00') return allTimeSlots.filter(s => s >= '09:00' && s < '17:00');
     return allTimeSlots.filter(slot => slot >= minOpen && slot < maxClose);
   }, [weekDays, settings]);
 
   const dayCalendarTimeSlots = useMemo(() => {
     if (!settings?.workingHours || !weekDays[selectedDayIndex]) return weekCalendarTimeSlots;
-    const daySettings = settings.workingHours[getDayName(weekDays[selectedDayIndex])];
-    if (!daySettings || daySettings.closed) return [];
-    return allTimeSlots.filter(slot => slot >= daySettings.open && slot < daySettings.close);
+    const hours = getEffectiveHoursForDate(weekDays[selectedDayIndex], settings);
+    if (!hours || hours.isClosed || !hours.open || !hours.close) return weekCalendarTimeSlots;
+    return allTimeSlots.filter(slot => slot >= hours.open && slot < hours.close);
   }, [weekDays, selectedDayIndex, settings, weekCalendarTimeSlots]);
 
   const filteredAppointments = useMemo(() => {
@@ -1328,19 +1366,35 @@ function AdminDashboard() {
                             const isDragOver = dragOver?.date === dateStr && dragOver?.time === time;
                             const apptColor = appointment ? getAppointmentColor(appointment.service) : null;
 
+                            const effectiveHours = getEffectiveHoursForDate(day, settings);
+                            const isUnavailable = isSlotOutside(time, effectiveHours);
+                            const prevTime = weekCalendarTimeSlots[timeIndex - 1];
+                            const nextTime = weekCalendarTimeSlots[timeIndex + 1];
+                            const prevUnavailable = prevTime ? isSlotOutside(prevTime, effectiveHours) : true;
+                            const nextUnavailable = nextTime ? isSlotOutside(nextTime, effectiveHours) : true;
+                            // Opening handle: last unavailable morning slot (next slot is available)
+                            const isOpeningHandle = isUnavailable && !nextUnavailable;
+                            // Closing handle: last available slot (next slot is unavailable or end of grid)
+                            const isClosingHandle = !isUnavailable && !appointment && nextUnavailable;
+
                             return (
                               <div
                                 key={`${dateStr}-${time}`}
-                                className={`calendar-cell calendar-slot-cell ${appointment ? 'has-appointment' : ''}`}
-                                style={{ background: isDragOver && !appointment ? 'rgba(26,26,26,0.07)' : undefined }}
-                                onDragOver={(e) => { e.preventDefault(); setDragOver({ date: dateStr, time }); }}
+                                className={`calendar-cell calendar-slot-cell ${appointment ? 'has-appointment' : ''} ${isUnavailable ? 'is-unavailable' : ''}`}
+                                style={{
+                                  background: isUnavailable
+                                    ? undefined
+                                    : isDragOver && !appointment ? 'rgba(26,26,26,0.07)' : undefined,
+                                  position: 'relative',
+                                }}
+                                onDragOver={(e) => { if (!isUnavailable) { e.preventDefault(); setDragOver({ date: dateStr, time }); } }}
                                 onDragLeave={() => setDragOver(null)}
                                 onDrop={(e) => {
                                   e.preventDefault();
                                   const id = e.dataTransfer.getData('appointmentId');
                                   setDragOver(null);
                                   setDraggingId(null);
-                                  if (id) handleDrop(id, dateStr, time);
+                                  if (id && !isUnavailable) handleDrop(id, dateStr, time);
                                 }}
                               >
                                 {appointment ? (
@@ -1487,13 +1541,144 @@ function AdminDashboard() {
                                       </>
                                     )}
                                   </div>
+                                ) : isUnavailable ? (
+                                  <>
+                                    {isOpeningHandle && (
+                                      <div
+                                        className="wh-drag-handle wh-open-handle"
+                                        title="Sleep om openingstijd aan te passen"
+                                        onPointerDown={(e) => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          const handle = e.currentTarget;
+                                          handle.setPointerCapture(e.pointerId);
+                                          document.body.style.cursor = 'ns-resize';
+                                          document.body.style.userSelect = 'none';
+                                          const cellEl = handle.closest('.calendar-slot-cell');
+                                          const rowHeight = cellEl ? cellEl.getBoundingClientRect().height : 40;
+                                          const startY = e.clientY;
+                                          const currentOpen = effectiveHours?.open || '09:00';
+                                          let deltaSlots = 0;
+                                          let rafId = null;
+                                          let badge = null;
+
+                                          const updateBadge = (slots, clientY) => {
+                                            const newOpen = addMinutes(currentOpen, slots * 15);
+                                            if (!badge) {
+                                              badge = document.createElement('div');
+                                              Object.assign(badge.style, {
+                                                position: 'fixed', zIndex: '9999', pointerEvents: 'none',
+                                                padding: '4px 12px', borderRadius: '8px', fontSize: '13px',
+                                                fontWeight: '700', whiteSpace: 'nowrap',
+                                                background: 'rgba(251,191,36,0.95)', color: '#92400e',
+                                                border: '2px solid #f59e0b', boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                                transform: 'translateX(-50%)',
+                                              });
+                                              document.body.appendChild(badge);
+                                            }
+                                            badge.style.left = `${e.clientX}px`;
+                                            badge.style.top = `${clientY - 36}px`;
+                                            badge.textContent = `Ouvre à ${newOpen}`;
+                                          };
+
+                                          const onMove = (ev) => {
+                                            deltaSlots = Math.round((ev.clientY - startY) / rowHeight);
+                                            const captured = deltaSlots;
+                                            const cy = ev.clientY;
+                                            if (rafId !== null) return;
+                                            rafId = requestAnimationFrame(() => { rafId = null; updateBadge(captured, cy); });
+                                          };
+                                          const onUp = async () => {
+                                            if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+                                            handle.removeEventListener('pointermove', onMove);
+                                            handle.removeEventListener('pointerup', onUp);
+                                            document.body.style.cursor = '';
+                                            document.body.style.userSelect = '';
+                                            if (badge) { badge.remove(); badge = null; }
+                                            if (deltaSlots === 0) return;
+                                            const newOpen = addMinutes(currentOpen, deltaSlots * 15);
+                                            const currentClose = effectiveHours?.close || '18:00';
+                                            if (newOpen >= currentClose) return;
+                                            await saveWorkingHoursOverride(dateStr, newOpen, currentClose);
+                                          };
+                                          handle.addEventListener('pointermove', onMove);
+                                          handle.addEventListener('pointerup', onUp);
+                                        }}
+                                      />
+                                    )}
+                                  </>
                                 ) : (
-                                  <span
-                                    className="calendar-slot-empty"
-                                    style={{ cursor: 'pointer', display: 'block', width: '100%', height: '100%' }}
-                                    onClick={() => openQuickCreate(dateStr, time)}
-                                    title="Klik om een afspraak toe te voegen"
-                                  >+</span>
+                                  <>
+                                    <span
+                                      className="calendar-slot-empty"
+                                      style={{ cursor: 'pointer', display: 'block', width: '100%', height: '100%' }}
+                                      onClick={() => openQuickCreate(dateStr, time)}
+                                      title="Klik om een afspraak toe te voegen"
+                                    >+</span>
+                                    {isClosingHandle && (
+                                      <div
+                                        className="wh-drag-handle wh-close-handle"
+                                        title="Sleep om sluitingstijd aan te passen"
+                                        onPointerDown={(e) => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          const handle = e.currentTarget;
+                                          handle.setPointerCapture(e.pointerId);
+                                          document.body.style.cursor = 'ns-resize';
+                                          document.body.style.userSelect = 'none';
+                                          const cellEl = handle.closest('.calendar-slot-cell');
+                                          const rowHeight = cellEl ? cellEl.getBoundingClientRect().height : 40;
+                                          const startY = e.clientY;
+                                          const currentClose = effectiveHours?.close || '18:00';
+                                          let deltaSlots = 0;
+                                          let rafId = null;
+                                          let badge = null;
+
+                                          const updateBadge = (slots, clientY) => {
+                                            const newClose = addMinutes(currentClose, slots * 15);
+                                            if (!badge) {
+                                              badge = document.createElement('div');
+                                              Object.assign(badge.style, {
+                                                position: 'fixed', zIndex: '9999', pointerEvents: 'none',
+                                                padding: '4px 12px', borderRadius: '8px', fontSize: '13px',
+                                                fontWeight: '700', whiteSpace: 'nowrap',
+                                                background: 'rgba(251,191,36,0.95)', color: '#92400e',
+                                                border: '2px solid #f59e0b', boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                                transform: 'translateX(-50%)',
+                                              });
+                                              document.body.appendChild(badge);
+                                            }
+                                            badge.style.left = `${e.clientX}px`;
+                                            badge.style.top = `${clientY - 36}px`;
+                                            badge.textContent = `Ferme à ${newClose}`;
+                                          };
+
+                                          const onMove = (ev) => {
+                                            deltaSlots = Math.round((ev.clientY - startY) / rowHeight);
+                                            const captured = deltaSlots;
+                                            const cy = ev.clientY;
+                                            if (rafId !== null) return;
+                                            rafId = requestAnimationFrame(() => { rafId = null; updateBadge(captured, cy); });
+                                          };
+                                          const onUp = async () => {
+                                            if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+                                            handle.removeEventListener('pointermove', onMove);
+                                            handle.removeEventListener('pointerup', onUp);
+                                            document.body.style.cursor = '';
+                                            document.body.style.userSelect = '';
+                                            if (badge) { badge.remove(); badge = null; }
+                                            if (deltaSlots === 0) return;
+                                            const newClose = addMinutes(currentClose, deltaSlots * 15);
+                                            const currentOpen = effectiveHours?.open || '09:00';
+                                            if (newClose <= currentOpen) return;
+                                            await saveWorkingHoursOverride(dateStr, currentOpen, newClose);
+                                          };
+                                          handle.addEventListener('pointermove', onMove);
+                                          handle.addEventListener('pointerup', onUp);
+                                        }}
+                                      />
+                                    )}
+                                  </>
                                 )}
                               </div>
                             );
@@ -1526,14 +1711,24 @@ function AdminDashboard() {
                     </div>
                     
                     <div className="timeline">
-                      {dayCalendarTimeSlots.map((time, timeIndex) => {
-                        const appointment = getAppointmentForCell(weekDays[selectedDayIndex], time);
-                        const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(weekDays[selectedDayIndex], dayCalendarTimeSlots[timeIndex - 1])?.id === appointment.id;
-                        const isContinued = timeIndex < dayCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(weekDays[selectedDayIndex], dayCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
+                      {weekCalendarTimeSlots.map((time, timeIndex) => {
+                        const mobileDay = weekDays[selectedDayIndex];
+                        const mobileDateStr = formatDateToYMD(mobileDay);
+                        const mobileEffectiveHours = getEffectiveHoursForDate(mobileDay, settings);
+                        const mobileSlotUnavailable = isSlotOutside(time, mobileEffectiveHours);
+
+                        const appointment = mobileSlotUnavailable ? null : getAppointmentForCell(mobileDay, time);
+                        const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(mobileDay, weekCalendarTimeSlots[timeIndex - 1])?.id === appointment.id;
+                        const isContinued = timeIndex < weekCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(mobileDay, weekCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
                         const mobileApptColor = appointment ? getAppointmentColor(appointment.service) : null;
 
+                        const prevMobileUnavail = timeIndex > 0 ? isSlotOutside(weekCalendarTimeSlots[timeIndex - 1], mobileEffectiveHours) : true;
+                        const nextMobileUnavail = timeIndex < weekCalendarTimeSlots.length - 1 ? isSlotOutside(weekCalendarTimeSlots[timeIndex + 1], mobileEffectiveHours) : true;
+                        const isMobileOpenHandle = mobileSlotUnavailable && !nextMobileUnavail;
+                        const isMobileCloseHandle = !mobileSlotUnavailable && !appointment && nextMobileUnavail;
+
                         return (
-                          <div key={`timeline-${time}`} className="timeline-slot" data-mobile-time={time}>
+                          <div key={`timeline-${time}`} className={`timeline-slot ${mobileSlotUnavailable ? 'is-unavailable' : ''}`} data-mobile-time={mobileSlotUnavailable ? undefined : time}>
                             <div className="slot-time">{time}</div>
                             <div className={`slot-content ${appointment ? 'has-appointment' : ''}`}>
                               {appointment ? (
@@ -1756,12 +1951,133 @@ function AdminDashboard() {
                                     </>
                                   )}
                                 </div>
+                              ) : mobileSlotUnavailable ? (
+                                <div className="slot-unavailable">
+                                  {isMobileOpenHandle && (
+                                    <div
+                                      className="wh-drag-handle wh-open-handle"
+                                      style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}
+                                      onPointerDown={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        const handle = e.currentTarget;
+                                        handle.setPointerCapture(e.pointerId);
+                                        document.body.style.userSelect = 'none';
+                                        const slotEl = handle.closest('.timeline-slot');
+                                        const rowHeight = slotEl ? slotEl.getBoundingClientRect().height : 60;
+                                        const startY = e.clientY;
+                                        const currentOpen = mobileEffectiveHours?.open || '09:00';
+                                        let deltaSlots = 0;
+                                        let rafId = null;
+                                        let badge = null;
+                                        const updateBadge = (slots, clientY) => {
+                                          const newOpen = addMinutes(currentOpen, slots * 15);
+                                          if (!badge) {
+                                            badge = document.createElement('div');
+                                            Object.assign(badge.style, {
+                                              position: 'fixed', zIndex: '9999', pointerEvents: 'none',
+                                              padding: '5px 14px', borderRadius: '8px', fontSize: '13px',
+                                              fontWeight: '700', whiteSpace: 'nowrap',
+                                              background: 'rgba(251,191,36,0.95)', color: '#92400e',
+                                              border: '2px solid #f59e0b', boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                              transform: 'translateX(-50%)',
+                                            });
+                                            document.body.appendChild(badge);
+                                          }
+                                          badge.style.left = '50%';
+                                          badge.style.top = `${clientY - 44}px`;
+                                          badge.textContent = `Ouvre à ${newOpen}`;
+                                        };
+                                        const onMove = (ev) => {
+                                          deltaSlots = Math.round((ev.clientY - startY) / rowHeight);
+                                          const d = deltaSlots; const cy = ev.clientY;
+                                          if (rafId !== null) return;
+                                          rafId = requestAnimationFrame(() => { rafId = null; updateBadge(d, cy); });
+                                        };
+                                        const onUp = async () => {
+                                          if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+                                          handle.removeEventListener('pointermove', onMove);
+                                          handle.removeEventListener('pointerup', onUp);
+                                          document.body.style.userSelect = '';
+                                          if (badge) { badge.remove(); badge = null; }
+                                          if (deltaSlots === 0) return;
+                                          const newOpen = addMinutes(currentOpen, deltaSlots * 15);
+                                          const currentClose = mobileEffectiveHours?.close || '18:00';
+                                          if (newOpen >= currentClose) return;
+                                          await saveWorkingHoursOverride(mobileDateStr, newOpen, currentClose);
+                                        };
+                                        handle.addEventListener('pointermove', onMove);
+                                        handle.addEventListener('pointerup', onUp);
+                                      }}
+                                    />
+                                  )}
+                                </div>
                               ) : (
-                                <div
-                                  className="slot-empty"
-                                  style={{ cursor: 'pointer', flex: 1 }}
-                                  onClick={() => openQuickCreate(formatDateToYMD(weekDays[selectedDayIndex]), time)}
-                                >+</div>
+                                <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'stretch' }}>
+                                  <div
+                                    className="slot-empty"
+                                    style={{ cursor: 'pointer', flex: 1 }}
+                                    onClick={() => openQuickCreate(mobileDateStr, time)}
+                                  >+</div>
+                                  {isMobileCloseHandle && (
+                                    <div
+                                      className="wh-drag-handle wh-close-handle"
+                                      style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}
+                                      onPointerDown={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        const handle = e.currentTarget;
+                                        handle.setPointerCapture(e.pointerId);
+                                        document.body.style.userSelect = 'none';
+                                        const slotEl = handle.closest('.timeline-slot');
+                                        const rowHeight = slotEl ? slotEl.getBoundingClientRect().height : 60;
+                                        const startY = e.clientY;
+                                        const currentClose = mobileEffectiveHours?.close || '18:00';
+                                        let deltaSlots = 0;
+                                        let rafId = null;
+                                        let badge = null;
+                                        const updateBadge = (slots, clientY) => {
+                                          const newClose = addMinutes(currentClose, slots * 15);
+                                          if (!badge) {
+                                            badge = document.createElement('div');
+                                            Object.assign(badge.style, {
+                                              position: 'fixed', zIndex: '9999', pointerEvents: 'none',
+                                              padding: '5px 14px', borderRadius: '8px', fontSize: '13px',
+                                              fontWeight: '700', whiteSpace: 'nowrap',
+                                              background: 'rgba(251,191,36,0.95)', color: '#92400e',
+                                              border: '2px solid #f59e0b', boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                              transform: 'translateX(-50%)',
+                                            });
+                                            document.body.appendChild(badge);
+                                          }
+                                          badge.style.left = '50%';
+                                          badge.style.top = `${clientY - 44}px`;
+                                          badge.textContent = `Ferme à ${newClose}`;
+                                        };
+                                        const onMove = (ev) => {
+                                          deltaSlots = Math.round((ev.clientY - startY) / rowHeight);
+                                          const d = deltaSlots; const cy = ev.clientY;
+                                          if (rafId !== null) return;
+                                          rafId = requestAnimationFrame(() => { rafId = null; updateBadge(d, cy); });
+                                        };
+                                        const onUp = async () => {
+                                          if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+                                          handle.removeEventListener('pointermove', onMove);
+                                          handle.removeEventListener('pointerup', onUp);
+                                          document.body.style.userSelect = '';
+                                          if (badge) { badge.remove(); badge = null; }
+                                          if (deltaSlots === 0) return;
+                                          const newClose = addMinutes(currentClose, deltaSlots * 15);
+                                          const currentOpen = mobileEffectiveHours?.open || '09:00';
+                                          if (newClose <= currentOpen) return;
+                                          await saveWorkingHoursOverride(mobileDateStr, currentOpen, newClose);
+                                        };
+                                        handle.addEventListener('pointermove', onMove);
+                                        handle.addEventListener('pointerup', onUp);
+                                      }}
+                                    />
+                                  )}
+                                </div>
                               )}
                             </div>
                           </div>

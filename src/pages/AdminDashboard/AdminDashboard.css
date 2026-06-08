@@ -2099,6 +2099,70 @@
   font-size: 18px;
 }
 
+/* Unavailable time slots */
+.calendar-slot-cell.is-unavailable {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(239, 68, 68, 0.06),
+    rgba(239, 68, 68, 0.06) 4px,
+    rgba(239, 68, 68, 0.02) 4px,
+    rgba(239, 68, 68, 0.02) 8px
+  );
+  border-bottom: 1px solid rgba(239, 68, 68, 0.1);
+  cursor: not-allowed;
+}
+
+/* Working hours drag handles */
+.wh-drag-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8px;
+  cursor: ns-resize;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
+
+.wh-open-handle {
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent, rgba(239, 68, 68, 0.25));
+}
+
+.wh-open-handle::after {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(239, 68, 68, 0.5);
+}
+
+.wh-open-handle:hover,
+.wh-open-handle:hover::after {
+  background: rgba(239, 68, 68, 0.8);
+}
+
+.wh-close-handle {
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent, rgba(239, 68, 68, 0.25));
+}
+
+.wh-close-handle::after {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(239, 68, 68, 0.5);
+}
+
+.wh-close-handle:hover::after {
+  background: rgba(239, 68, 68, 0.8);
+}
+
 .calendar-appointment {
   height: calc(100% - 20px);
   min-height: 66px;
@@ -2613,7 +2677,27 @@
     border-right: 1px solid #f3f3f3;
   }
 
-  .slot-content { flex: 1; padding: 10px; display: flex; align-items: stretch; }
+  .slot-content { flex: 1; padding: 6px 10px; display: flex; align-items: stretch; position: relative; }
+
+  .timeline-slot.is-unavailable {
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(239, 68, 68, 0.06),
+      rgba(239, 68, 68, 0.06) 4px,
+      rgba(239, 68, 68, 0.02) 4px,
+      rgba(239, 68, 68, 0.02) 8px
+    );
+    min-height: 36px;
+  }
+
+  .timeline-slot.is-unavailable .slot-time {
+    color: rgba(239, 68, 68, 0.5);
+  }
+
+  .slot-unavailable {
+    flex: 1;
+    position: relative;
+  }
 
   .slot-empty {
     flex: 1;
