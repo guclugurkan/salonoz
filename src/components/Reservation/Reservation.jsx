@@ -196,12 +196,16 @@ export default function Reservation() {
       }
     }
 
-    // Check if the service ends before closing time
+    // Check if the service ends before closing time (salon + staff)
     if (settings) {
-      const { close } = getEffectiveHours(formData.date, settings);
-      if (close && currentStartTime > close) {
-        return false;
-      }
+      const { close: salonClose } = getEffectiveHours(formData.date, settings);
+      const staffHours = formData.staff ? getStaffHoursForDate(formData.staff, formData.date) : null;
+      if (staffHours?.isClosed) return false;
+      const staffClose = staffHours?.close || null;
+      const effectiveClose = salonClose && staffClose
+        ? (staffClose < salonClose ? staffClose : salonClose)
+        : (staffClose || salonClose);
+      if (effectiveClose && currentStartTime > effectiveClose) return false;
     }
 
     return true;
@@ -224,16 +228,40 @@ export default function Reservation() {
     return { open: daySettings.open, close: daySettings.close, isClosed: false };
   }
 
+  const getStaffHoursForDate = (staffMember, dateStr) => {
+    if (!staffMember || !dateStr) return null;
+    if (settings?.staffVacations) {
+      const vac = settings.staffVacations.find(v => v.staffId === staffMember._id?.toString());
+      if (vac?.dates.includes(dateStr)) return { open: null, close: null, isClosed: true };
+    }
+    if (staffMember.workingHours) {
+      const dayName = getDayName(dateStr);
+      const dayInfo = staffMember.workingHours[dayName];
+      if (dayInfo?.closed) return { open: null, close: null, isClosed: true };
+      if (dayInfo?.open && dayInfo?.close) return { open: dayInfo.open, close: dayInfo.close, isClosed: false };
+    }
+    return null;
+  }
+
   const getAvailableTimeSlots = () => {
     if (!formData.date || !settings) return timeSlots;
 
     if (settings.closedDays && settings.closedDays.includes(formData.date)) return [];
 
     const { open, close, isClosed } = getEffectiveHours(formData.date, settings);
-
     if (isClosed || !open || !close) return [];
 
-    return timeSlots.filter(slot => slot >= open && slot < close);
+    let effectiveOpen = open;
+    let effectiveClose = close;
+
+    if (formData.staff) {
+      const staffHours = getStaffHoursForDate(formData.staff, formData.date);
+      if (staffHours?.isClosed) return [];
+      if (staffHours?.open && staffHours.open > effectiveOpen) effectiveOpen = staffHours.open;
+      if (staffHours?.close && staffHours.close < effectiveClose) effectiveClose = staffHours.close;
+    }
+
+    return timeSlots.filter(slot => slot >= effectiveOpen && slot < effectiveClose);
   }
 
   const dynamicTimeSlots = getAvailableTimeSlots();
