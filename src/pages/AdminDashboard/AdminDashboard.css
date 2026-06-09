@@ -3215,7 +3215,12 @@
 .add-closed-day {
   display: flex;
   gap: 12px;
-  max-width: 400px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.add-closed-day--range {
+  max-width: 700px;
 }
 
 .add-closed-day input[type="date"] {
@@ -3225,6 +3230,67 @@
   border-radius: 8px;
   font-family: inherit;
   font-size: 14px;
+}
+
+.date-range-inputs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.date-range-inputs .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.date-range-inputs .input-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.date-range-inputs .input-group input,
+.date-range-inputs .input-group select {
+  padding: 10px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #fff;
+}
+
+.settings-select {
+  padding: 10px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+  min-width: 180px;
+}
+
+.staff-vacation-group {
+  margin-top: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: #f8f8f8;
+  border-radius: 10px;
+  border: 1px solid #eee;
+}
+
+.staff-vacation-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.closed-day-tag--staff {
+  background-color: #4a4a7a;
 }
 
 .closed-days-tags {

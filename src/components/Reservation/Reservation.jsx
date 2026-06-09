@@ -117,20 +117,28 @@ export default function Reservation() {
   }, [])
 
   const getFilteredStaff = () => {
-    if (!formData.service) return staff;
-    return staff.filter(member => {
-      if (member.canDoAllServices) return true;
-      if (!member.allowedServices) return false;
-      
-      // If a variant is selected, check for the specific variant key
-      if (formData.variant) {
-        const variantKey = `${formData.service.id}:${formData.variant.name}`;
-        return member.allowedServices.includes(variantKey);
-      }
-      
-      // Otherwise check the main service ID
-      return member.allowedServices.includes(formData.service.id);
-    });
+    let filtered = staff;
+
+    if (formData.service) {
+      filtered = filtered.filter(member => {
+        if (member.canDoAllServices) return true;
+        if (!member.allowedServices) return false;
+        if (formData.variant) {
+          const variantKey = `${formData.service.id}:${formData.variant.name}`;
+          return member.allowedServices.includes(variantKey);
+        }
+        return member.allowedServices.includes(formData.service.id);
+      });
+    }
+
+    if (formData.date && settings?.staffVacations?.length > 0) {
+      filtered = filtered.filter(member => {
+        const vac = settings.staffVacations.find(v => v.staffId === member._id?.toString());
+        return !vac || !vac.dates.includes(formData.date);
+      });
+    }
+
+    return filtered;
   }
 
   const filteredStaff = getFilteredStaff();

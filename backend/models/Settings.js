@@ -13,6 +13,12 @@ const dateOverrideSchema = new mongoose.Schema({
   isClosed: { type: Boolean, default: false },
 }, { _id: false });
 
+const staffVacationSchema = new mongoose.Schema({
+  staffId: { type: String, required: true },
+  staffName: { type: String, default: '' },
+  dates: [{ type: String }], // Array of "YYYY-MM-DD"
+}, { _id: false });
+
 const settingsSchema = new mongoose.Schema({
   workingHours: {
     monday: { type: daySettingsSchema, default: () => ({ open: "09:00", close: "18:00", closed: false }) },
@@ -25,6 +31,7 @@ const settingsSchema = new mongoose.Schema({
   },
   closedDays: [{ type: String }], // Array of "YYYY-MM-DD"
   dateOverrides: { type: [dateOverrideSchema], default: [] }, // Per-date working hours overrides
+  staffVacations: { type: [staffVacationSchema], default: [] }, // Per-staff vacation days
 }, { timestamps: true });
 
 module.exports = mongoose.model('Settings', settingsSchema);
