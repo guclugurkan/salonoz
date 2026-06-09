@@ -2850,6 +2850,21 @@ function AdminDashboard() {
             <h3 className="modal-title">Afspraak Wijzigen</h3>
             <p className="modal-subtitle">{editModal.appointment?.name} — {editModal.appointment?.service}</p>
 
+            {editForm.time && editForm.blocks?.length > 0 && (() => {
+              const totalMin = editForm.blocks.reduce((sum, b) => sum + b.duration, 0);
+              const [h, m] = editForm.time.split(':').map(Number);
+              const end = new Date(2000, 0, 1, h, m);
+              end.setMinutes(end.getMinutes() + totalMin);
+              const endTime = end.toTimeString().substring(0, 5);
+              return (
+                <div style={{ margin: '0 0 16px', padding: '10px 14px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#166534' }}>
+                  <span>🕐</span>
+                  <span><strong>{editForm.time}</strong> → <strong>{endTime}</strong></span>
+                  <span style={{ color: '#4ade80', fontSize: '12px' }}>({totalMin} min)</span>
+                </div>
+              );
+            })()}
+
             <div className="edit-form-grid">
               <div className="edit-datetime-row">
                 <div className="form-group">
