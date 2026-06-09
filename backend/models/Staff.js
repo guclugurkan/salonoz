@@ -14,12 +14,12 @@ const staffSchema = new mongoose.Schema({
   order: { type: Number, default: 0 },
   workingHours: {
     monday:    { type: staffDaySchema, default: () => ({ open: "09:00", close: "18:00", closed: false }) },
-    tuesday:   { type: staffDaySchema, default: () => ({ open: "09:00", close: "18:00", closed: false }) },
+    tuesday:   { type: staffDaySchema, default: () => ({ open: "09:00", close: "18:00", closed: true }) },
     wednesday: { type: staffDaySchema, default: () => ({ open: "09:00", close: "18:00", closed: false }) },
-    thursday:  { type: staffDaySchema, default: () => ({ open: "09:00", close: "18:00", closed: false }) },
+    thursday:  { type: staffDaySchema, default: () => ({ open: "09:00", close: "20:00", closed: false }) },
     friday:    { type: staffDaySchema, default: () => ({ open: "09:00", close: "18:00", closed: false }) },
-    saturday:  { type: staffDaySchema, default: () => ({ open: "09:00", close: "18:00", closed: false }) },
-    sunday:    { type: staffDaySchema, default: () => ({ open: "09:00", close: "18:00", closed: true }) },
+    saturday:  { type: staffDaySchema, default: () => ({ open: "09:00", close: "16:00", closed: false }) },
+    sunday:    { type: staffDaySchema, default: () => ({ open: "09:00", close: "16:00", closed: false }) },
   },
 }, { timestamps: true });
 
