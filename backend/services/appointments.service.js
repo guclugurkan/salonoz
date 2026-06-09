@@ -154,27 +154,11 @@ async function createAppointment(data) {
       return {
         success: false,
         statusCode: 409,
-        error: "This time slot is already booked for the selected staff member.",
+        error: "Dit tijdslot is al geboekt voor de geselecteerde medewerker.",
       };
     }
   }
 
-  // Anti-spam / Anti-doublon : 1 RDV max par jour par e-mail (sauf override admin)
-  if (!adminOverride && email && date) {
-    const userConflict = await Appointment.findOne({
-      email,
-      date,
-      status: { $nin: ["cancelled", "rejected"] }
-    });
-
-    if (userConflict) {
-      return {
-        success: false,
-        statusCode: 409,
-        error: "Vous avez déjà un rendez-vous réservé à cette date.",
-      };
-    }
-  }
 
   // Deadline d'annulation = date+heure du RDV - 24h (si date + time fournis)
   const cancelToken = crypto.randomUUID();
