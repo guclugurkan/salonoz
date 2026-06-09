@@ -1717,7 +1717,7 @@ function AdminDashboard() {
                         const mobileEffectiveHours = getEffectiveHoursForDate(mobileDay, settings);
                         const mobileSlotUnavailable = isSlotOutside(time, mobileEffectiveHours);
 
-                        const appointment = mobileSlotUnavailable ? null : getAppointmentForCell(mobileDay, time);
+                        const appointment = getAppointmentForCell(mobileDay, time);
                         const isContinuation = timeIndex > 0 && appointment && getAppointmentForCell(mobileDay, weekCalendarTimeSlots[timeIndex - 1])?.id === appointment.id;
                         const isContinued = timeIndex < weekCalendarTimeSlots.length - 1 && appointment && getAppointmentForCell(mobileDay, weekCalendarTimeSlots[timeIndex + 1])?.id === appointment.id;
                         const mobileApptColor = appointment ? getAppointmentColor(appointment.service) : null;
