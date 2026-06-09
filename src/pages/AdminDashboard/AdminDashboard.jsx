@@ -3024,7 +3024,20 @@ function AdminDashboard() {
         <div className="modal-overlay" onClick={closeQuickCreate}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
             <h3 className="modal-title">Nieuwe Afspraak</h3>
-            <p className="modal-subtitle">{quickCreate.staff} · {quickCreate.date} · {quickCreate.time}</p>
+            <p className="modal-subtitle">{quickCreate.staff} · {quickCreate.date} · {(() => {
+              const startTime = quickCreate.time;
+              if (!startTime) return startTime;
+              const blocks = quickForm.service ? getServiceBlocks(quickForm.service) : null;
+              if (!blocks) return startTime;
+              let t = startTime;
+              for (const b of blocks) {
+                const [h, m] = t.split(':').map(Number);
+                const d = new Date(2000, 0, 1, h, m);
+                d.setMinutes(d.getMinutes() + b.duration);
+                t = d.toTimeString().substring(0, 5);
+              }
+              return `${startTime} → ${t}`;
+            })()}</p>
 
             {/* Recherche client */}
             <div style={{ position: 'relative', marginBottom: '14px' }}>

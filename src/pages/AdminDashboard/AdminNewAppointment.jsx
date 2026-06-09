@@ -91,6 +91,19 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
       .flatMap(a => (a.bookedSlots && a.bookedSlots.length > 0) ? a.bookedSlots : [a.time]);
   };
 
+  const calculateEndTime = (startTime) => {
+    if (!startTime) return null;
+    const targetService = formData.variant ? formData.variant : formData.service;
+    const blocks = targetService?.blocks?.length > 0
+      ? targetService.blocks
+      : [{ duration: 30, type: 'work' }];
+    let t = startTime;
+    for (const block of blocks) {
+      t = addMinutes(t, block.duration);
+    }
+    return t;
+  };
+
   const isTimeValidForService = (startTime, occupiedSlots) => {
     // Si pas de service sélectionné, on bloque juste les créneaux occupés
     if (!formData.service) {
@@ -344,6 +357,19 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
               );
             })()}
           </div>
+
+          {formData.time && (
+            <div style={{ marginTop: '12px', padding: '10px 14px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#166534' }}>
+              <span>🕐</span>
+              <span><strong>{formData.time}</strong> → <strong>{calculateEndTime(formData.time)}</strong></span>
+              {(formData.service || formData.variant) && (() => {
+                const target = formData.variant || formData.service;
+                const blocks = target?.blocks?.length > 0 ? target.blocks : [{ duration: 30, type: 'work' }];
+                const total = blocks.reduce((sum, b) => sum + b.duration, 0);
+                return <span style={{ color: '#4ade80', fontSize: '12px' }}>({total} min)</span>;
+              })()}
+            </div>
+          )}
 
           <div className="form-divider" style={{ height: '1px', background: '#eee', margin: '30px 0' }}></div>
 
