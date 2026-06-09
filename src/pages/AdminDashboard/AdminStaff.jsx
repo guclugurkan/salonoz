@@ -1,5 +1,25 @@
 import React, { useState, useEffect } from 'react';
 
+const daysOfWeek = [
+  { key: 'monday', label: 'Maandag' },
+  { key: 'tuesday', label: 'Dinsdag' },
+  { key: 'wednesday', label: 'Woensdag' },
+  { key: 'thursday', label: 'Donderdag' },
+  { key: 'friday', label: 'Vrijdag' },
+  { key: 'saturday', label: 'Zaterdag' },
+  { key: 'sunday', label: 'Zondag' },
+];
+
+const defaultWorkingHours = {
+  monday:    { open: '09:00', close: '18:00', closed: false },
+  tuesday:   { open: '09:00', close: '18:00', closed: false },
+  wednesday: { open: '09:00', close: '18:00', closed: false },
+  thursday:  { open: '09:00', close: '18:00', closed: false },
+  friday:    { open: '09:00', close: '18:00', closed: false },
+  saturday:  { open: '09:00', close: '18:00', closed: false },
+  sunday:    { open: '09:00', close: '18:00', closed: true },
+};
+
 const AdminStaff = ({ token, showToast }) => {
   const [staffList, setStaffList] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -10,7 +30,8 @@ const AdminStaff = ({ token, showToast }) => {
     name: '',
     role: '',
     canDoAllServices: true,
-    allowedServices: []
+    allowedServices: [],
+    workingHours: defaultWorkingHours,
   });
 
   const fetchData = async () => {
@@ -43,7 +64,10 @@ const AdminStaff = ({ token, showToast }) => {
         name: staff.name,
         role: staff.role,
         canDoAllServices: staff.canDoAllServices,
-        allowedServices: staff.allowedServices || []
+        allowedServices: staff.allowedServices || [],
+        workingHours: staff.workingHours
+          ? { ...defaultWorkingHours, ...staff.workingHours }
+          : { ...defaultWorkingHours },
       });
     } else {
       setEditingStaff(null);
@@ -51,10 +75,31 @@ const AdminStaff = ({ token, showToast }) => {
         name: '',
         role: '',
         canDoAllServices: true,
-        allowedServices: []
+        allowedServices: [],
+        workingHours: { ...defaultWorkingHours },
       });
     }
     setIsModalOpen(true);
+  };
+
+  const handleHourChange = (day, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      workingHours: {
+        ...prev.workingHours,
+        [day]: { ...prev.workingHours[day], [field]: value }
+      }
+    }));
+  };
+
+  const toggleDayClosed = (day) => {
+    setFormData(prev => ({
+      ...prev,
+      workingHours: {
+        ...prev.workingHours,
+        [day]: { ...prev.workingHours[day], closed: !prev.workingHours[day].closed }
+      }
+    }));
   };
 
   const handleToggleService = (serviceId, variantName = null) => {
@@ -296,6 +341,51 @@ const AdminStaff = ({ token, showToast }) => {
                   })}
                 </div>
               )}
+
+              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #eee' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '1rem', color: '#1a1a1a' }}>
+                  Werkuren medewerker
+                </h4>
+                <div className="settings-hours-list">
+                  {daysOfWeek.map(({ key, label }) => (
+                    <div key={key} className={`settings-hour-row ${formData.workingHours[key]?.closed ? 'is-closed' : ''}`} style={{ padding: '0.6rem 0', fontSize: '13px' }}>
+                      <div className="day-name" style={{ fontSize: '13px' }}>{label}</div>
+                      <div className="hour-inputs">
+                        <div className="input-group">
+                          <label>Open</label>
+                          <input
+                            type="time"
+                            value={formData.workingHours[key]?.open || '09:00'}
+                            onChange={(e) => handleHourChange(key, 'open', e.target.value)}
+                            disabled={formData.workingHours[key]?.closed}
+                          />
+                        </div>
+                        <div className="input-group">
+                          <label>Sluit</label>
+                          <input
+                            type="time"
+                            value={formData.workingHours[key]?.close || '18:00'}
+                            onChange={(e) => handleHourChange(key, 'close', e.target.value)}
+                            disabled={formData.workingHours[key]?.closed}
+                          />
+                        </div>
+                      </div>
+                      <div className="toggle-group">
+                        <label className="switch-label">
+                          <input
+                            type="checkbox"
+                            checked={formData.workingHours[key]?.closed || false}
+                            onChange={() => toggleDayClosed(key)}
+                          />
+                          <span className="switch-text">
+                            {formData.workingHours[key]?.closed ? 'Vrij' : 'Aanwezig'}
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               <div className="modal-actions" style={{ marginTop: '30px' }}>
                 <button type="button" className="modal-button cancel" onClick={() => setIsModalOpen(false)}>Annuleren</button>

@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import './Reservation.css'
 
+function getDayName(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][d.getDay()];
+}
+
 // Categories are now fetched dynamically from backend
 // The hardcoded ones are removed.
 
@@ -131,10 +136,21 @@ export default function Reservation() {
       });
     }
 
-    if (formData.date && settings?.staffVacations?.length > 0) {
+    if (formData.date) {
+      // Filter out staff on vacation
+      if (settings?.staffVacations?.length > 0) {
+        filtered = filtered.filter(member => {
+          const vac = settings.staffVacations.find(v => v.staffId === member._id?.toString());
+          return !vac || !vac.dates.includes(formData.date);
+        });
+      }
+
+      // Filter out staff whose weekly schedule marks this day as closed
+      const dayName = getDayName(formData.date);
       filtered = filtered.filter(member => {
-        const vac = settings.staffVacations.find(v => v.staffId === member._id?.toString());
-        return !vac || !vac.dates.includes(formData.date);
+        if (!member.workingHours) return true;
+        const day = member.workingHours[dayName];
+        return !day || !day.closed;
       });
     }
 
