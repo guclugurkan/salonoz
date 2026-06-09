@@ -64,9 +64,19 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
 
   const getDayName = (dateStr) => {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    const date = new Date(dateStr + 'T00:00:00');
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     return days[date.getDay()];
+  };
+
+  const getEffectiveHours = (dateStr) => {
+    if (!dateStr || !settings) return null;
+    const override = settings.dateOverrides?.find(o => o.date === dateStr);
+    if (override) return { open: override.open, close: override.close, isClosed: override.isClosed || false };
+    const dayName = getDayName(dateStr);
+    const daySettings = settings.workingHours?.[dayName];
+    if (!daySettings || daySettings.closed) return { open: null, close: null, isClosed: true };
+    return { open: daySettings.open, close: daySettings.close, isClosed: false };
   };
 
   const getOccupiedSlots = () => {
@@ -104,10 +114,9 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
     }
 
     // Vérifier que le service se termine avant l'heure de fermeture
-    if (settings && formData.date) {
-      const dayName = getDayName(formData.date);
-      const daySettings = settings.workingHours?.[dayName];
-      if (daySettings && currentTime > daySettings.close) return false;
+    if (formData.date) {
+      const hours = getEffectiveHours(formData.date);
+      if (hours && !hours.isClosed && hours.close && currentTime > hours.close) return false;
     }
 
     return true;
@@ -297,12 +306,16 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
               const occupiedSlots = getOccupiedSlots();
               return (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
-                  {[
-                    '09:00', '09:15', '09:30', '09:45', '10:00', '10:15', '10:30', '10:45',
-                    '11:00', '11:15', '11:30', '11:45', '12:00', '12:15', '12:30', '12:45',
-                    '13:00', '13:15', '13:30', '13:45', '14:00', '14:15', '14:30', '14:45',
-                    '15:00', '15:15', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45'
-                  ].map(t => {
+                  {(() => {
+                    const slots = [];
+                    for (let h = 8; h <= 21; h++) {
+                      for (let m = 0; m < 60; m += 15) {
+                        if (h === 21 && m > 0) break;
+                        slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+                      }
+                    }
+                    return slots;
+                  })().map(t => {
                     const isValid = isTimeValidForService(t, occupiedSlots);
                     const isSelected = formData.time === t;
                     return (
