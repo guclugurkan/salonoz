@@ -27,6 +27,9 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
     notes: ''
   });
 
+  const [extraServices, setExtraServices] = useState([]);
+  // each item: { category: null, service: null, variant: null }
+
   const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   const fetchData = async () => {
@@ -91,32 +94,47 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
       .flatMap(a => (a.bookedSlots && a.bookedSlots.length > 0) ? a.bookedSlots : [a.time]);
   };
 
+  const getServiceBlocks = (service, variant) => {
+    if (!service) return [];
+    if (variant?.blocks?.length > 0) return variant.blocks;
+    if (service.blocks?.length > 0) return service.blocks;
+    return [{ duration: 30, type: 'work' }];
+  };
+
+  const getAllBlocks = () => {
+    const main = getServiceBlocks(formData.service, formData.variant);
+    const extras = extraServices.flatMap(es => getServiceBlocks(es.service, es.variant));
+    return [...main, ...extras];
+  };
+
+  const calcBookedSlots = (startTime, blocks) => {
+    if (!startTime || !blocks.length) return [];
+    let current = startTime;
+    const slots = [];
+    for (const block of blocks) {
+      const n = Math.ceil(block.duration / 15);
+      for (let i = 0; i < n; i++) {
+        if (block.type === 'work') slots.push(current);
+        current = addMinutes(current, 15);
+      }
+    }
+    return slots;
+  };
+
   const calculateEndTime = (startTime) => {
     if (!startTime) return null;
-    const targetService = formData.variant ? formData.variant : formData.service;
-    const blocks = targetService?.blocks?.length > 0
-      ? targetService.blocks
-      : [{ duration: 30, type: 'work' }];
+    const blocks = getAllBlocks();
+    if (!blocks.length) return startTime;
     let t = startTime;
-    for (const block of blocks) {
-      t = addMinutes(t, block.duration);
-    }
+    for (const block of blocks) t = addMinutes(t, block.duration);
     return t;
   };
 
   const isTimeValidForService = (startTime, occupiedSlots) => {
-    // Si pas de service sélectionné, on bloque juste les créneaux occupés
-    if (!formData.service) {
-      return !occupiedSlots.includes(startTime);
-    }
-
+    if (!formData.service) return !occupiedSlots.includes(startTime);
     if (occupiedSlots.includes(startTime)) return false;
 
-    const targetService = formData.variant ? formData.variant : formData.service;
-    const blocks = targetService.blocks && targetService.blocks.length > 0
-      ? targetService.blocks
-      : [{ duration: 30, type: 'work' }];
-
+    const blocks = getAllBlocks();
     let currentTime = startTime;
     for (const block of blocks) {
       const numIntervals = Math.ceil(block.duration / 15);
@@ -126,7 +144,6 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
       }
     }
 
-    // Vérifier que le service se termine avant l'heure de fermeture
     if (formData.date) {
       const hours = getEffectiveHours(formData.date);
       if (hours && !hours.isClosed && hours.close && currentTime > hours.close) return false;
@@ -176,8 +193,18 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
       return;
     }
 
+    const allBlocks = getAllBlocks();
+    const serviceLabel = (srv, variant) =>
+      srv ? (variant ? `${srv.name} (${variant.name})` : srv.name) : '';
+    const allServiceNames = [
+      serviceLabel(formData.service, formData.variant),
+      ...extraServices.filter(es => es.service).map(es => serviceLabel(es.service, es.variant))
+    ].filter(Boolean);
+    const combinedService = allServiceNames.join(' + ');
+    const bookedSlots = formData.time ? calcBookedSlots(formData.time, allBlocks) : [];
+
     const appointmentData = {
-      service: formData.service ? (formData.variant ? `${formData.service.name} (${formData.variant.name})` : formData.service.name) : '',
+      service: combinedService,
       staff: formData.staff?.name || '',
       date: formData.date,
       time: formData.time,
@@ -188,6 +215,8 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
       status: 'confirmed',
       adminOverride: true,
       sendConfirmationEmail: sendEmail,
+      blocks: allBlocks,
+      bookedSlots,
     };
 
     try {
@@ -203,6 +232,7 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
       if (data.success) {
         showToast('Afspraak succesvol toegevoegd');
         setFormData({ category: null, service: null, variant: null, staff: null, date: '', time: '', name: '', email: '', phone: '', notes: '' });
+        setExtraServices([]);
         setClientSearch('');
         setSendEmail(false);
         if (onAppointmentCreated) onAppointmentCreated();
@@ -282,6 +312,79 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
             </div>
           )}
 
+          {/* Extra services */}
+          {extraServices.map((es, idx) => {
+            const prevBlocks = [
+              getServiceBlocks(formData.service, formData.variant),
+              ...extraServices.slice(0, idx).map(e => getServiceBlocks(e.service, e.variant))
+            ].flat();
+            const prevDuration = prevBlocks.reduce((s, b) => s + b.duration, 0);
+            const startLabel = formData.time ? addMinutes(formData.time, prevDuration) : null;
+
+            return (
+              <div key={idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Extra service {idx + 1}
+                    {startLabel && <span style={{ marginLeft: '8px', fontWeight: '400', color: '#94a3b8' }}>· begint om {startLabel}</span>}
+                  </span>
+                  <button type="button" onClick={() => setExtraServices(prev => prev.filter((_, i) => i !== idx))}
+                    style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>✕</button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label className="info-label">Categorie</label>
+                    <select className="appointments-filter-select" style={{ width: '100%', height: '42px' }}
+                      value={es.category?.id || ''}
+                      onChange={e => {
+                        const cat = categories.find(c => c.id === e.target.value);
+                        setExtraServices(prev => prev.map((item, i) => i === idx ? { category: cat, service: null, variant: null } : item));
+                      }}>
+                      <option value="">Selecteer categorie</option>
+                      {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="info-label">Service</label>
+                    <select className="appointments-filter-select" style={{ width: '100%', height: '42px' }}
+                      disabled={!es.category}
+                      value={es.service?.id || ''}
+                      onChange={e => {
+                        const srv = es.category.services.find(s => s.id === e.target.value);
+                        setExtraServices(prev => prev.map((item, i) => i === idx ? { ...item, service: srv, variant: null } : item));
+                      }}>
+                      <option value="">Selecteer service</option>
+                      {es.category?.services.map(srv => <option key={srv.id} value={srv.id}>{srv.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+                {es.service?.variants?.length > 0 && (
+                  <div style={{ marginTop: '10px' }}>
+                    <label className="info-label">Variant</label>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+                      {es.service.variants.map(v => (
+                        <button key={v.name} type="button"
+                          className={`cat-btn ${es.variant?.name === v.name ? 'confirm' : 'edit'}`}
+                          style={{ minWidth: '70px', padding: '6px 12px', fontSize: '13px' }}
+                          onClick={() => setExtraServices(prev => prev.map((item, i) => i === idx ? { ...item, variant: v } : item))}>
+                          {v.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {formData.service && (
+            <button type="button"
+              onClick={() => setExtraServices(prev => [...prev, { category: null, service: null, variant: null }])}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '10px 16px', fontSize: '13px', color: '#64748b', cursor: 'pointer', marginBottom: '20px', width: '100%', justifyContent: 'center' }}>
+              + Extra service toevoegen
+            </button>
+          )}
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
             <div className="form-group">
               <label className="info-label">Medewerker</label>
@@ -358,18 +461,38 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
             })()}
           </div>
 
-          {formData.time && (
-            <div style={{ marginTop: '12px', padding: '10px 14px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#166534' }}>
-              <span>🕐</span>
-              <span><strong>{formData.time}</strong> → <strong>{calculateEndTime(formData.time)}</strong></span>
-              {(formData.service || formData.variant) && (() => {
-                const target = formData.variant || formData.service;
-                const blocks = target?.blocks?.length > 0 ? target.blocks : [{ duration: 30, type: 'work' }];
-                const total = blocks.reduce((sum, b) => sum + b.duration, 0);
-                return <span style={{ color: '#4ade80', fontSize: '12px' }}>({total} min)</span>;
-              })()}
-            </div>
-          )}
+          {formData.time && formData.service && (() => {
+            const allSvcs = [
+              { service: formData.service, variant: formData.variant },
+              ...extraServices.filter(es => es.service)
+            ];
+            let cursor = formData.time;
+            const rows = allSvcs.map(({ service, variant }) => {
+              const blocks = getServiceBlocks(service, variant);
+              const duration = blocks.reduce((s, b) => s + b.duration, 0);
+              const start = cursor;
+              cursor = addMinutes(cursor, duration);
+              return { label: variant ? `${service.name} (${variant.name})` : service.name, start, end: cursor, duration };
+            });
+            const totalMin = getAllBlocks().reduce((s, b) => s + b.duration, 0);
+            return (
+              <div style={{ marginTop: '12px', padding: '12px 14px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', fontSize: '13px', color: '#166534' }}>
+                {rows.map((row, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: i < rows.length - 1 ? '4px' : 0 }}>
+                    <span>🕐</span>
+                    <span><strong>{row.start}</strong> → <strong>{row.end}</strong></span>
+                    <span style={{ color: '#4ade80' }}>{row.label}</span>
+                    <span style={{ color: '#86efac' }}>({row.duration} min)</span>
+                  </div>
+                ))}
+                {rows.length > 1 && (
+                  <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #bbf7d0', fontSize: '12px', color: '#166534' }}>
+                    Totaal: <strong>{totalMin} min</strong> · {formData.time} → {calculateEndTime(formData.time)}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           <div className="form-divider" style={{ height: '1px', background: '#eee', margin: '30px 0' }}></div>
 

@@ -135,6 +135,11 @@ async function createAppointment(data) {
     }
   }
 
+  // If the client sends blocks directly (e.g. combined services), use those
+  if (data.blocks && Array.isArray(data.blocks) && data.blocks.length > 0) {
+    blocks = data.blocks;
+  }
+
   const generatedBookedSlots = data.bookedSlots || (time ? calculateBookedSlots(time, blocks) : []);
 
   // Vérification conflit uniquement si staff + date + time sont renseignés
