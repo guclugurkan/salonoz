@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react'
 import './Reservation.css'
 
-function getDayName(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00');
-  return ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][d.getDay()];
-}
-
 // Categories are now fetched dynamically from backend
 // The hardcoded ones are removed.
 
@@ -146,7 +141,8 @@ export default function Reservation() {
       }
 
       // Filter out staff whose weekly schedule marks this day as closed
-      const dayName = getDayName(formData.date);
+      const _d = new Date(formData.date + 'T00:00:00');
+      const dayName = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][_d.getDay()];
       filtered = filtered.filter(member => {
         if (!member.workingHours) return true;
         const day = member.workingHours[dayName];
