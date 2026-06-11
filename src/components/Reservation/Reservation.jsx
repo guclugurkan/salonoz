@@ -221,11 +221,14 @@ export default function Reservation() {
   const getEffectiveHours = (dateStr, s) => {
     if (!dateStr || !s) return { open: null, close: null, isClosed: false };
     if (s.closedDays?.includes(dateStr)) return { open: null, close: null, isClosed: true };
-    const override = s.dateOverrides?.find(o => o.date === dateStr);
-    if (override) return { open: override.open, close: override.close, isClosed: override.isClosed || false };
     const dayName = getDayName(dateStr);
     const daySettings = s.workingHours?.[dayName];
     if (!daySettings || daySettings.closed) return { open: null, close: null, isClosed: true };
+    const override = s.dateOverrides?.find(o => o.date === dateStr);
+    if (override) {
+      if (override.isClosed) return { open: null, close: null, isClosed: true };
+      return { open: override.open, close: override.close, isClosed: false };
+    }
     return { open: daySettings.open, close: daySettings.close, isClosed: false };
   }
 

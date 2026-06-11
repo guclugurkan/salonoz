@@ -73,13 +73,14 @@ function getEffectiveHoursForDate(date, settings) {
   if (!settings) return null;
   const dateStr = typeof date === 'string' ? date : formatDateToYMD(date);
   if (settings.closedDays?.includes(dateStr)) return { open: null, close: null, isClosed: true };
-  const override = settings.dateOverrides?.find(o => o.date === dateStr);
-  if (override) {
-    return { open: override.open, close: override.close, isClosed: override.isClosed || false };
-  }
   const dayName = DAY_NAMES[typeof date === 'string' ? new Date(date + 'T00:00:00').getDay() : date.getDay()];
   const daySettings = settings.workingHours?.[dayName];
   if (!daySettings || daySettings.closed) return { open: null, close: null, isClosed: true };
+  const override = settings.dateOverrides?.find(o => o.date === dateStr);
+  if (override) {
+    if (override.isClosed) return { open: null, close: null, isClosed: true };
+    return { open: override.open, close: override.close, isClosed: false };
+  }
   return { open: daySettings.open, close: daySettings.close, isClosed: false };
 }
 

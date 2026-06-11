@@ -75,11 +75,14 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
   const getEffectiveHours = (dateStr) => {
     if (!dateStr || !settings) return null;
     if (settings.closedDays?.includes(dateStr)) return { open: null, close: null, isClosed: true };
-    const override = settings.dateOverrides?.find(o => o.date === dateStr);
-    if (override) return { open: override.open, close: override.close, isClosed: override.isClosed || false };
     const dayName = getDayName(dateStr);
     const daySettings = settings.workingHours?.[dayName];
     if (!daySettings || daySettings.closed) return { open: null, close: null, isClosed: true };
+    const override = settings.dateOverrides?.find(o => o.date === dateStr);
+    if (override) {
+      if (override.isClosed) return { open: null, close: null, isClosed: true };
+      return { open: override.open, close: override.close, isClosed: false };
+    }
     return { open: daySettings.open, close: daySettings.close, isClosed: false };
   };
 
