@@ -387,7 +387,12 @@ export default function Reservation() {
         if (formData.service.variants && formData.service.variants.length > 0) return formData.variant !== null;
         return true;
       case 3: return formData.staff !== null
-      case 4: return formData.date !== ''
+      case 4: {
+        if (!formData.date) return false;
+        const h = getEffectiveHours(formData.date, settings);
+        if (h?.isClosed) return false;
+        return true;
+      }
       case 5: return formData.time !== ''
       case 6: return formData.name && formData.email && formData.phone
       case 7: return true
@@ -668,18 +673,28 @@ export default function Reservation() {
                   type="date"
                   className="date-input"
                   value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  min={new Date().toISOString().split('T')[0]}
-                  max={(() => { const d = new Date(); d.setMonth(d.getMonth() + 3); return d.toISOString().split('T')[0]; })()}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value, time: '' })}
+                  min={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })()}
+                  max={(() => { const d = new Date(); d.setMonth(d.getMonth() + 3); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })()}
                 />
               </div>
-              {formData.date && (
-                <p className="selected-date">
-                  {new Date(formData.date).toLocaleDateString('nl-BE', {
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                  })}
-                </p>
-              )}
+              {formData.date && (() => {
+                const h = getEffectiveHours(formData.date, settings);
+                if (h?.isClosed) {
+                  return (
+                    <p style={{ marginTop: '12px', color: '#ef4444', fontSize: '14px', textAlign: 'center', fontWeight: '500' }}>
+                      Het salon is gesloten op deze datum. Kies een andere dag.
+                    </p>
+                  );
+                }
+                return (
+                  <p className="selected-date">
+                    {new Date(formData.date + 'T00:00:00').toLocaleDateString('nl-BE', {
+                      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                    })}
+                  </p>
+                );
+              })()}
             </div>
           )}
 
