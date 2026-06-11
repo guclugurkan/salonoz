@@ -17,8 +17,11 @@ const allTimeSlots = [
   '13:00', '13:15', '13:30', '13:45', '14:00', '14:15', '14:30', '14:45',
   '15:00', '15:15', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45',
   '17:00', '17:15', '17:30', '17:45', '18:00', '18:15', '18:30', '18:45',
-  '19:00', '19:15', '19:30', '19:45', '20:00', '20:15', '20:30', '20:45'
+  '19:00', '19:15', '19:30', '19:45', '20:00', '20:15', '20:30', '20:45',
+  '21:00'
 ];
+
+const CALENDAR_TIME_SLOTS = allTimeSlots.filter(s => s >= '09:00' && s <= '21:00');
 
 function addMinutes(timeStr, mins) {
   const [h, m] = timeStr.split(':').map(Number);
@@ -1089,27 +1092,9 @@ function AdminDashboard() {
     return Array.from({ length: 7 }, (_, index) => addDays(currentWeekStart, index));
   }, [currentWeekStart]);
 
-  const weekCalendarTimeSlots = useMemo(() => {
-    if (!settings?.workingHours) return allTimeSlots.filter(s => s >= '09:00' && s < '17:00');
-    let minOpen = '23:59';
-    let maxClose = '00:00';
-    weekDays.forEach(day => {
-      const hours = getEffectiveHoursForDate(day, settings);
-      if (hours && !hours.isClosed && hours.open && hours.close) {
-        if (hours.open < minOpen) minOpen = hours.open;
-        if (hours.close > maxClose) maxClose = hours.close;
-      }
-    });
-    if (maxClose === '00:00') return allTimeSlots.filter(s => s >= '09:00' && s < '17:00');
-    return allTimeSlots.filter(slot => slot >= minOpen && slot < maxClose);
-  }, [weekDays, settings]);
+  const weekCalendarTimeSlots = CALENDAR_TIME_SLOTS;
 
-  const dayCalendarTimeSlots = useMemo(() => {
-    if (!settings?.workingHours || !weekDays[selectedDayIndex]) return weekCalendarTimeSlots;
-    const hours = getEffectiveHoursForDate(weekDays[selectedDayIndex], settings);
-    if (!hours || hours.isClosed || !hours.open || !hours.close) return weekCalendarTimeSlots;
-    return allTimeSlots.filter(slot => slot >= hours.open && slot < hours.close);
-  }, [weekDays, selectedDayIndex, settings, weekCalendarTimeSlots]);
+  const dayCalendarTimeSlots = CALENDAR_TIME_SLOTS;
 
   const filteredAppointments = useMemo(() => {
     return appointments.filter((appointment) => {
