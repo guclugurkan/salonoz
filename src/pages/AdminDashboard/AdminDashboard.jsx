@@ -72,6 +72,7 @@ const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'frid
 function getEffectiveHoursForDate(date, settings) {
   if (!settings) return null;
   const dateStr = typeof date === 'string' ? date : formatDateToYMD(date);
+  if (settings.closedDays?.includes(dateStr)) return { open: null, close: null, isClosed: true };
   const override = settings.dateOverrides?.find(o => o.date === dateStr);
   if (override) {
     return { open: override.open, close: override.close, isClosed: override.isClosed || false };

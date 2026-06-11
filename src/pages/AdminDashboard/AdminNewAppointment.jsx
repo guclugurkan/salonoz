@@ -74,6 +74,7 @@ const AdminNewAppointment = ({ token, showToast, onAppointmentCreated }) => {
 
   const getEffectiveHours = (dateStr) => {
     if (!dateStr || !settings) return null;
+    if (settings.closedDays?.includes(dateStr)) return { open: null, close: null, isClosed: true };
     const override = settings.dateOverrides?.find(o => o.date === dateStr);
     if (override) return { open: override.open, close: override.close, isClosed: override.isClosed || false };
     const dayName = getDayName(dateStr);

@@ -220,6 +220,7 @@ export default function Reservation() {
 
   const getEffectiveHours = (dateStr, s) => {
     if (!dateStr || !s) return { open: null, close: null, isClosed: false };
+    if (s.closedDays?.includes(dateStr)) return { open: null, close: null, isClosed: true };
     const override = s.dateOverrides?.find(o => o.date === dateStr);
     if (override) return { open: override.open, close: override.close, isClosed: override.isClosed || false };
     const dayName = getDayName(dateStr);
