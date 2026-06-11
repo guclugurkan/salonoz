@@ -23,11 +23,20 @@ async function updateSettings(data) {
       if (data.workingHours) {
         settings.workingHours = { ...settings.workingHours.toObject(), ...data.workingHours };
       }
-      if (data.closedDays) {
+      if (data.closedDays !== undefined) {
         settings.closedDays = data.closedDays;
+        settings.markModified('closedDays');
       }
-      if (data.dateOverrides) {
-        settings.dateOverrides = data.dateOverrides;
+      if (data.dateOverrides !== undefined) {
+        // Always strip overrides for dates that are in closedDays (use updated list)
+        const closedSet = new Set(data.closedDays !== undefined ? data.closedDays : (settings.closedDays || []));
+        settings.dateOverrides = data.dateOverrides.filter(o => !closedSet.has(o.date));
+        settings.markModified('dateOverrides');
+      } else if (data.closedDays !== undefined && settings.dateOverrides?.length) {
+        // closedDays updated but dateOverrides not sent — still clean up conflicts in DB
+        const closedSet = new Set(data.closedDays);
+        settings.dateOverrides = settings.dateOverrides.filter(o => !closedSet.has(o.date));
+        settings.markModified('dateOverrides');
       }
       if (data.staffVacations !== undefined) {
         settings.staffVacations = data.staffVacations;

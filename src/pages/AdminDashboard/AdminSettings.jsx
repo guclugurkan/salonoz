@@ -77,9 +77,15 @@ const AdminSettings = ({ settings, onUpdate, isSaving }) => {
       d => !(localSettings.closedDays || []).includes(d)
     );
     if (newDates.length === 0) return;
+    const newClosedDays = [...(localSettings.closedDays || []), ...newDates].sort();
+    // Strip any dateOverrides that conflict with the newly closed dates
+    const filteredOverrides = (localSettings.dateOverrides || []).filter(
+      o => !newDates.includes(o.date)
+    );
     setLocalSettings({
       ...localSettings,
-      closedDays: [...(localSettings.closedDays || []), ...newDates].sort()
+      closedDays: newClosedDays,
+      dateOverrides: filteredOverrides,
     });
     setRangeStart('');
     setRangeEnd('');
