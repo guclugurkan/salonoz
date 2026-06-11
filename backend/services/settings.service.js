@@ -29,6 +29,10 @@ async function updateSettings(data) {
       if (data.dateOverrides) {
         settings.dateOverrides = data.dateOverrides;
       }
+      if (data.staffVacations !== undefined) {
+        settings.staffVacations = data.staffVacations;
+        settings.markModified('staffVacations');
+      }
     }
     return await settings.save();
   } catch (error) {
