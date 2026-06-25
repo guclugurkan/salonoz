@@ -41,7 +41,7 @@ export default function ServicesPage() {
       icon: "❋",
       img: "/images/services/balayage-higlights.jpeg",
       size: "large",
-      tag: "Vanaf 60 €",
+      tag: "Vanaf 170 €",
     },
     {
       title: "Kids",

@@ -183,7 +183,6 @@ export default function PricingPage() {
               <div key={i} className="pp__extension-row">
                 <div className="pp__extension-info">
                   <span className="pp__extension-name">{item.name}</span>
-                  <span className="pp__extension-price">{item.price}</span>
                 </div>
                 <a href="tel:+320485550271" className="pp__extension-btn">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
