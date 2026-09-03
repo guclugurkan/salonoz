@@ -50,6 +50,29 @@ async function updateSettings(data) {
   }
 }
 
+async function toggleClosedDay(date, closed) {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) settings = await Settings.create({});
+
+    const current = new Set(settings.closedDays || []);
+    if (closed) {
+      current.add(date);
+      // A full closure wins over any custom hours for that date
+      settings.dateOverrides = (settings.dateOverrides || []).filter(o => o.date !== date);
+      settings.markModified('dateOverrides');
+    } else {
+      current.delete(date);
+    }
+    settings.closedDays = [...current].sort();
+    settings.markModified('closedDays');
+    return await settings.save();
+  } catch (error) {
+    console.error("Error in toggleClosedDay service:", error);
+    throw error;
+  }
+}
+
 async function setDateOverride(date, open, close, isClosed = false) {
   try {
     let settings = await Settings.findOne();
@@ -73,4 +96,5 @@ module.exports = {
   getSettings,
   updateSettings,
   setDateOverride,
+  toggleClosedDay,
 };

@@ -529,6 +529,26 @@ function AdminDashboard() {
     }
   };
 
+  const handleToggleClosedDay = async (dateStr, closed) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/settings/closed-day`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ date: dateStr, closed }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSettings(data.data);
+        showToast(closed ? 'Dag gesloten' : 'Dag heropend');
+      } else {
+        showToast(data.error || 'Fout bij bijwerken', 'error');
+      }
+    } catch (err) {
+      console.error('Error toggling closed day:', err);
+      showToast('Netwerkfout', 'error');
+    }
+  };
+
   const saveWorkingHoursOverride = async (dateStr, open, close) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/settings/date-override`, {
@@ -1335,12 +1355,24 @@ function AdminDashboard() {
                       style={{ gridTemplateColumns: `120px repeat(${weekDays.length}, 1fr)` }}
                     >
                       <div className="calendar-cell calendar-time-header">Tijd</div>
-                      {weekDays.map((day) => (
-                        <div key={formatDateToYMD(day)} className="calendar-cell calendar-day-header">
-                          <span className="calendar-day-name">{day.toLocaleDateString('nl-NL', { weekday: 'short' })}</span>
-                          <span className="calendar-day-date">{day.toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })}</span>
-                        </div>
-                      ))}
+                      {weekDays.map((day) => {
+                        const dayKey = formatDateToYMD(day);
+                        const isClosedDay = settings?.closedDays?.includes(dayKey) || false;
+                        return (
+                          <div key={dayKey} className={`calendar-cell calendar-day-header ${isClosedDay ? 'is-closed-day' : ''}`}>
+                            <span className="calendar-day-name">{day.toLocaleDateString('nl-NL', { weekday: 'short' })}</span>
+                            <span className="calendar-day-date">{day.toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })}</span>
+                            <label className="day-closed-toggle" title="Sluit deze dag voor afspraken">
+                              <input
+                                type="checkbox"
+                                checked={isClosedDay}
+                                onChange={(e) => handleToggleClosedDay(dayKey, e.target.checked)}
+                              />
+                              <span>Gesloten</span>
+                            </label>
+                          </div>
+                        );
+                      })}
 
                       {weekCalendarTimeSlots.map((time, timeIndex) => (
                         <div key={`row-${time}`} className="calendar-row-wrapper">
@@ -1695,6 +1727,20 @@ function AdminDashboard() {
                     <div className="daily-schedule-info">
                       <h3>{weekDays[selectedDayIndex].toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
                       <p>{getAppointmentCountForDay(weekDays[selectedDayIndex])} afspraak/afspraken</p>
+                      {(() => {
+                        const mobileDayKey = formatDateToYMD(weekDays[selectedDayIndex]);
+                        const isClosedDay = settings?.closedDays?.includes(mobileDayKey) || false;
+                        return (
+                          <label className={`day-closed-toggle day-closed-toggle--mobile ${isClosedDay ? 'is-active' : ''}`}>
+                            <input
+                              type="checkbox"
+                              checked={isClosedDay}
+                              onChange={(e) => handleToggleClosedDay(mobileDayKey, e.target.checked)}
+                            />
+                            <span>Gesloten (geen afspraken mogelijk)</span>
+                          </label>
+                        );
+                      })()}
                     </div>
                     
                     <div className="timeline">

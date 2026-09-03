@@ -2066,6 +2066,49 @@
   color: #1a1a1a;
 }
 
+/* --- Jour fermé (congé) : bascule dans l'en-tête de colonne --- */
+.day-closed-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #999999;
+  cursor: pointer;
+  user-select: none;
+}
+
+.day-closed-toggle input {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #dc2626;
+}
+
+.calendar-day-header.is-closed-day {
+  background-color: #fef2f2;
+  box-shadow: inset 0 -3px 0 #dc2626;
+}
+
+.calendar-day-header.is-closed-day .day-closed-toggle {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.day-closed-toggle--mobile {
+  justify-content: center;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.day-closed-toggle--mobile.is-active {
+  color: #dc2626;
+  font-weight: 700;
+}
+
 .calendar-time-cell {
   min-height: 88px;
   display: flex;
