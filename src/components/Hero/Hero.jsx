@@ -33,7 +33,7 @@ export default function Hero() {
         <p className="hero__tagline">Hair • Beauty • Barber</p>
 
         <div className="hero__actions">
-          <Link to="/reservation" className="hero__btn hero__btn--primary">Book Online</Link>
+          <a href="https://salon-oz.salonized.com/widget_bookings/new" className="hero__btn hero__btn--primary">Book Online</a>
           <Link to="/contact" className="hero__btn hero__btn--secondary">
             <Phone className="hero__icon" />
             Call us

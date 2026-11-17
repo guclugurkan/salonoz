@@ -87,9 +87,9 @@ export default function CancelPage() {
                 </div>
               </div>
             )}
-            <Link to="/reservation" className="cancel-page__btn">
+            <a href="https://salon-oz.salonized.com/widget_bookings/new" className="cancel-page__btn">
               Nieuwe afspraak maken
-            </Link>
+            </a>
           </div>
         )}
 

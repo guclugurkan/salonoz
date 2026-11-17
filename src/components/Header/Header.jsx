@@ -53,10 +53,10 @@ export default function Header() {
           </nav>
 
           {/* CTA — desktop */}
-          <Link to="/reservation" className="header__button">
+          <a href="https://salon-oz.salonized.com/widget_bookings/new" className="header__button">
             <span className="header__buttonText">Book Online</span>
             <span className="header__buttonFill" />
-          </Link>
+          </a>
 
           {/* Hamburger — mobile */}
           <button
@@ -87,13 +87,13 @@ export default function Header() {
           ))}
         </nav>
 
-        <Link
-          to="/reservation"
+        <a
+          href="https://salon-oz.salonized.com/widget_bookings/new"
           className="header__mobile-button"
           style={{ transitionDelay: menuOpen ? `${navLinks.length * 60}ms` : "0ms" }}
         >
           Book Online
-        </Link>
+        </a>
       </div>
     </>
   );
