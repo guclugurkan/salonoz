@@ -80,7 +80,26 @@ export default function PricingPage() {
         const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/categories`);
         if (response.ok) {
           const data = await response.json();
-          setCategories(data.data || []);
+          setCategories((data.data || []).map(category => ({
+            ...category,
+            services: category.services?.flatMap(service => {
+              if (service.name?.trim() !== "Balayage & Foilyage met Snit & Brushing") {
+                return [service];
+              }
+
+              return [
+                { ...service, name: "Balayage & Foilyage met Snit & Brushing (uitgroei)" },
+                {
+                  name: "Balayage & Foilyage met Snit & Brushing ( Volledig )",
+                  displayPrice: "vanaf 220 €",
+                },
+                {
+                  name: "Balayage & Foilyage met Brushing ( Volledig )",
+                  displayPrice: "vanaf 195 €",
+                },
+              ];
+            }),
+          })));
         }
       } catch (error) {
         console.error('Failed to fetch pricing data:', error);
