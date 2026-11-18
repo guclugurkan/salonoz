@@ -3,13 +3,13 @@ import "./ContactPage.css";
 import useScrollReveal from "../../hooks/useScrollReveal";
 
 const hours = [
-  { day: "Maandag",          time: "09:00 — 18:00" },
+  { day: "Maandag",          time: "10:00 — 19:00" },
   { day: "Dinsdag",          time: "Gesloten" },
-  { day: "Woensdag",         time: "09:00 — 18:00" },
-  { day: "Donderdag",        time: "09:00 — 20:00" },
-  { day: "Vrijdag",          time: "09:00 — 18:00" },
-  { day: "Zaterdag",         time: "09:00 — 16:00" },
-  { day: "Zondag",           time: "09:00 — 16:00" },
+  { day: "Woensdag",         time: "10:00 — 19:00" },
+  { day: "Donderdag",        time: "10:00 — 20:00" },
+  { day: "Vrijdag",          time: "10:00 — 19:00" },
+  { day: "Zaterdag",         time: "10:00 — 17:00" },
+  { day: "Zondag",           time: "10:00 — 17:00" },
 ];
 
 export default function ContactPage() {
