@@ -35,7 +35,7 @@ export default function Reservation() {
   const [waitlistError, setWaitlistError] = useState(null)
   const [settings, setSettings] = useState(null)
   const [staff, setStaff] = useState([])
-  const [rulesAccepted, setRulesAccepted] = useState(false)
+  const [rulesAccepted] = useState(false)
   const [formData, setFormData] = useState({
     category: null,
     service: null,
@@ -522,7 +522,7 @@ export default function Reservation() {
           </div>
           <div className="rules-modal__footer">
             <p className="rules-modal__notice">Door op "Ik ga akkoord" te klikken, bevestigt u dat u deze regels heeft gelezen en accepteert.</p>
-            <button className="rules-modal__btn" onClick={() => setRulesAccepted(true)}>
+            <button className="rules-modal__btn" onClick={() => window.location.assign('https://salon-oz.salonized.com/widget_bookings/new')}>
               Ik ga akkoord
             </button>
           </div>
