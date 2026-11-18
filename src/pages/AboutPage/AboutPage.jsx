@@ -6,7 +6,6 @@ import { GOOGLE_REVIEWS_URL } from "../../data/reviewsData";
 const team = [
   { name: "OZ", role: "Men's & International Artist", initial: "O" },
   { name: "Elanur", role: "Color & Balayage", initial: "E" },
-  { name: "Ashkan", role: "Color & Balayage Specialist", initial: "A" },
 ];
 
 const stats = [

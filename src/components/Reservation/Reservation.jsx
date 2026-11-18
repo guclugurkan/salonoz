@@ -499,22 +499,22 @@ export default function Reservation() {
           </div>
           <div className="rules-modal__body">
             <div className="rules-modal__section">
-              <h3>📅 Afspraken</h3>
+              <h3>Afspraken</h3>
               <ul>
                 <li>Online reservaties zijn pas definitief na bevestiging per e-mail.</li>
                 <li>Gelieve op tijd aanwezig te zijn voor uw afspraak.</li>
               </ul>
             </div>
             <div className="rules-modal__section">
-              <h3>❌ Annulatie</h3>
+              <h3>Annulatie</h3>
               <ul>
                 <li>Annuleren kan tot <strong>24u voor uw afspraak</strong> via de link in uw bevestigingsmail.</li>
-                <li>Bij grote behandelingen: telefonisch via <a href="tel:+320485550271">0485 55 02 71</a>.</li>
+                <li>Bij vragen of onduidelijkheden, gelieve telefonisch contact op te nemen via <a href="tel:+320485550271">0485 55 02 71</a>.</li>
                 <li>Niet opdagen of te laat annuleren: het <strong>volledige bedrag wordt aangerekend</strong>.</li>
               </ul>
             </div>
             <div className="rules-modal__section">
-              <h3>💳 Betaling</h3>
+              <h3>Betaling</h3>
               <ul>
                 <li>Betaling ter plaatse via cash of Payconiq.</li>
               </ul>
